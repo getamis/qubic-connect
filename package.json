@@ -1,0 +1,9 @@
+{
+  "name": "qubic-creator-sdk",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "https://github.com/getamis/qubic-creator-sdk.git",
+  "author": "amis-labs",
+  "license": "MIT",
+  "private": true
+}
