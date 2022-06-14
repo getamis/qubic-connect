@@ -1,10 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
+import fetch from 'cross-fetch';
+import Base64 from 'crypto-js/enc-base64';
+import HmacSHA256 from 'crypto-js/hmac-sha256';
+import { GraphQLClient, gql } from 'graphql-request';
 import { QubicConnector } from '@qubic-js/react';
-import { useWeb3React } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers';
-import { useQuery } from 'graphql-hooks';
+// import { useWeb3React } from '@web3-react/core';
+// import { Web3Provider } from '@ethersproject/providers';
 
-import { QUBIC_API_KEY, QUBIC_API_SECRET, QUBIC_CHAIN_ID, QUBIC_INFURA_PROJECT_ID } from '../constants/environment';
+import {
+  API_KEY,
+  API_SECRET,
+  CREATOR_API,
+  QUBIC_API_KEY,
+  QUBIC_API_SECRET,
+  QUBIC_CHAIN_ID,
+  QUBIC_INFURA_PROJECT_ID,
+} from '../constants/environment';
 
 interface BaseUserData {
   accessToken?: string | undefined;
@@ -27,62 +38,80 @@ export interface QubicAuthConnector {
   updateUser: (update: { address?: string; email?: string }) => void;
 }
 
-interface QubicAuthConnectorProps {
-  clientName?: string;
+let qubicConnector: QubicConnector;
+
+const GQL_NOW = gql`
+  query NOW_PUBLIC {
+    now
+  }
+`;
+
+const HTTP_METHOD = 'POST';
+
+interface RequestSignature {
+  url: string;
+  headers: Record<string, string>;
+  body: unknown;
 }
 
-type NowGqlResult = {
-  now: number;
+const requestSignature = ({ url, headers, body }: RequestSignature) => {
+  const requestHeaders = { ...headers };
+  const requestUrl = new URL(url);
+  const now = String(Date.now());
+  const requestURI = `${requestUrl.pathname}${requestUrl.search}`;
+  let sig: string | undefined;
+
+  try {
+    const msg = `${now}${HTTP_METHOD}${requestURI}${body}`;
+    sig = API_SECRET ? HmacSHA256(msg, API_SECRET).toString(Base64) : undefined;
+
+    if (body) {
+      requestHeaders['X-Es-Encrypted'] = 'yes';
+    }
+
+    if (sig) {
+      requestHeaders['X-Es-Sign'] = sig;
+    }
+  } catch (error) {
+    console.error('signature error');
+  }
+
+  requestHeaders['X-Es-Api-Key'] = API_KEY;
+  requestHeaders['X-Es-Ts'] = now;
+  return requestHeaders;
 };
 
-let qubicConnector: QubicConnector;
-let timeSample: number = 0;
-const TIME_DIFF_LIMIT_MSEC = 1000;
+export const useQubicAuthConnector = () => {
+  // const context = useWeb3React<Web3Provider>();
+  // const { deactivate } = context;
+  // const [user, setUser] = useState<UserData | undefined | null>(undefined);
+  const [isAlignWithServerTime, setIsAlignWithServerTime] = useState<boolean>(false);
 
-const GQL_NOW = `query NOW_PUBLIC {
-  now
-}`;
+  const checkTimeDiff = useCallback(async () => {
+    try {
+      const client = new GraphQLClient(CREATOR_API, {
+        fetch: (url: any, option: any) =>
+          fetch(url, {
+            ...option,
+            headers: requestSignature({
+              url,
+              headers: option.headers,
+              body: option.body,
+            }),
+          }),
+      });
 
-export const useQubicAuthConnector = ({ clientName }: QubicAuthConnectorProps) => {
-  const context = useWeb3React<Web3Provider>();
-  const { deactivate } = context;
-  const [user, setUser] = useState<UserData | undefined | null>(undefined);
-  const [timeDiff, setTimeDiff] = useState<number>(0);
-
-  const { data, loading } = useQuery<NowGqlResult>(GQL_NOW, {
-    // operationName: `NOW_PUBLIC`,
-    // context: { clientType: 'public', clientName },
-    // notifyOnNetworkStatusChange: true,
-    // fetchPolicy: 'no-cache',
-  });
+      await client.rawRequest(GQL_NOW);
+      setIsAlignWithServerTime(true);
+    } catch (error) {
+      // ignored error.
+      console.warn('Device local time not align with server time.');
+    }
+  }, []);
 
   useEffect(() => {
-    if (loading) {
-      // Expect first time render loading is true
-      timeSample = Date.now();
-    } else if (timeSample > 0) {
-      // Prevent first time loading is false situation.
-      timeSample += Date.now();
-      if (data?.now) {
-        const diff = data.now * 1000 - Math.floor(0.5 * timeSample);
-        if (Math.abs(diff) > TIME_DIFF_LIMIT_MSEC) {
-          console.warn('Device local time not align with server time.');
-          setTimeDiff(diff);
-        }
-      }
-    }
-  }, [loading, data]);
-
-  const updateUser = useCallback(
-    ({ address, email }: UserData) => {
-      setUser({
-        ...user,
-        address,
-        email,
-      });
-    },
-    [user],
-  );
+    checkTimeDiff();
+  }, [checkTimeDiff]);
 
   useEffect(() => {
     try {
@@ -95,31 +124,36 @@ export const useQubicAuthConnector = ({ clientName }: QubicAuthConnectorProps) =
         enableIframe: true,
       });
     } catch (err) {
+      console.log(err);
       // do nothing
     }
   }, []);
 
-  useEffect(() => {
-    try {
-      const authLocal = localStorage.getItem('creator-auth');
-      const authRecover = JSON.parse(authLocal || '{}');
-      const { expiredAt } = authRecover || {};
+  // useEffect(() => {
+  //   try {
+  //     const authLocal = localStorage.getItem('creator-auth');
+  //     const authRecover = JSON.parse(authLocal || '{}');
+  //     const { expiredAt } = authRecover || {};
 
-      if (expiredAt) {
-        if (expiredAt * 1000 < Date.now()) {
-          setUser(null);
-          deactivate();
-          localStorage.removeItem('creator-auth');
-          return;
-        }
-      }
+  //     if (expiredAt) {
+  //       if (expiredAt * 1000 < Date.now()) {
+  //         setUser(null);
+  //         deactivate();
+  //         localStorage.removeItem('creator-auth');
+  //         return;
+  //       }
+  //     }
 
-      setUser(authRecover || null);
-    } catch (err) {
-      // do nothing
-      setUser(undefined);
-    }
-  }, [deactivate]);
+  //     setUser(authRecover || null);
+  //   } catch (err) {
+  //     // do nothing
+  //     setUser(undefined);
+  //   }
+  // }, [deactivate]);
 
-  return { qubicConnector, user, timeDiff, setUser, updateUser };
+  return {
+    qubicConnector,
+    isAlignWithServerTime,
+    // user, setUser
+  };
 };

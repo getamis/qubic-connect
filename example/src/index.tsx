@@ -1,31 +1,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Web3ReactProvider } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+// import { Web3ReactProvider } from '@web3-react/core';
+// import { Web3Provider } from '@ethersproject/providers';
+// import { ethers } from 'ethers';
 
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { Ethereumish } from './sdk/types/ethereum';
+// import { Ethereumish } from './sdk/types/ethereum';
 
-declare global {
-  interface Window {
-    ethereum: Ethereumish;
-  }
-}
+// declare global {
+//   interface Window {
+//     ethereum: Ethereumish;
+//   }
+// }
 
-const web3library = (provider: any): Web3Provider => {
-  const { isQubic } = provider;
-  return new ethers.providers.Web3Provider(isQubic ? provider : window.ethereum);
-};
+// const web3library = (provider: any): Web3Provider => {
+//   const { isQubic } = provider;
+//   return new ethers.providers.Web3Provider(isQubic ? provider : window.ethereum);
+// };
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
-    <Web3ReactProvider getLibrary={web3library}>
-      <App />
-    </Web3ReactProvider>
+    {/* <Web3ReactProvider getLibrary={web3library}> */}
+    <App />
+    {/* </Web3ReactProvider> */}
   </React.StrictMode>,
 );
 
