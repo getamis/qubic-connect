@@ -1,23 +1,30 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useRef } from 'react';
+import { QubicCreator } from './sdk/index';
 import './App.css';
 
+const qubicCreator = new QubicCreator({
+  name: '',
+  service: '',
+  domain: '',
+  key: 'xxx',
+  secret: 'xxx',
+});
+
 function App() {
+  const loginPanelRef = useRef(null);
+
+  useEffect(() => {
+    if (loginPanelRef?.current) {
+      qubicCreator.createLoginPanel(loginPanelRef.current);
+    }
+  }, [loginPanelRef]);
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <div>
+          <div ref={loginPanelRef} className="loginPanel" />
+        </div>
       </header>
     </div>
   );
