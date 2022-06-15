@@ -10,10 +10,6 @@ type BuilderInput = {
   isGQL?: boolean;
 };
 
-interface ServiceHeaders {
-  [key: string]: string | number | boolean;
-}
-
 const serviceHeaderBuilder = ({
   serviceUri,
   body = '',
@@ -22,7 +18,7 @@ const serviceHeaderBuilder = ({
   apiKey,
   isGQL = false,
 }: BuilderInput) => {
-  let headers = {} as ServiceHeaders;
+  let headers = {} as Record<string, string | number | boolean>;
 
   const now = Date.now();
   const urlObj = new URL(serviceUri);

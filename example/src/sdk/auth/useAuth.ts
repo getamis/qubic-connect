@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
+import fetch from 'cross-fetch';
 import Web3 from 'web3';
+import querystring from 'query-string';
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core';
 import { Web3Provider, ExternalProvider } from '@ethersproject/providers';
-import { AbstractProvider } from 'web3-core';
 import { QubicConnector } from '@qubic-js/react';
 
-import { useQubicAuthConnector } from './useQubicAuthConnector';
+import serviceHeaderBuilder from '../utils/serviceHeaderBuilder';
 import convertStringToHex from '../utils/convertStringToHex';
 
 import {
-  // API_KEY,
-  // API_SECRET,
-  // CREATOR_API,
+  API_KEY,
+  API_SECRET,
+  CREATOR_API_URL,
   QUBIC_API_KEY,
   QUBIC_API_SECRET,
   QUBIC_CHAIN_ID,
@@ -22,7 +23,77 @@ interface CustomizeProvider extends ExternalProvider {
   isQubic?: boolean;
 }
 
+interface SignInProps {
+  accountAddress: string | null;
+  signature: string;
+  dataString: string;
+  isQubicUser: boolean;
+}
+
+interface SignInResult {
+  accessToken: string;
+  access_token: string;
+  expiredAt: number;
+  expired_at: number;
+  isQubicUser: boolean;
+}
+
 let qubicConnector: QubicConnector;
+
+const signIn = async ({ accountAddress, signature, dataString, isQubicUser }: SignInProps) => {
+  if (!API_KEY || !API_SECRET) {
+    throw new Error('No API Auth or client info');
+  }
+  if (!accountAddress || !signature || (!isQubicUser && !dataString)) {
+    console.error('Missing sign-in data');
+    return;
+  }
+  const payload = isQubicUser
+    ? querystring.stringify({
+        address: accountAddress,
+        ticket: signature,
+      })
+    : querystring.stringify({
+        provider: 'wallet',
+        address: accountAddress,
+        signature,
+        data: convertStringToHex(dataString),
+      });
+  const serviceUri = isQubicUser
+    ? `https://${CREATOR_API_URL}/services/auth/qubic`
+    : `https://${CREATOR_API_URL}/services/auth`;
+  const httpMethod = 'POST';
+  const headers: any = serviceHeaderBuilder({
+    serviceUri,
+    httpMethod,
+    body: payload,
+    apiKey: API_KEY,
+    apiSecret: API_SECRET,
+  });
+  console.log(headers);
+  try {
+    const result = await fetch(serviceUri, {
+      method: httpMethod,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        ...headers,
+      },
+      body: payload,
+    });
+    const data = await result.json();
+    console.log(data);
+  } catch (err) {
+    console.log(err);
+  }
+  // const { data } = await axios.post(serviceUri, payload, {
+  //   headers: {
+  //     'Content-Type': 'application/x-www-form-urlencoded',
+  //     ...headers,
+  //   },
+  //   withCredentials: true,
+  // });
+  // return { ...data, isQubicUser };
+};
 
 const useAuth = () => {
   const context = useWeb3React<Web3Provider>();
@@ -60,12 +131,19 @@ const useAuth = () => {
         }
         setAuthSignature(signature);
         console.log(signature);
+        signIn({
+          accountAddress: account,
+          signature,
+          dataString: signDataString,
+          isQubicUser,
+        });
       } catch (error) {
         console.error(error);
         console.error('簽章失敗');
+        deactivate();
       }
     },
-    [account, currentProvider],
+    [account, currentProvider, deactivate, isQubicUser, signDataString],
   );
 
   const handleLogin = useCallback(
@@ -90,8 +168,8 @@ const useAuth = () => {
 
     if (account && startSign && currentProvider && isQubic) {
       const dataString = JSON.stringify({
-        name: 'OneOffs',
-        url: 'https://nft.oneoffs.art',
+        name: 'Qubic Creator',
+        url: 'https://creator.dev.qubic.market',
         permissions: ['wallet.permission.access_email_address'],
         nonce: Date.now(),
         service: 'qubee-creator',
@@ -107,6 +185,19 @@ const useAuth = () => {
       setStartSign(false);
     }
   }, [account, currentProvider, currentProvider?.isQubic, ethersProvider, handleSignAuthData, startSign]);
+
+  useEffect(() => {
+    // const accountAddress = account || walletConnectState.address;
+    const accountAddress = account;
+    if (accountAddress && authSignature && signDataString) {
+      // handleCreatorSignIn({
+      //   accountAddress,
+      //   signature: authSignature,
+      //   dataString: signDataString,
+      //   isQubicUser: isQubicProvider,
+      // });
+    }
+  }, [account, authSignature, signDataString]);
 
   return {
     // user,

@@ -1,9 +1,9 @@
 // export const AUTH_SERVICE_NAME = process.env.REACT_APP_AUTH_SERVICE_NAME;
 // export const AUTH_APP_NAME = process.env.NEXT_PUBLIC_AUTH_APP_NAME;
 // export const AUTH_APP_DOMAIN = process.env.NEXT_PUBLIC_AUTH_APP_DOMAIN;
-export const API_KEY = process.env.REACT_APP_CREATOR_API_KEY || '';
-export const API_SECRET = process.env.REACT_APP_CREATOR_API_SECRET || '';
-export const CREATOR_API = process.env.REACT_APP_CREATOR_API || '';
+export const API_KEY = process.env.REACT_APP_CREATOR_API_URL_KEY || '';
+export const API_SECRET = process.env.REACT_APP_CREATOR_API_URL_SECRET || '';
+export const CREATOR_API_URL = process.env.REACT_APP_CREATOR_API_URL || '';
 
 export const QUBIC_API_KEY = process.env.REACT_APP_QUBIC_API_KEY || '';
 export const QUBIC_API_SECRET = process.env.REACT_APP_QUBIC_API_SECRET || '';
