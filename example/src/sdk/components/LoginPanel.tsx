@@ -1,10 +1,10 @@
-import { Root } from 'react-dom/client';
 import Web3 from 'web3';
-import useAuth from '../auth/useAuth';
-import { Web3ReactProvider } from '@web3-react/core';
+import { LoginMethod, useAuth } from '../auth/useAuth';
 import { Web3Provider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 import { Ethereumish } from '../types/ethereum';
+import { QubicCreatorAuthConfig } from '../types/qubicCreator';
+import { ReactElement } from 'react';
 
 declare global {
   interface Window {
@@ -13,20 +13,40 @@ declare global {
   }
 }
 
-const web3library = (provider: any): Web3Provider => {
+export interface CreatorLogin {
+  type: 'metamask' | 'wallet_connect' | 'qubic';
+  address: string;
+  accessToken: string;
+  errorMessage: string;
+  provider: string; //ether.js
+}
+
+export interface CreatorSignInButtonProps {
+  onLogin?: (param: CreatorLogin) => void;
+  onLogout?: () => void;
+}
+
+interface CreatorSignInButton extends QubicCreatorAuthConfig {
+  method: LoginMethod;
+}
+
+export const getWeb3Library = (provider: any): Web3Provider => {
   const { isQubic } = provider;
   return new ethers.providers.Web3Provider(isQubic ? provider : window.ethereum);
 };
 
-const LoginPanel = () => {
-  const { handleLogin } = useAuth();
-  return <button onClick={handleLogin}>Login</button>;
-};
+export function createCreatorSignInButtonElement(config: CreatorSignInButton) {
+  const { name: authAppName, service: authServiceName, domain: authAppUrl, key, secret } = config;
+  const keyPair = { key, secret };
 
-export function createLoginPanelComponent(ReactRootElement: Root, { onLogin = () => {} }) {
-  ReactRootElement.render(
-    <Web3ReactProvider getLibrary={web3library}>
-      <LoginPanel />
-    </Web3ReactProvider>,
-  );
+  const SignInButton = (props: CreatorSignInButtonProps): ReactElement => {
+    const { handleQubicLogin, authData } = useAuth({ authAppName, authAppUrl, authServiceName, keyPair });
+    return (
+      <button className="authbutton" onClick={handleQubicLogin}>
+        Qubic Login
+      </button>
+    );
+  };
+
+  return SignInButton;
 }

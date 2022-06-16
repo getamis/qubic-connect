@@ -12,7 +12,7 @@ export interface CreatorLogin {
   provider: string; //ether.js
 }
 
-export interface CreateLoginPanelConfig {
+export interface createCreatorSignInButtonConfig {
   onLogin: (param: CreatorLogin) => void;
   onLogout: () => void;
   titleText: string;
@@ -36,7 +36,7 @@ export class QubicCreator {
     return this._provider;
   }
 
-  public createLoginPanel(element?: null | HTMLBaseElement, config?: CreateLoginPanelConfig) {
+  public createCreatorSignInButton(element?: null | HTMLBaseElement, config?: createCreatorSignInButtonConfig) {
     if (element) {
       const root = createRoot(element);
       root.render(<LoginPanel />);
