@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import fetch from 'cross-fetch';
 import querystring from 'query-string';
-import { useWeb3React } from '@web3-react/core';
+import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core';
+import { InjectedConnector } from '@web3-react/injected-connector';
 import { Web3Provider, ExternalProvider } from '@ethersproject/providers';
 import { QubicConnector } from '@qubic-js/react';
 
@@ -19,7 +20,9 @@ import {
   QUBIC_INFURA_PROJECT_ID,
 } from '../constants/environment';
 
-export type LoginMethod = 'wc' | 'qubic' | 'metamask';
+const SUPPORTED_CHAIN_IDS = [1, 3, 4, 5, 137, 80001];
+
+export type LoginMethod = 'metamask' | 'wallet_connect' | 'qubic';
 
 interface CustomizeProvider extends ExternalProvider {
   isQubic?: boolean;
@@ -73,6 +76,7 @@ const signIn = async ({
     console.error('Missing sign-in data');
     return;
   }
+
   const payload = isQubicUser
     ? querystring.stringify({
         address: accountAddress,
@@ -159,22 +163,44 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
     [setAuthData],
   );
 
-  const handleQubicLogin = useCallback(
-    async (ev?: any) => {
-      if (!qubicConnector && typeof window === 'undefined') return;
-      ev?.preventDefault();
-      try {
-        await activate(qubicConnector, (e: Error): void => {
-          throw e;
-        });
-        setStartSign('qubic');
-      } catch (err) {
-        console.error(err);
-        console.error('Login to Qubic fail.');
-      }
-    },
-    [activate],
-  );
+  const handleQubicLogin = useCallback(async () => {
+    if (!qubicConnector && typeof window === 'undefined') return;
+    try {
+      await activate(qubicConnector, (e: Error): void => {
+        throw e;
+      });
+      setStartSign('qubic');
+    } catch (err) {
+      console.error(err);
+      console.error('Login to Qubic fail.');
+    }
+  }, [activate]);
+
+  const handleLoginMetaMask = useCallback(async () => {
+    if (!window.ethereum || (window.ethereum && !window.ethereum.isMetaMask)) {
+      // alert(t('install_metamask_alert'));
+      // setLoginMsg(t('login_metamask_error'));
+      return;
+    }
+
+    // setLoginMsg('');
+    // await disconnectWC();
+
+    const dappConnector = new InjectedConnector({
+      supportedChainIds: SUPPORTED_CHAIN_IDS,
+    });
+
+    if (dappConnector && typeof window !== 'undefined') {
+      await activate(dappConnector, (e: Error): void => {
+        console.error('Metamask login ERROR', e);
+        if (e instanceof UnsupportedChainIdError) {
+          alert(e.message);
+        }
+        // setLoginMsg(t('login_metamask_error'));
+      });
+      setStartSign('metamask');
+    }
+  }, [activate]);
 
   useEffect(() => {
     qubicConnector = new QubicConnector({
@@ -249,9 +275,9 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
 
   return {
     // user,
+    handleLoginMetaMask,
     handleQubicLogin,
     authData,
-    // handleQubicLoginMetaMask,
     // handleLogOut,
     // handleRenewAuth,
     // loginMsg,

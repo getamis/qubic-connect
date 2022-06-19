@@ -1,10 +1,14 @@
 import Web3 from 'web3';
+import { useCallback, useState } from 'react';
 import { LoginMethod, useAuth } from '../auth/useAuth';
 import { Web3Provider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 import { Ethereumish } from '../types/ethereum';
 import { QubicCreatorAuthConfig } from '../types/qubicCreator';
-import { ReactElement } from 'react';
+
+import QubicLogo from '../assets/qubic-logo.svg';
+import MetamaskFox from '../assets/metamask-fox.svg';
+import WalletConnectCircle from '../assets/walletconnect-circle-blue.svg';
 
 declare global {
   interface Window {
@@ -13,8 +17,14 @@ declare global {
   }
 }
 
+const iconMap: Record<LoginMethod, string> = {
+  qubic: QubicLogo,
+  metamask: MetamaskFox,
+  wallet_connect: WalletConnectCircle,
+};
+
 export interface CreatorLogin {
-  type: 'metamask' | 'wallet_connect' | 'qubic';
+  type: LoginMethod;
   address: string;
   accessToken: string;
   errorMessage: string;
@@ -26,9 +36,42 @@ export interface CreatorSignInButtonProps {
   onLogout?: () => void;
 }
 
+export interface SignInFullScreenModalProps extends CreatorSignInButtonProps {
+  children: React.ReactNode[] | React.ReactNode;
+}
+
 interface CreatorSignInButton extends QubicCreatorAuthConfig {
   method: LoginMethod;
 }
+
+const styleButton = {
+  width: '100%',
+  borderRadius: '4px',
+  border: 0,
+  padding: '6px 16px',
+  margin: '20px 0',
+  outline: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const styleButtonWhiteTheme = {
+  ...styleButton,
+  color: '#212121',
+  backgroundColor: '#fff',
+};
+
+const styleText = {
+  fontFamily: 'Roboto, sans-serif',
+  fontSize: '20px',
+};
+
+const icon = {
+  width: '24px',
+  height: '24px',
+  marginRight: '8px',
+};
 
 export const getWeb3Library = (provider: any): Web3Provider => {
   const { isQubic } = provider;
@@ -39,14 +82,84 @@ export function createCreatorSignInButtonElement(config: CreatorSignInButton) {
   const { name: authAppName, service: authServiceName, domain: authAppUrl, key, secret } = config;
   const keyPair = { key, secret };
 
-  const SignInButton = (props: CreatorSignInButtonProps): ReactElement => {
-    const { handleQubicLogin, authData } = useAuth({ authAppName, authAppUrl, authServiceName, keyPair });
+  const SignInButton = (props: CreatorSignInButtonProps): React.ReactElement => {
+    const { handleQubicLogin, handleLoginMetaMask, authData } = useAuth({
+      authAppName,
+      authAppUrl,
+      authServiceName,
+      keyPair,
+    });
+    const buttonIcon = iconMap?.[config.method as LoginMethod] || '';
+    const buttonText = useCallback(() => {
+      switch (config.method) {
+        case 'qubic':
+          return 'Qubic Wallet';
+        case 'metamask':
+          return 'MetaMask';
+        case 'wallet_connect':
+          return 'Wallet Connect';
+      }
+    }, []);
+    const handleWalletLogin = useCallback(
+      (ev: any): any => {
+        ev?.preventDefault();
+        ev?.stopPropagation();
+        switch (config.method) {
+          case 'qubic':
+            return handleQubicLogin();
+          case 'metamask':
+            return handleLoginMetaMask();
+        }
+      },
+      [handleLoginMetaMask, handleQubicLogin],
+    );
+
     return (
-      <button className="authbutton" onClick={handleQubicLogin}>
-        Qubic Login
+      <button style={styleButtonWhiteTheme} onClick={handleWalletLogin}>
+        <img style={icon} src={buttonIcon} alt="method-icon" />
+        <span style={styleText}>{buttonText()}</span>
       </button>
     );
   };
 
   return SignInButton;
 }
+
+export const SignInFullScreen = ({ children }: SignInFullScreenModalProps) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const StyleFullScreenModal = {
+    display: isVisible ? 'flex' : 'none',
+    position: 'fixed' as React.CSSProperties['position'],
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  };
+
+  const StyleBackdrop = {
+    zIndex: -1,
+    position: 'fixed' as React.CSSProperties['position'],
+    width: '100vw',
+    height: '100vh',
+  };
+
+  const handleVisibilitySwitch = useCallback(() => {
+    setIsVisible(!isVisible);
+  }, [isVisible]);
+
+  return (
+    <>
+      <div style={StyleFullScreenModal}>
+        <div style={StyleBackdrop} onClick={handleVisibilitySwitch}></div>
+        <div>{children}</div>
+      </div>
+      <button onClick={handleVisibilitySwitch} style={styleButtonWhiteTheme}>
+        <span style={styleText}> Login</span>
+      </button>
+    </>
+  );
+};

@@ -1,8 +1,15 @@
 import { createRoot } from 'react-dom/client';
 import { Web3ReactProvider } from '@web3-react/core';
 import { LoginMethod } from './auth/useAuth';
-import { getWeb3Library, createCreatorSignInButtonElement, CreatorSignInButtonProps } from './components/LoginPanel';
+import {
+  getWeb3Library,
+  createCreatorSignInButtonElement,
+  CreatorSignInButtonProps,
+  SignInFullScreen,
+} from './components/LoginPanel';
 import { QubicCreatorAuthConfig } from './types/qubicCreator';
+
+const ALLOWED_METHODS: LoginMethod[] = ['qubic', 'metamask', 'wallet_connect'];
 
 export interface CreatorSignInButtonConfig extends CreatorSignInButtonProps {
   method: LoginMethod;
@@ -12,6 +19,10 @@ export interface CreatorSignInButtonConfig extends CreatorSignInButtonProps {
   // itemStyle?: CSSStyleDeclaration;
   // activeStyleStyle?: CSSStyleDeclaration;
   // backdropStyle?: CSSStyleDeclaration;
+}
+
+export interface CreatorSignInPanel extends CreatorSignInButtonProps {
+  methods?: LoginMethod[];
 }
 
 export class QubicCreator {
@@ -52,34 +63,42 @@ export class QubicCreator {
       const root = createRoot(element);
       const creatorAuthConfig = this._getCreatorAuthConfig();
 
-      const Button = createCreatorSignInButtonElement({
+      const LoginButton = createCreatorSignInButtonElement({
         method: config.method,
         ...creatorAuthConfig,
       });
 
       root.render(
         <Web3ReactProvider getLibrary={getWeb3Library}>
-          <Button onLogin={config?.onLogin} onLogout={config?.onLogout} />
+          <LoginButton onLogin={config?.onLogin} onLogout={config?.onLogout} />
         </Web3ReactProvider>,
       );
     }
   }
 
-  public createCreatorSignInMethodPanel(element?: null | HTMLBaseElement) {
+  public createCreatorSignInMethodPanel(
+    element?: null | HTMLBaseElement,
+    config: CreatorSignInPanel = {
+      methods: ALLOWED_METHODS,
+    },
+  ) {
     if (element) {
       const root = createRoot(element);
       const creatorAuthConfig = this._getCreatorAuthConfig();
+      const LoginButtons = config.methods?.map(method => {
+        if (!ALLOWED_METHODS.includes(method)) return null;
+        const LoginButton = createCreatorSignInButtonElement({
+          method,
+          ...creatorAuthConfig,
+        });
+        return <LoginButton />;
+      });
 
-      // createCreatorSignInButtonElement(root, {
-      //   ...creatorAuthConfig,
-      //   ...config,
-      // } as CreatorSignInButtonConfig);
-
-      // root.render(
-      //   <Web3ReactProvider getLibrary={web3library}>
-      //     <SignInButton />
-      //   </Web3ReactProvider>,
-      // );
+      root.render(
+        <Web3ReactProvider getLibrary={getWeb3Library}>
+          <SignInFullScreen>{LoginButtons}</SignInFullScreen>
+        </Web3ReactProvider>,
+      );
     }
   }
 }

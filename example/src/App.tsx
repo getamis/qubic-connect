@@ -14,22 +14,46 @@ const qubicCreator = new QubicCreator({
 });
 
 function App() {
-  const loginPanelRef = useRef(null);
-  const [provider, setProvider] = useState(null);
+  const qubicLoginButtonRef = useRef(null);
+  const metamaskLoginButtonRef = useRef(null);
+  const wcLoginButtonRef = useRef(null);
+  const loginWithFullScreenModalButtonRef = useRef(null);
+  // const [provider, setProvider] = useState(null);
   useEffect(() => {
-    if (loginPanelRef?.current) {
-      qubicCreator.createCreatorSignInButton(loginPanelRef.current, {
+    if (qubicLoginButtonRef?.current) {
+      qubicCreator.createCreatorSignInButton(qubicLoginButtonRef.current, {
         method: 'qubic',
         onLogin: () => {},
       });
     }
-  }, [loginPanelRef]);
+    if (metamaskLoginButtonRef?.current) {
+      qubicCreator.createCreatorSignInButton(metamaskLoginButtonRef.current, {
+        method: 'metamask',
+        onLogin: () => {},
+      });
+    }
+    if (wcLoginButtonRef?.current) {
+      qubicCreator.createCreatorSignInButton(wcLoginButtonRef.current, {
+        method: 'wallet_connect',
+        onLogin: () => {},
+      });
+    }
+    if (loginWithFullScreenModalButtonRef?.current) {
+      qubicCreator.createCreatorSignInMethodPanel(loginWithFullScreenModalButtonRef.current, {
+        methods: ['qubic', 'metamask'],
+        onLogin: () => {},
+      });
+    }
+  }, [qubicLoginButtonRef, metamaskLoginButtonRef, wcLoginButtonRef]);
 
   return (
     <div className="App">
       <header className="App-header">
         <div>
-          <div ref={loginPanelRef} className="loginPanel" />
+          <div ref={qubicLoginButtonRef} className="login-button" />
+          <div ref={metamaskLoginButtonRef} className="login-button" />
+          <div ref={wcLoginButtonRef} className="login-button" />
+          <div ref={loginWithFullScreenModalButtonRef} className="login-button" />
         </div>
       </header>
     </div>
