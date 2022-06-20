@@ -83,7 +83,7 @@ export function createCreatorSignInButtonElement(config: CreatorSignInButton) {
   const keyPair = { key, secret };
 
   const SignInButton = (props: CreatorSignInButtonProps): React.ReactElement => {
-    const { handleQubicLogin, handleLoginMetaMask, authData } = useAuth({
+    const { handleQubicLogin, handleLoginMetaMask, handleLoginWalletConnect, authData } = useAuth({
       authAppName,
       authAppUrl,
       authServiceName,
@@ -109,9 +109,11 @@ export function createCreatorSignInButtonElement(config: CreatorSignInButton) {
             return handleQubicLogin();
           case 'metamask':
             return handleLoginMetaMask();
+          case 'wallet_connect':
+            return handleLoginWalletConnect();
         }
       },
-      [handleLoginMetaMask, handleQubicLogin],
+      [handleLoginMetaMask, handleLoginWalletConnect, handleQubicLogin],
     );
 
     return (

@@ -10,7 +10,10 @@ import {
 import { QubicCreatorAuthConfig } from './types/qubicCreator';
 
 const ALLOWED_METHODS: LoginMethod[] = ['qubic', 'metamask', 'wallet_connect'];
-
+// TODO:
+/* 
+  1. Expose Login Function.
+ */
 export interface CreatorSignInButtonConfig extends CreatorSignInButtonProps {
   method: LoginMethod;
 

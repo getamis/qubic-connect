@@ -6,6 +6,7 @@ import { InjectedConnector } from '@web3-react/injected-connector';
 import { Web3Provider, ExternalProvider } from '@ethersproject/providers';
 import { QubicConnector } from '@qubic-js/react';
 
+import useWalletConnect from './useWalletConnect';
 // import { WalletPermissions } from '../types/wallet';
 import serviceHeaderBuilder from '../utils/serviceHeaderBuilder';
 import convertStringToHex from '../utils/convertStringToHex';
@@ -91,6 +92,7 @@ const signIn = async ({
   const serviceUri = isQubicUser
     ? `https://${CREATOR_API_URL}/services/auth/qubic`
     : `https://${CREATOR_API_URL}/services/auth`;
+
   const httpMethod = 'POST';
   const headers: any = serviceHeaderBuilder({
     serviceUri,
@@ -104,7 +106,6 @@ const signIn = async ({
     method: httpMethod,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      credentials: 'include',
       ...headers,
     },
     body: payload,
@@ -121,24 +122,55 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
   const [authData, setAuthData] = useState<SignInResult>();
   const [authSignature, setAuthSignature] = useState<string | undefined>('');
   const [signDataString, setSignDataString] = useState<string>('');
-  const [isQubicUser, setIsQubicUser] = useState(true);
+  const [isQubicUser, setIsQubicUser] = useState(false);
+
+  const { walletConnector, connectWC, isWalletConnected, walletConnectState, disconnectWC } = useWalletConnect({
+    onConnectCallback: () => setStartSign('wallet_connect'),
+  });
 
   const currentProvider = ethersProvider?.provider as CustomizeProvider;
+
+  // const keepCryptoActive = useCallback(async () => {
+  //   setLoginMsg('');
+
+  //   if (walletConnector && isWalletConnected) {
+  //     await connectWC();
+  //     return;
+  //   }
+
+  //   const connector = user?.isQubicUser
+  //     ? qubicConnector
+  //     : new InjectedConnector({
+  //         supportedChainIds: SUPPORTED_CHAIN_IDS,
+  //       });
+
+  //   if (!ethersProvider && connector && typeof window !== 'undefined') {
+  //     await activate(connector, (e: Error): void => {
+  //       console.error('Keep crypto active ERROR', e);
+  //       if (e instanceof UnsupportedChainIdError) {
+  //         alert(e.message);
+  //       }
+  //       setLoginMsg(t('login_qubic_error'));
+  //     });
+  //   }
+  // }, [activate, connectWC, ethersProvider, isWalletConnected, qubicConnector, t, user?.isQubicUser, walletConnector]);
 
   const handleSignAuthData = useCallback(
     async (payload: any) => {
       if (!account || !payload) {
         return;
       }
-      const isQubic = Boolean((currentProvider as CustomizeProvider)?.isQubic);
+      console.log(payload);
 
+      const isQubic = Boolean((currentProvider as CustomizeProvider)?.isQubic);
+      console.log(isQubic);
       try {
         const signatureResult = currentProvider?.request ? await currentProvider.request(payload) : '';
         // When user reject or close qubic-wallet, will get Error as return value
         if (typeof signatureResult !== 'string' && !Array.isArray(signatureResult)) {
           throw signatureResult;
         }
-
+        console.log(signatureResult);
         const signature = isQubic ? signatureResult[0] : signatureResult;
         setAuthSignature(signature);
       } catch (error) {
@@ -184,7 +216,7 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
     }
 
     // setLoginMsg('');
-    // await disconnectWC();
+    await disconnectWC();
 
     const dappConnector = new InjectedConnector({
       supportedChainIds: SUPPORTED_CHAIN_IDS,
@@ -200,7 +232,114 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
       });
       setStartSign('metamask');
     }
-  }, [activate]);
+  }, [activate, disconnectWC]);
+
+  // const handleRenewAuth = useCallback(async () => {
+  //   if (isRenewAuthProcessing) {
+  //     return;
+  //   }
+  //   isRenewAuthProcessing = true;
+  //   try {
+  //     const newData = await renewAuth(apiKeyPair);
+  //     const newUser = { ...user, ...newData };
+  //     setupAuthData(newUser);
+  //   } catch (err) {
+  //     console.error('Renew auth ERROR', err);
+  //     handleLogOut({});
+  //   }
+  //   isRenewAuthProcessing = false;
+  // }, [apiKeyPair, user, setupAuthData, handleLogOut]);
+
+  // /**
+  //  * Check user?.expiredAt to renewAuth or logout
+  //  */
+  // if (user?.expiredAt) {
+  //   const expiredAtMs = user.expiredAt * 1000;
+  //   if (expiredAtMs <= Date.now()) {
+  //     handleLogOut({});
+  //   } else if (expiredAtMs <= Date.now() + RENEW_AUTH_THRESHOLD_MS) {
+  //     handleRenewAuth();
+  //   }
+  // }
+
+  // const execSwitchAccounts = useCallback(async () => {
+  //   if (!ethersProvider) {
+  //     return;
+  //   }
+
+  //   if (!user?.isQubicUser) {
+  //     setLoginMsg(t('not_qubic_user_error'));
+  //     return;
+  //   }
+
+  //   if (!account) {
+  //     setLoginMsg(t('switch_account_error'));
+  //     return;
+  //   }
+
+  //   try {
+  //     const currentProvider = ethersProvider.provider;
+
+  //     if (currentProvider?.request) {
+  //       await currentProvider.request({
+  //         method: 'eth_requestAccounts',
+  //       });
+
+  //       setWalletUserSwitched(true);
+  //     }
+  //   } catch (error) {
+  //     console.error('Switch account ERROR', error);
+  //     setLoginMsg(t('switch_account_error'));
+  //   }
+  // }, [account, ethersProvider, t, user?.isQubicUser]);
+
+  const handleLoginWalletConnect = useCallback(async () => {
+    // setLoginMsg('');
+    await connectWC();
+  }, [connectWC]);
+
+  // const handleLogOut = useCallback(
+  //   async (ev?) => {
+  //     if (ev?.preventDefault) {
+  //       ev?.preventDefault();
+  //     }
+
+  //     if (!isLogin || isLogoutProcessing) {
+  //       return;
+  //     }
+
+  //     isLogoutProcessing = true;
+
+  //     try {
+  //       if (walletConnector) {
+  //         await disconnectWC();
+  //       } else {
+  //         deactivate();
+  //       }
+
+  //       await signOut(apiKeyPair);
+  //     } catch (error) {
+  //       // do nothing
+  //     }
+
+  //     setUser(null);
+  //     setSignDataString('');
+  //     setAuthSignature('');
+  //     setStartSwitchQubicUser(false);
+  //     setStartSign(false);
+  //     removeAuthDataFromStorage();
+
+  //     apolloClient.resetStore();
+
+  //     isLogoutProcessing = false;
+
+  //     // silence logout
+  //     if (ev) {
+  //       alert('Logout!');
+  //     }
+  //   },
+  //   [apiKeyPair, isLogin, apolloClient, deactivate, disconnectWC, setUser, walletConnector],
+  // );
 
   useEffect(() => {
     qubicConnector = new QubicConnector({
@@ -215,8 +354,10 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
 
   useEffect(() => {
     if (!account || !startSign || !currentProvider) return;
+    console.log(account);
     const isQubicProvider = !!currentProvider?.isQubic;
     let rpcPayload: SignRPCPayload | undefined;
+
     const dataString = JSON.stringify({
       name: props.authAppName,
       url: props.authAppUrl,
@@ -224,7 +365,7 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
       permissions: ['wallet.permission.access_email_address'],
       nonce: Date.now(),
     });
-
+    console.log('hex', convertStringToHex(dataString));
     if (startSign === 'qubic') {
       if (!isQubicProvider) return;
       setIsQubicUser(true);
@@ -237,7 +378,7 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
       rpcPayload = {
         jsonrpc: '2.0',
         method: 'personal_sign',
-        params: [account, convertStringToHex(dataString)],
+        params: [convertStringToHex(dataString), account],
       };
     }
     setSignDataString(dataString);
@@ -265,7 +406,7 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
     const accountAddress = account;
     if (accountAddress && authSignature && signDataString) {
       handleCreatorSignIn({
-        accountAddress: account,
+        accountAddress,
         signature: authSignature,
         dataString: signDataString,
         isQubicUser,
@@ -275,6 +416,7 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
 
   return {
     // user,
+    handleLoginWalletConnect,
     handleLoginMetaMask,
     handleQubicLogin,
     authData,
