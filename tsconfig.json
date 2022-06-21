@@ -1,5 +1,7 @@
 {
+  "include": ["./src/**/*"],
   "compilerOptions": {
+    "outDir": "dist",
     "baseUrl": ".",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,

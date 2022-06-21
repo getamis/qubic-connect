@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { QubicCreator } from './sdk/index';
+import QubicCreator from '../../dist';
 import './App.css';
 
 const API_KEY = process.env.REACT_APP_CREATOR_API_URL_KEY || '';

@@ -1,5 +1,5 @@
 import Web3 from 'web3';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { LoginMethod, useAuth } from '../auth/useAuth';
 import { Web3Provider } from '@ethersproject/providers';
 import { ethers } from 'ethers';

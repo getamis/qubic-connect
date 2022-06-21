@@ -1,3 +1,4 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Web3ReactProvider } from '@web3-react/core';
 import { LoginMethod } from './auth/useAuth';

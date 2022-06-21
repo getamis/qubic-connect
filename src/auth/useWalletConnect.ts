@@ -44,7 +44,6 @@ const INITIAL_STATE: WCState = {
 const WALLET_CONNECT_BRIDGE = 'https://bridge.walletconnect.org';
 
 const apiGetAccountAssets = async (address: string, chainId: number): Promise<WCAssetData[]> => {
-  console.log('asdasd');
   const response = await fetch(`https://ethereum-api.xyz/account-assets?address=${address}&chainId=${chainId}`, {
     headers: {
       Accept: 'application/json',
@@ -216,9 +215,6 @@ const useWalletConnect = ({ onConnectCallback }: UseWalletConnectProps) => {
 
       if (!connectInstance.connected) {
         // create new session
-        console.log('!!');
-        console.log(connectInstance.connected);
-        console.log(connectInstance);
         await connectInstance.createSession();
       }
 

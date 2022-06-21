@@ -7,18 +7,24 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "snowpack dev",
-    "build": "snowpack build"
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.dev.json --watch"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.4",
     "snowpack": "^3.8.8"
+  },
+  "peerDependencies": {
+    "@walletconnect/client": "^1.7.8",
+    "@walletconnect/qrcode-modal": "^1.7.8"
   },
   "dependencies": {
     "@qubic-js/browser": "^1.2.3",
     "@qubic-js/core": "^1.2.3",
     "@qubic-js/react": "^1.2.3",
     "@types/crypto-js": "^4.1.1",
+    "@types/react": "^18.0.12",
+    "@types/react-dom": "^18.0.5",
     "@walletconnect/client": "^1.7.8",
     "@walletconnect/qrcode-modal": "^1.7.8",
     "@web3-react/core": "^6.1.9",
@@ -27,13 +33,13 @@
     "crypto-js": "^4.1.1",
     "ethers": "^5.6.8",
     "graphql": "^16.5.0",
-    "graphql-hooks": "^5.11.4",
     "graphql-request": "^4.3.0",
     "preact": "^10.7.3",
     "qubic-js": "^0.0.0",
     "query-string": "^7.1.1",
-    "react-dom": "^18.1.0",
+    "react-dom": "^18.2.0",
     "styled-components": "^5.3.5",
+    "typescript": "^4.7.4",
     "web-vitals": "^2.1.4",
     "web3": "^1.7.3",
     "web3-react": "^5.0.5"
