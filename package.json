@@ -1,10 +1,12 @@
 {
   "name": "qubic-creator-sdk",
   "version": "0.1.0",
-  "main": "index.js",
+  "source": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "repository": "https://github.com/getamis/qubic-creator-sdk.git",
   "author": "amis-labs",
-  "license": "MIT",
+  "license": "Apache License 2.0",
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -13,8 +15,7 @@
     "copy-assets": "mkdir -p ./dist/assets && cp ./src/assets/* \"$_\""
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "snowpack": "^3.8.8"
+    "@testing-library/jest-dom": "^5.16.4"
   },
   "peerDependencies": {
     "@walletconnect/client": "^1.7.8",
