@@ -1,5 +1,5 @@
 import Web3 from 'web3';
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { LoginMethod, useAuth } from '../auth/useAuth';
 import { Web3Provider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
@@ -20,19 +20,18 @@ declare global {
 const iconMap: Record<LoginMethod, string> = {
   qubic: QubicLogo,
   metamask: MetamaskFox,
-  wallet_connect: WalletConnectCircle,
+  // wallet_connect: WalletConnectCircle,
 };
 
 export interface CreatorLogin {
   type: LoginMethod;
   address: string;
   accessToken: string;
-  errorMessage: string;
-  provider: string; //ether.js
+  provider?: string; //ether.js
 }
 
 export interface CreatorSignInButtonProps {
-  onLogin?: (param: CreatorLogin) => void;
+  onLogin?: (errorMessage: string | null, param: CreatorLogin) => void;
   onLogout?: () => void;
 }
 
@@ -83,7 +82,7 @@ export function createCreatorSignInButtonElement(config: CreatorSignInButton) {
   const keyPair = { key, secret };
 
   const SignInButton = (props: CreatorSignInButtonProps): React.ReactElement => {
-    const { handleQubicLogin, handleLoginMetaMask, handleLoginWalletConnect, authData } = useAuth({
+    const { handleQubicLogin, handleLoginMetaMask, accessToken, address } = useAuth({
       authAppName,
       authAppUrl,
       authServiceName,
@@ -96,8 +95,8 @@ export function createCreatorSignInButtonElement(config: CreatorSignInButton) {
           return 'Qubic Wallet';
         case 'metamask':
           return 'MetaMask';
-        case 'wallet_connect':
-          return 'Wallet Connect';
+        // case 'wallet_connect':
+        //   return 'Wallet Connect';
       }
     }, []);
     const handleWalletLogin = useCallback(
@@ -109,12 +108,22 @@ export function createCreatorSignInButtonElement(config: CreatorSignInButton) {
             return handleQubicLogin();
           case 'metamask':
             return handleLoginMetaMask();
-          case 'wallet_connect':
-            return handleLoginWalletConnect();
+          // case 'wallet_connect':
+          //   return handleLoginWalletConnect();
         }
       },
-      [handleLoginMetaMask, handleLoginWalletConnect, handleQubicLogin],
+      [handleLoginMetaMask, handleQubicLogin],
     );
+
+    useEffect(() => {
+      if (accessToken && address) {
+        props.onLogin?.(null, {
+          type: config.method,
+          accessToken,
+          address,
+        });
+      }
+    });
 
     return (
       <button style={styleButtonWhiteTheme} onClick={handleWalletLogin}>

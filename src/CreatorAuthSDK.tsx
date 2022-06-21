@@ -10,10 +10,11 @@ import {
 } from './components/LoginPanel';
 import { QubicCreatorAuthConfig } from './types/qubicCreator';
 
-const ALLOWED_METHODS: LoginMethod[] = ['qubic', 'metamask', 'wallet_connect'];
+const ALLOWED_METHODS: LoginMethod[] = ['qubic', 'metamask'];
 // TODO:
 /* 
   1. Expose Login Function.
+  2. Fix the issue of the wallet connect.
  */
 export interface CreatorSignInButtonConfig extends CreatorSignInButtonProps {
   method: LoginMethod;

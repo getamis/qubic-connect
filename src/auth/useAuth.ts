@@ -6,7 +6,7 @@ import { InjectedConnector } from '@web3-react/injected-connector';
 import { Web3Provider, ExternalProvider } from '@ethersproject/providers';
 import { QubicConnector } from '@qubic-js/react';
 
-import useWalletConnect from './useWalletConnect';
+// import useWalletConnect from './useWalletConnect';
 // import { WalletPermissions } from '../types/wallet';
 import serviceHeaderBuilder from '../utils/serviceHeaderBuilder';
 import convertStringToHex from '../utils/convertStringToHex';
@@ -23,7 +23,8 @@ import {
 
 const SUPPORTED_CHAIN_IDS = [1, 3, 4, 5, 137, 80001];
 
-export type LoginMethod = 'metamask' | 'wallet_connect' | 'qubic';
+// export type LoginMethod = 'metamask' | 'wallet_connect' | 'qubic';
+export type LoginMethod = 'metamask' | 'qubic';
 
 interface CustomizeProvider extends ExternalProvider {
   isQubic?: boolean;
@@ -83,7 +84,6 @@ const signIn = async ({
     console.error('Missing sign-in data');
     return;
   }
-  console.log('signature', signature);
 
   const payload = isQubicUser
     ? querystring.stringify({
@@ -97,7 +97,6 @@ const signIn = async ({
         data: convertStringToHex(dataString),
       });
 
-  console.log(payload);
   const serviceUri = isQubicUser
     ? `https://${CREATOR_API_URL}/services/auth/qubic`
     : `https://${CREATOR_API_URL}/services/auth`;
@@ -133,9 +132,9 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
   const [signDataString, setSignDataString] = useState<string>('');
   const [isQubicUser, setIsQubicUser] = useState(false);
 
-  const { walletConnector, connectWC, isWalletConnected, walletConnectState, disconnectWC } = useWalletConnect({
-    onConnectCallback: () => setStartSign('wallet_connect'),
-  });
+  // const { walletConnector, connectWC, isWalletConnected, walletConnectState, disconnectWC } = useWalletConnect({
+  //   onConnectCallback: () => setStartSign('wallet_connect'),
+  // });
 
   const currentProvider = ethersProvider?.provider as CustomizeProvider;
 
@@ -169,17 +168,14 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
       if (!account || !payload) {
         return;
       }
-      console.log(payload);
 
       const isQubic = Boolean((currentProvider as CustomizeProvider)?.isQubic);
-      console.log(isQubic);
       try {
         const signatureResult = currentProvider?.request ? await currentProvider.request(payload) : '';
         // When user reject or close qubic-wallet, will get Error as return value
         if (typeof signatureResult !== 'string' && !Array.isArray(signatureResult)) {
           throw signatureResult;
         }
-        console.log(signatureResult);
         const signature = isQubic ? signatureResult[0] : signatureResult;
         setAuthSignature(signature);
       } catch (error) {
@@ -225,7 +221,7 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
     }
 
     // setLoginMsg('');
-    await disconnectWC();
+    // await disconnectWC();
 
     const dappConnector = new InjectedConnector({
       supportedChainIds: SUPPORTED_CHAIN_IDS,
@@ -241,34 +237,34 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
       });
       setStartSign('metamask');
     }
-  }, [activate, disconnectWC]);
+  }, [activate]);
 
-  const signByWalletConnector = useCallback(
-    async (payload: SignPayload) => {
-      if (!walletConnector) {
-        return;
-      }
+  // const signByWalletConnector = useCallback(
+  //   async (payload: SignPayload) => {
+  //     if (!walletConnector) {
+  //       return;
+  //     }
 
-      if (!payload) {
-        console.error('Missing WalletConnector sign payload');
-        // setLoginMsg(t('sign_error'));
-        return;
-      }
+  //     if (!payload) {
+  //       console.error('Missing WalletConnector sign payload');
+  //       // setLoginMsg(t('sign_error'));
+  //       return;
+  //     }
 
-      try {
-        const signature = await walletConnector.signPersonalMessage(payload.params);
-        // When user reject or close qubic-wallet, will get Error as return value
-        if (typeof signature !== 'string') {
-          throw signature;
-        }
-        setAuthSignature(signature);
-      } catch (error) {
-        console.error('WalletConnect Sign Auth ERROR', error);
-        // setLoginMsg(t('sign_error'));
-      }
-    },
-    [walletConnector],
-  );
+  //     try {
+  //       const signature = await walletConnector.signPersonalMessage(payload.params);
+  //       // When user reject or close qubic-wallet, will get Error as return value
+  //       if (typeof signature !== 'string') {
+  //         throw signature;
+  //       }
+  //       setAuthSignature(signature);
+  //     } catch (error) {
+  //       console.error('WalletConnect Sign Auth ERROR', error);
+  //       // setLoginMsg(t('sign_error'));
+  //     }
+  //   },
+  //   [walletConnector],
+  // );
 
   // const handleRenewAuth = useCallback(async () => {
   //   if (isRenewAuthProcessing) {
@@ -329,10 +325,10 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
   //   }
   // }, [account, ethersProvider, t, user?.isQubicUser]);
 
-  const handleLoginWalletConnect = useCallback(async () => {
-    // setLoginMsg('');
-    await connectWC();
-  }, [connectWC]);
+  // const handleLoginWalletConnect = useCallback(async () => {
+  //   // setLoginMsg('');
+  //   await connectWC();
+  // }, [connectWC]);
 
   // const handleLogOut = useCallback(
   //   async (ev?) => {
@@ -379,15 +375,16 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
 
   const handleSignAuthData = useCallback(
     async (payload: SignPayload) => {
-      if (walletConnector) {
-        signByWalletConnector(payload);
-      } else if (ethersProvider) {
+      // if (walletConnector) {
+      //   signByWalletConnector(payload);
+      // } else
+      if (ethersProvider) {
         signByWeb3Provider(payload);
       } else {
         // setLoginMsg(t('sign_error'));
       }
     },
-    [ethersProvider, signByWalletConnector, signByWeb3Provider, walletConnector],
+    [ethersProvider, signByWeb3Provider],
   );
 
   useEffect(() => {
@@ -405,10 +402,10 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
     if (!startSign) return;
 
     const isQubicProvider = !!currentProvider?.isQubic;
-    const wcAddress = walletConnectState.address;
-    const isUseWalletConnect = wcAddress && walletConnector;
-    console.log(wcAddress);
-    console.log(isUseWalletConnect);
+    // const wcAddress = walletConnectState.address;
+    // const isUseWalletConnect = wcAddress && walletConnector;
+    // console.log(wcAddress);
+    // console.log(isUseWalletConnect);
     let rpcPayload: SignRPCPayload | undefined;
 
     const dataString = JSON.stringify({
@@ -437,21 +434,21 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
           params: [convertStringToHex(dataString), account],
         };
       }
-    } else if (isUseWalletConnect) {
-      console.log('ddd');
-      rpcPayload = {
-        jsonrpc: '2.0',
-        method: 'personal_sign',
-        params: [convertStringToHex(dataString), wcAddress],
-      };
     }
+    // else if (isUseWalletConnect) {
+    //   rpcPayload = {
+    //     jsonrpc: '2.0',
+    //     method: 'personal_sign',
+    //     params: [convertStringToHex(dataString), wcAddress],
+    //   };
+    // }
 
     if (rpcPayload) {
       handleSignAuthData(rpcPayload);
     } else {
-      if (walletConnector) {
-        disconnectWC();
-      }
+      // if (walletConnector) {
+      //   disconnectWC();
+      // }
 
       console.error('Sign fail: no payload');
     }
@@ -467,18 +464,14 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
     props.authAppName,
     props.authAppUrl,
     props.authServiceName,
-    walletConnectState.address,
-    walletConnector,
-    disconnectWC,
+    // walletConnectState.address,
+    // walletConnector,
+    // disconnectWC,
   ]);
 
   useEffect(() => {
-    if (authData) {
-    }
-  }, [authData]);
-
-  useEffect(() => {
-    const accountAddress = account || walletConnectState.address;
+    // const accountAddress = account || walletConnectState.address;
+    const accountAddress = account;
     if (accountAddress && authSignature && signDataString) {
       handleCreatorSignIn({
         accountAddress,
@@ -487,14 +480,15 @@ export const useAuth = (props: CreatorAuthConnectorProps) => {
         isQubicUser,
       });
     }
-  }, [account, authSignature, handleCreatorSignIn, isQubicUser, signDataString, walletConnectState.address]);
+  }, [account, authSignature, handleCreatorSignIn, isQubicUser, signDataString]);
 
   return {
     // user,
-    handleLoginWalletConnect,
+    // handleLoginWalletConnect,
     handleLoginMetaMask,
     handleQubicLogin,
-    authData,
+    accessToken: authData?.accessToken,
+    address: account,
     // handleLogOut,
     // handleRenewAuth,
     // loginMsg,
