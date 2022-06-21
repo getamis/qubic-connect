@@ -11,9 +11,11 @@
     "jsx": "react",
     "lib": ["esnext", "dom"],
     "moduleResolution": "node",
-    "noEmit": true,
+    // "noEmit": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "target": "ES5",
+    "module": "commonjs"
   },
   "exclude": ["coverage", "dist/**", "node_modules", "**/__tests__", "**/__mocks__"]
 }

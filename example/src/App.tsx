@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import QubicCreator from '../../dist';
 import './App.css';
 
@@ -8,7 +8,7 @@ const API_SECRET = process.env.REACT_APP_CREATOR_API_URL_SECRET || '';
 const qubicCreator = new QubicCreator({
   name: 'Qubic Creator',
   service: 'qubee-creator',
-  domain: 'creator.stag.qubic.market',
+  domain: 'creator.dev.qubic.market',
   key: API_KEY,
   secret: API_SECRET,
 });
@@ -18,6 +18,7 @@ function App() {
   const metamaskLoginButtonRef = useRef(null);
   const wcLoginButtonRef = useRef(null);
   const loginWithFullScreenModalButtonRef = useRef(null);
+
   // const [provider, setProvider] = useState(null);
   useEffect(() => {
     if (qubicLoginButtonRef?.current) {
