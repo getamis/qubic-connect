@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import QubicCreator from '../../dist';
+import QubicCreatorSdk from '../../dist';
 import './App.css';
 import {
   CHAIN_ID,
@@ -11,7 +11,7 @@ import {
   QUBIC_API_SECRET,
 } from './environment';
 
-const qubicCreator = new QubicCreator({
+const qubicCreatorSdk = new QubicCreatorSdk({
   name: 'Qubic Creator',
   service: 'qubee-creator',
   domain: 'creator.dev.qubic.market',
@@ -40,7 +40,7 @@ function App() {
     }
     isMountedRef.current = true;
     if (qubicLoginButtonRef?.current) {
-      qubicCreator.createLoginButton(qubicLoginButtonRef.current, {
+      qubicCreatorSdk.createLoginButton(qubicLoginButtonRef.current, {
         method: 'qubic',
         onLogin: (e: any, res: any) => {
           console.log({ accessToken: res.accessToken });
@@ -48,7 +48,7 @@ function App() {
       });
     }
     if (metamaskLoginButtonRef?.current) {
-      qubicCreator.createLoginButton(metamaskLoginButtonRef.current, {
+      qubicCreatorSdk.createLoginButton(metamaskLoginButtonRef.current, {
         method: 'metamask',
         onLogin: (e: any, res: any) => {
           console.log({ accessToken: res.accessToken });
@@ -56,13 +56,13 @@ function App() {
       });
     }
     if (wcLoginButtonRef?.current) {
-      qubicCreator.createLoginButton(wcLoginButtonRef.current, {
+      qubicCreatorSdk.createLoginButton(wcLoginButtonRef.current, {
         method: 'walletconnect',
         onLogin: () => {},
       });
     }
     if (loginWithFullScreenModalButtonRef?.current) {
-      qubicCreator.createCreatorLoginMethodPanel(loginWithFullScreenModalButtonRef.current, {
+      qubicCreatorSdk.createCreatorLoginMethodPanel(loginWithFullScreenModalButtonRef.current, {
         methods: ['qubic', 'metamask', 'walletconnect'],
         onLogin: () => {},
       });

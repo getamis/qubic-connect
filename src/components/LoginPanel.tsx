@@ -45,11 +45,6 @@ export const LoginFullScreen = memo<LoginPanelProps>(props => {
     setIsVisible(!isVisible);
   }, [isVisible]);
 
-  console.log({
-    commonClasses,
-    answer: clsx(commonClasses.button, commonClasses.buttonWhite),
-  });
-
   return (
     <>
       <div
