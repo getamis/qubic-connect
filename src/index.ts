@@ -1,1 +1,1 @@
-export { QubicCreator as default } from './CreatorAuthSDK';
+export { QubicCreatorSdk as default } from './CreatorSdk';
