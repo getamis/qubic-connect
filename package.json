@@ -1,32 +1,44 @@
 {
   "name": "qubic-creator-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "source": "./src/index.ts",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "repository": "https://github.com/getamis/qubic-creator-sdk.git",
   "author": "amis-labs",
-  "license": "Apache License 2.0",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "tsc -p tsconfig.json & yarn copy-assets",
-    "start": "yarn watch & yarn copy-assets",
+    "start": "yarn watch & yarn copy-assets && cd example && yarn start",
     "watch": "tsc -p tsconfig.json --watch",
     "copy-assets": "mkdir -p ./dist/assets && cp ./src/assets/* \"$_\"",
-    "lint": "eslint ./src && tsc",
-    "prepublishOnly": "yarn lint",
-    "release": "release-it"
+    "release": "release-it",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write --parser typescript",
+      "eslint --cache"
+    ]
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.4",
-    "@typescript-eslint/eslint-plugin": "^3.9.0",
-    "@typescript-eslint/parser": "^3.9.0",
+    "@typescript-eslint/eslint-plugin": "^5.29.0",
+    "@typescript-eslint/parser": "^5.29.0",
     "eslint": "^7.7.0",
     "eslint-config-airbnb": "^18.2.0",
+    "eslint-config-preact": "^1.3.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
-    "eslint-plugin-react": "^7.20.6",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "husky": "^8.0.1",
+    "jest": "^28.1.1",
+    "lint-staged": "^13.0.2",
+    "prettier": "^2.7.1",
     "release-it": "^15.1.0"
   },
   "dependencies": {

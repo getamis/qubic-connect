@@ -1,6 +1,7 @@
 {
   "extends": [
     "airbnb",
+    "preact",
     "prettier",
     "prettier/react",
     "prettier/@typescript-eslint",
@@ -20,8 +21,7 @@
       "node": {
         "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
-    },
-    "import/core-modules": ["@qubic-js/core", "@qubic-js/browser", "@qubic-js/react"]
+    }
   },
   "rules": {
     "@typescript-eslint/ban-ts-comment": "off",
@@ -52,6 +52,7 @@
     "react/no-multi-comp": 0,
     "react/sort-comp": 0,
     "no-lonely-if": 0,
+    "react/jsx-fragments": 0,
     "jsx-a11y/anchor-is-valid": [
       "error",
       {
