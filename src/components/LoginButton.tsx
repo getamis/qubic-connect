@@ -4,9 +4,7 @@ import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import jss from 'jss';
 import clsx from 'clsx';
-import QubicLogo from '../assets/qubic-logo.svg';
-import MetamaskFox from '../assets/metamask-fox.svg';
-import WalletConnectCircle from '../assets/walletconnect-circle-blue.svg';
+import { ComponentChildren } from 'preact';
 import { SdkConfig, SdkOnLogin, SdkOnLogout } from '../types/QubicCreator';
 
 import { ExtendedExternalProvider, ExtendedExternalProviderType } from '../types/ExtendedExternalProvider';
@@ -14,6 +12,9 @@ import { createSingMessageAndLogin } from './utils/singMessageAndLogin';
 import { isWalletconnectProvider } from '../utils/isWalletconnectProvider';
 import '../utils/fixWalletConnect';
 import { commonClasses } from './styles';
+import SvgQubicLogo from './svg/QubicLogo';
+import SvgMetamaskFox from './svg/MetamaskFox';
+import SvgWalletconnectCircleBlue from './svg/WalletconnectCircleBlue';
 
 export interface LoginButtonProps {
   method: ExtendedExternalProviderType;
@@ -25,8 +26,6 @@ export interface LoginButtonProps {
 const { classes } = jss
   .createStyleSheet({
     icon: {
-      width: '24px',
-      height: '24px',
       marginRight: '8px',
     },
   })
@@ -49,13 +48,13 @@ export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponen
     ExtendedExternalProviderType,
     {
       buttonText: string;
-      buttonIcon: string;
+      buttonIcon: ComponentChildren;
       provider: ExtendedExternalProvider;
     }
   > = {
     qubic: {
       buttonText: 'Qubic Wallet',
-      buttonIcon: QubicLogo,
+      buttonIcon: <SvgQubicLogo className={classes.icon} />,
       provider: new QubicProvider({
         apiKey: qubicWalletKey,
         apiSecret: qubicWalletSecret,
@@ -67,12 +66,12 @@ export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponen
     },
     metamask: {
       buttonText: 'MetaMask',
-      buttonIcon: MetamaskFox,
+      buttonIcon: <SvgMetamaskFox className={classes.icon} />,
       provider: window.ethereum,
     },
     walletconnect: {
       buttonText: 'WalletConnect',
-      buttonIcon: WalletConnectCircle,
+      buttonIcon: <SvgWalletconnectCircleBlue className={classes.icon} />,
       provider: new WalletConnectProvider({
         chainId,
         infuraId,
@@ -124,7 +123,7 @@ export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponen
         className={clsx(commonClasses.button, commonClasses.buttonWhite)}
         onClick={handleWalletLogin}
       >
-        <img className={classes.icon} src={buttonIcon} alt="method-icon" />
+        {buttonIcon}
         <span className={clsx(commonClasses.text)}>{buttonText}</span>
       </button>
     );
