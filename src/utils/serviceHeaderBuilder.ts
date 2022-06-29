@@ -17,8 +17,8 @@ const serviceHeaderBuilder = ({
   apiSecret,
   apiKey,
   isGQL = false,
-}: BuilderInput) => {
-  let headers = {} as Record<string, string | number | boolean>;
+}: BuilderInput): HeadersInit => {
+  const headers: HeadersInit = {};
 
   const now = Date.now();
   const urlObj = new URL(serviceUri);
@@ -45,7 +45,7 @@ const serviceHeaderBuilder = ({
   return {
     // API Key
     'X-Es-Api-Key': apiKey,
-    'X-Es-Ts': now,
+    'X-Es-Ts': now.toString(),
     ...headers,
   };
 };

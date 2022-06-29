@@ -1,18 +1,27 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import WalletConnect from '@walletconnect/client/dist/cjs';
-import QRCodeModal from '@walletconnect/qrcode-modal/dist/cjs';
-import QubicCreator from '../../dist';
+import { useEffect, useRef } from 'react';
+import QubicCreatorSdk from '../../dist';
 import './App.css';
+import {
+  CHAIN_ID,
+  INFURA_ID,
+  API_KEY,
+  API_SECRET,
+  CREATOR_API_URL,
+  QUBIC_API_KEY,
+  QUBIC_API_SECRET,
+} from './environment';
 
-const API_KEY = process.env.REACT_APP_CREATOR_API_URL_KEY || '';
-const API_SECRET = process.env.REACT_APP_CREATOR_API_URL_SECRET || '';
-
-const qubicCreator = new QubicCreator({
+const qubicCreatorSdk = new QubicCreatorSdk({
   name: 'Qubic Creator',
   service: 'qubee-creator',
   domain: 'creator.dev.qubic.market',
   key: API_KEY,
   secret: API_SECRET,
+  qubicWalletKey: QUBIC_API_KEY,
+  qubicWalletSecret: QUBIC_API_SECRET,
+  creatorUrl: CREATOR_API_URL,
+  chainId: parseInt(CHAIN_ID),
+  infuraId: INFURA_ID,
 });
 
 function App() {
@@ -20,17 +29,18 @@ function App() {
   const metamaskLoginButtonRef = useRef(null);
   const wcLoginButtonRef = useRef(null);
   const loginWithFullScreenModalButtonRef = useRef(null);
-  const testConnectWC = useCallback(async () => {
-    const connectInstance = new WalletConnect({ bridge: 'https://bridge.walletconnect.org', qrcodeModal: QRCodeModal });
-    if (!connectInstance.connected) {
-      // create new session
-      await connectInstance.createSession();
-    }
-  }, []);
   // const [provider, setProvider] = useState(null);
+
+  const isMountedRef = useRef(false);
+  // strict mode caused useEffect called twice
+  // https://stackoverflow.com/questions/61254372/my-react-component-is-rendering-twice-because-of-strict-mode/61897567#61897567
   useEffect(() => {
+    if (isMountedRef.current === true) {
+      return;
+    }
+    isMountedRef.current = true;
     if (qubicLoginButtonRef?.current) {
-      qubicCreator.createCreatorSignInButton(qubicLoginButtonRef.current, {
+      qubicCreatorSdk.createLoginButton(qubicLoginButtonRef.current, {
         method: 'qubic',
         onLogin: (e: any, res: any) => {
           console.log({ accessToken: res.accessToken });
@@ -38,26 +48,26 @@ function App() {
       });
     }
     if (metamaskLoginButtonRef?.current) {
-      qubicCreator.createCreatorSignInButton(metamaskLoginButtonRef.current, {
+      qubicCreatorSdk.createLoginButton(metamaskLoginButtonRef.current, {
         method: 'metamask',
         onLogin: (e: any, res: any) => {
           console.log({ accessToken: res.accessToken });
         },
       });
     }
-    // if (wcLoginButtonRef?.current) {
-    //   qubicCreator.createCreatorSignInButton(wcLoginButtonRef.current, {
-    //     method: 'wallet_connect',
-    //     onLogin: () => {},
-    //   });
-    // }
-    if (loginWithFullScreenModalButtonRef?.current) {
-      qubicCreator.createCreatorSignInMethodPanel(loginWithFullScreenModalButtonRef.current, {
-        methods: ['qubic', 'metamask'],
+    if (wcLoginButtonRef?.current) {
+      qubicCreatorSdk.createLoginButton(wcLoginButtonRef.current, {
+        method: 'walletconnect',
         onLogin: () => {},
       });
     }
-  }, [qubicLoginButtonRef, metamaskLoginButtonRef, wcLoginButtonRef]);
+    if (loginWithFullScreenModalButtonRef?.current) {
+      qubicCreatorSdk.createCreatorLoginMethodPanel(loginWithFullScreenModalButtonRef.current, {
+        methods: ['qubic', 'metamask', 'walletconnect'],
+        onLogin: () => {},
+      });
+    }
+  }, []);
 
   return (
     <div className="App">
@@ -67,9 +77,6 @@ function App() {
           <div ref={metamaskLoginButtonRef} className="login-button" />
           <div ref={wcLoginButtonRef} className="login-button" />
           <div ref={loginWithFullScreenModalButtonRef} className="login-button" />
-          <button onClick={testConnectWC} style={{ width: '100px', height: '100px' }} className="login-button">
-            WC Test
-          </button>
         </div>
       </header>
     </div>
