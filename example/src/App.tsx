@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import QubicCreatorSdk from '../../dist';
 import { Currency } from '../../dist/types/price';
+import { TappayResult } from '../../dist/api/purchase';
 import './App.css';
 import {
   CHAIN_ID,
@@ -53,9 +54,9 @@ function App() {
   // strict mode caused useEffect called twice
   // https://stackoverflow.com/questions/61254372/my-react-component-is-rendering-twice-because-of-strict-mode/61897567#61897567
 
-  const onPayFormResult = useCallback((result: any) => {
+  const onPayFormResult = useCallback((result: TappayResult) => {
     console.log('PayFormResult', result);
-    alert(`購買成功！ 結尾號碼為 ${result.batchBuyAsset.tappay.cardInfo.lastFour}`);
+    alert(`購買成功！ 結尾號碼為 ${result.tappay.cardInfo.lastFour}`);
   }, []);
 
   useEffect(() => {

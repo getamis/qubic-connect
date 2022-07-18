@@ -116,7 +116,7 @@ interface BatchBuyAssetInput {
   tapPayPrime: string;
 }
 
-interface BatchBuyAssetResult {
+export interface TappayResult {
   tappay: {
     status: string;
     msg: string;
@@ -125,6 +125,10 @@ interface BatchBuyAssetResult {
       lastFour: string;
     };
   };
+}
+
+interface BatchBuyAssetResult {
+  batchBuyAsset: TappayResult,
 }
 
 export async function getBatchBuyAssetResult({

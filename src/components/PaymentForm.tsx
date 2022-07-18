@@ -86,7 +86,7 @@ export function createPaymentFormElement(
                 tapPayPrime: prime,
               });
 
-              onSuccessCallback(response);
+              onSuccessCallback(response.batchBuyAsset);
             }
           } catch (e) {
             console.error(e);
