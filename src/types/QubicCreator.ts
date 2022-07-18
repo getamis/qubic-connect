@@ -11,6 +11,7 @@ export interface SdkConfig {
   infuraId: string;
   creatorUrl?: string;
   chainId?: number;
+  tapPayMerchantId?: string;
 }
 
 export interface SdkLoginSuccessData {
