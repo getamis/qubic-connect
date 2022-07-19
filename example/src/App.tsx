@@ -42,7 +42,7 @@ const qubicCreatorSdk = new QubicCreatorSdk({
 });
 
 function App() {
-  const [logined, setLogined] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const qubicLoginButtonRef = useRef(null);
   const metamaskLoginButtonRef = useRef(null);
   const wcLoginButtonRef = useRef(null);
@@ -68,7 +68,7 @@ function App() {
       qubicCreatorSdk.createLoginButton(qubicLoginButtonRef.current, {
         method: 'qubic',
         onLogin: (e: any, res: any) => {
-          setLogined(true);
+          setIsLoggedIn(true);
           console.log({ accessToken: res.accessToken });
         },
       });
@@ -77,7 +77,7 @@ function App() {
       qubicCreatorSdk.createLoginButton(metamaskLoginButtonRef.current, {
         method: 'metamask',
         onLogin: (e: any, res: any) => {
-          setLogined(true);
+          setIsLoggedIn(true);
           console.log({ accessToken: res.accessToken });
         },
       });
@@ -97,7 +97,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (logined && qubicPayIframeRef.current && qubicCreatorSdk.accessToken) {
+    if (isLoggedIn && qubicPayIframeRef.current && qubicCreatorSdk.accessToken) {
       const { setPaymentFormProps } = qubicCreatorSdk.createCreatorPaymentForm(
         qubicPayIframeRef.current,
         onPayFormResult,
@@ -105,10 +105,10 @@ function App() {
 
       setPaymentFormProps(mockData);
     }
-  }, [logined, onPayFormResult]);
+  }, [isLoggedIn, onPayFormResult]);
 
   return (
-    <div className="App">
+    <div className="container">
       <div className="login-button-group">
         <div ref={qubicLoginButtonRef} className="login-button" />
         <div ref={metamaskLoginButtonRef} className="login-button" />
@@ -117,11 +117,11 @@ function App() {
       </div>
       {qubicCreatorSdk.accessToken && <p className="hint">AccessToken: {qubicCreatorSdk.accessToken}</p>}
       {qubicCreatorSdk.accessToken && (
-        <button className="logout-button" type="button" onClick={() => setLogined(false)} disabled={!logined}>
+        <button className="logout-button" type="button" onClick={() => setIsLoggedIn(false)} disabled={!isLoggedIn}>
           Logout
         </button>
       )}
-      <div ref={qubicPayIframeRef} className="login-button" />
+      <div ref={qubicPayIframeRef} />
     </div>
   );
 }

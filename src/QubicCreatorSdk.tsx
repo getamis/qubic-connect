@@ -22,7 +22,8 @@ export class QubicCreatorSdk {
   }
 
   private logoutCallbacks: Array<() => void> = [];
-  public createLoginButton(element: HTMLBaseElement, props: LoginButtonProps): void {
+  public createLoginButton(element: HTMLElement | null, props: LoginButtonProps): void {
+    if (!element) throw Error(`${element} not found`);
     const LoginButton = createLoginButtonElement(this.config);
 
     const { method, onLogin, onLogout } = props;
@@ -47,11 +48,12 @@ export class QubicCreatorSdk {
   }
 
   public createCreatorLoginMethodPanel(
-    element: HTMLBaseElement,
+    element: HTMLElement | null,
     props: LoginPanelProps = {
       methods: ALLOWED_METHODS,
     },
   ): void {
+    if (!element) throw Error(`${element} not found`);
     const { methods, ...restProps } = props;
     const LoginButtons = methods?.map(method => {
       if (!ALLOWED_METHODS.includes(method)) return null;
@@ -64,14 +66,15 @@ export class QubicCreatorSdk {
   }
 
   public createCreatorPaymentForm(
-    element: HTMLBaseElement,
+    element: HTMLElement | null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSuccessCallback: (result: any) => void,
   ): {
     setPaymentFormProps: (value: PaymentFormProps) => void;
   } {
+    if (!element) throw Error(`${element} not found`);
     if (!this.accessToken) {
-      throw new Error('Not Logined Yet');
+      throw new Error('Not logged in yet');
     }
 
     let paymentFormProps: PaymentFormProps | undefined;

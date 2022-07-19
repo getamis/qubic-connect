@@ -1091,7 +1091,7 @@
   dependencies:
     "@octokit/openapi-types" "^12.4.0"
 
-"@qubic-js/browser@^1.2.8":
+"@qubic-js/browser@1.3.0":
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/@qubic-js/browser/-/browser-1.2.8.tgz#1148be80615b99a2c66a7a1a9681fa9c765fc178"
   integrity sha512-2O6xyvtejRFifYxkmOWMRMSqzepti1hQJR/F+oDkk94mSHYeBLxbG2abNoR6FBhsNNKU3C04DefVGqN+kPKkkw==
@@ -1101,7 +1101,7 @@
     eth-rpc-errors "^4.0.2"
     json-rpc-engine "^6.1.0"
 
-"@qubic-js/core@^1.2.8":
+"@qubic-js/core@1.3.0":
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/@qubic-js/core/-/core-1.2.8.tgz#f21a641ca14e74d993fa04da4e91483641f4dfc8"
   integrity sha512-1YvfsW5IQwxYg9vXz4TK5IlUAU51sTdJi+tCoMH9XyzjUQrOleQRte4dgq4hAi+WYCfu5POu80X8v47I9ku2Vw==
@@ -1130,7 +1130,7 @@
     json-rpc-engine "^5.3.0"
     node-fetch "^2.6.1"
 
-"@qubic-js/react@^1.2.8":
+"@qubic-js/react@1.3.0":
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/@qubic-js/react/-/react-1.2.8.tgz#b2378fd99ed1a0e18b1b143fabd8b4f1542bd7c0"
   integrity sha512-ORAe0DS/UWRSEuSMvQKhyzZ235PB5UIxcrNXT7o2DEzdrDqubscK04NQxST7FxA0eRdo+wgGrG7xM3A1wUKbPQ==
@@ -6856,7 +6856,7 @@ raw-body@^2.2.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-rc@1.2.8, rc@^1.2.8:
+rc@1.2.8, rc@1.3.0:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/rc/-/rc-1.2.8.tgz#cd924bf5200a075b83c188cd6b9e211b7fc0d3ed"
   integrity sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==
@@ -6964,7 +6964,7 @@ registry-url@^5.0.0:
   resolved "https://registry.yarnpkg.com/registry-url/-/registry-url-5.1.0.tgz#e98334b50d5434b81136b44ec638d9c2009c5009"
   integrity sha512-8acYXXTI0AkQv6RAOjE3vOaIXZkT9wo4LOFbBKYQEEnnMNBpKqdUrI6S4NT0KPIo/WVvJ5tE/X5LF/TQUf0ekw==
   dependencies:
-    rc "^1.2.8"
+    rc "1.3.0"
 
 release-it@^15.1.0:
   version "15.1.0"
