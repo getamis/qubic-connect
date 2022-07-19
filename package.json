@@ -12,7 +12,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc -p tsconfig.json & yarn copy-assets",
-    "start": "yarn watch & yarn copy-assets && cd example && yarn start",
+    "start": "yarn watch & yarn copy-assets && cd examples/pure-js && yarn start",
     "watch": "tsc -p tsconfig.json --watch",
     "deploy:payment:dev": "cd payment-form-web && yarn deploy:dev && cd ..",
     "copy-assets": "mkdir -p ./dist/assets && cp ./src/assets/* \"$_\"",
