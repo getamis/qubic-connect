@@ -31,6 +31,8 @@ const { classes } = jss
   })
   .attach();
 
+let globalQubicProvider: QubicProvider | undefined;
+
 export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponent<LoginButtonProps> {
   const {
     name: authAppName,
@@ -44,6 +46,16 @@ export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponen
     chainId,
   } = sdkConfig;
 
+  globalQubicProvider =
+    globalQubicProvider ||
+    new QubicProvider({
+      apiKey: qubicWalletKey,
+      apiSecret: qubicWalletSecret,
+      chainId: chainId || 1,
+      infuraProjectId: infuraId,
+      enableIframe: true,
+    });
+
   const externalProviderMap: Record<
     ExtendedExternalProviderType,
     {
@@ -55,14 +67,8 @@ export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponen
     qubic: {
       buttonText: 'Qubic Wallet',
       buttonIcon: <SvgQubicLogo className={classes.icon} />,
-      provider: new QubicProvider({
-        apiKey: qubicWalletKey,
-        apiSecret: qubicWalletSecret,
-        chainId: chainId || 1,
-        infuraProjectId: infuraId,
-        enableIframe: true,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }) as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      provider: globalQubicProvider as any,
     },
     metamask: {
       buttonText: 'MetaMask',

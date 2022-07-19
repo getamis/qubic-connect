@@ -1,70 +1,28 @@
 {
   "name": "qubic-creator-sdk",
-  "version": "0.1.4",
-  "source": "./src/index.ts",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
+  "version": "0.1.0",
+  "description": "Qubic Creator SDK monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
   ],
-  "repository": "https://github.com/getamis/qubic-creator-sdk.git",
-  "author": "amis-labs",
-  "license": "Apache-2.0",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "yarn watch & yarn copy-assets && cd examples/pure-js && yarn start",
-    "watch": "tsc -p tsconfig.json --watch",
-    "deploy:payment:dev": "cd payment-form-web && yarn deploy:dev && cd ..",
-    "convert-svgs": "npx @svgr/cli --out-dir ./src/components/svg  ./src/assets/*.svg",
-    "release": "release-it",
-    "prepare": "husky install"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write --parser typescript",
-      "eslint --cache"
-    ]
-  },
-  "devDependencies": {
-    "@svgr/cli": "^6.2.1",
-    "@testing-library/jest-dom": "^5.16.4",
-    "@typescript-eslint/eslint-plugin": "^5.29.0",
-    "@typescript-eslint/parser": "^5.29.0",
-    "eslint": "^7.7.0",
-    "eslint-config-airbnb": "^18.2.0",
-    "eslint-config-preact": "^1.3.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jsx-a11y": "^6.3.1",
-    "eslint-plugin-react-hooks": "^4.2.0",
-    "husky": "^8.0.1",
-    "jest": "^28.1.1",
-    "lint-staged": "^13.0.2",
-    "prettier": "^2.7.1",
-    "release-it": "^15.1.0"
-  },
   "dependencies": {
-    "@apollo/client": "^3.6.9",
-    "@ethersproject/providers": "^5.6.8",
-    "@qubic-js/browser": "1.3.0",
-    "@qubic-js/core": "1.3.0",
-    "@qubic-js/react": "1.3.0",
-    "@types/crypto-js": "^4.1.1",
-    "@types/uuid": "^8.3.4",
-    "@walletconnect/web3-provider": "^1.7.8",
-    "@web3-react/core": "^6.1.9",
-    "bignumber.js": "^9.0.2",
-    "clsx": "^1.1.1",
-    "cross-fetch": "^3.1.5",
-    "crypto-js": "^4.1.1",
-    "graphql": "^16.5.0",
-    "graphql-request": "^4.3.0",
-    "jss": "^10.9.0",
-    "jss-preset-default": "^10.9.0",
-    "preact": "^10.8.2",
-    "query-string": "^7.1.1",
-    "typescript": "^4.7.4",
-    "uuid": "^8.3.2",
-    "web-vitals": "^2.1.4"
-  }
+    "husky": "^8.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "deploy:payment:dev": " yarn workspace @qubic-creator/payment-form-web deploy:dev && cd ..",
+    "prepare": "husky install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getamis/qubic-creator-sdk.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/getamis/qubic-creator-sdk/issues"
+  },
+  "homepage": "https://github.com/getamis/qubic-creator-sdk#readme"
 }

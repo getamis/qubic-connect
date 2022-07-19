@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
-import QubicCreatorSdk from '../../dist';
-import { Currency } from '../../dist/types/price';
-import { TappayResult } from '../../dist/api/purchase';
+import QubicCreatorSdk from '@qubic-creator/core';
+import { Currency } from '@qubic-creator/core/dist/types/price';
+import { TappayResult } from '@qubic-creator/core/dist/api/purchase';
 import './App.css';
 import {
   CHAIN_ID,

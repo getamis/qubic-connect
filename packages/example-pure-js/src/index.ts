@@ -1,5 +1,6 @@
 import './index.css';
-import QubicCreatorSdk from '../../../dist';
+
+import QubicCreatorSdk from '@qubic-creator/core';
 import {
   CHAIN_ID,
   INFURA_ID,
@@ -9,8 +10,8 @@ import {
   QUBIC_API_KEY,
   QUBIC_API_SECRET,
 } from './environment';
-import { Currency } from '../../../dist/types/price';
-import { TappayResult } from '../../../dist/api/purchase';
+import { Currency } from '@qubic-creator/core/dist/types/price';
+import { TappayResult } from '@qubic-creator/core/dist/api/purchase';
 
 const mockData = {
   tokenId: undefined,

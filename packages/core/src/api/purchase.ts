@@ -128,7 +128,7 @@ export interface TappayResult {
 }
 
 interface BatchBuyAssetResult {
-  batchBuyAsset: TappayResult,
+  batchBuyAsset: TappayResult;
 }
 
 export async function getBatchBuyAssetResult({

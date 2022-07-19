@@ -1,5 +1,5 @@
 {
-  "name": "payment-form-web",
+  "name": "@qubic-creator/payment-form-web",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
