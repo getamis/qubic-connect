@@ -89,7 +89,7 @@ function App() {
       });
     }
     if (loginWithFullScreenModalButtonRef.current) {
-      qubicCreatorSdk.createCreatorLoginMethodPanel(loginWithFullScreenModalButtonRef.current, {
+      qubicCreatorSdk.createLoginPanel(loginWithFullScreenModalButtonRef.current, {
         methods: ['qubic', 'metamask', 'walletconnect'],
         onLogin: () => {},
       });

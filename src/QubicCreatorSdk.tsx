@@ -47,7 +47,7 @@ export class QubicCreatorSdk {
     );
   }
 
-  public createCreatorLoginMethodPanel(
+  public createLoginPanel(
     element: HTMLElement | null,
     props: LoginPanelProps = {
       methods: ALLOWED_METHODS,

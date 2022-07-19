@@ -81,7 +81,7 @@ function main() {
     },
   });
 
-  qubicCreatorSdk.createCreatorLoginMethodPanel(document.getElementById('login-modal'), {
+  qubicCreatorSdk.createLoginPanel(document.getElementById('login-modal'), {
     methods: ['metamask', 'qubic', 'walletconnect'],
     onLogin: (e, response) => {
       console.log({ accessToken: response?.accessToken });
