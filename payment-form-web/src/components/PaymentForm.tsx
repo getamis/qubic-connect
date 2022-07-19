@@ -2,11 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { TFunction, useTranslation } from 'react-i18next';
 
-import {
-  TAPPAY_APP_ID,
-  TAPPAY_APP_KEY,
-  TAPPAY_ENV,
-} from '../constants/env';
+import { TAPPAY_APP_ID, TAPPAY_APP_KEY, TAPPAY_ENV } from '../constants/env';
 import { validateName, validateEmail, validatePhone } from '../utils/validators';
 import ErrorContent from './ErrorContent';
 import { getCommonClasses } from './styles';
@@ -80,39 +76,33 @@ const tapPaycommonClasses = {
 };
 
 interface CreatorSdkData {
-  primaryColor?: string,
-  submitButtonVariant?: string,
+  primaryColor?: string;
+  submitButtonVariant?: string;
 }
 
 const PaymentForm = (): JSX.Element => {
   const { t } = useTranslation();
   const statusTable = useMemo(() => getStatusTable(t), [t]);
 
-  const [primaryColor, setPrimaryColor] = useState(INIT_PRIMARY_COLOR)
-  const [submitButtonVariant, setSubmitButtonVariant] = useState(INIT_SUBMIT_BUTTON_VARIANT)
+  const [primaryColor, setPrimaryColor] = useState(INIT_PRIMARY_COLOR);
+  const [submitButtonVariant, setSubmitButtonVariant] = useState(INIT_SUBMIT_BUTTON_VARIANT);
 
   const commonClasses = getCommonClasses(primaryColor);
 
   useEffect(() => {
-    window.addEventListener(
-      'message',
-      (ev: MessageEvent<CreatorSdkData>) => {
-        const {
-          data,
-          origin,
-        } = ev;
+    window.addEventListener('message', (ev: MessageEvent<CreatorSdkData>) => {
+      const { data, origin } = ev;
 
-        if (origin === LOCALHOST_ORIGIN) {
-          if (data.primaryColor) {
-            setPrimaryColor(data.primaryColor);
-          }
-
-          if (data.submitButtonVariant) {
-            setSubmitButtonVariant(data.submitButtonVariant);
-          }
+      if (origin === LOCALHOST_ORIGIN) {
+        if (data.primaryColor) {
+          setPrimaryColor(data.primaryColor);
         }
-      },
-    )
+
+        if (data.submitButtonVariant) {
+          setSubmitButtonVariant(data.submitButtonVariant);
+        }
+      }
+    });
   }, []);
 
   // We base on TWD.
@@ -175,8 +165,7 @@ const PaymentForm = (): JSX.Element => {
               `canGetPrime: ${update.canGetPrime} \n
                 card_numberStatus: ${statusTable[update.status.number]} \n
                 cardExpiryStatus: ${statusTable[update.status.expiry]} \n
-                cvcStatus: ${statusTable[update.status.ccv]}`
-              .replace(/ {4}/g, ''),
+                cvcStatus: ${statusTable[update.status.ccv]}`.replace(/ {4}/g, ''),
             );
           }
 
@@ -213,7 +202,6 @@ const PaymentForm = (): JSX.Element => {
   const formValidator = useCallback(() => {
     let result = true;
     const errorFields = [];
-
 
     if (!userName) {
       result = false;
@@ -276,19 +264,22 @@ const PaymentForm = (): JSX.Element => {
       const prime = result.card?.prime;
 
       if (prime) {
-        setAccessLock(true)
+        setAccessLock(true);
 
         // eslint-disable-next-line no-console
         console.log('AAA, prime', prime);
 
-        window.parent.postMessage(({
-          primeData: {
-            prime: result.card?.prime,
-            userEmail,
-            userName,
-            userPhone,
-          }
-        }), '*');
+        window.parent.postMessage(
+          {
+            primeData: {
+              prime: result.card?.prime,
+              userEmail,
+              userName,
+              userPhone,
+            },
+          },
+          '*',
+        );
       }
     });
   }, [formValidator, tpSDKSetup, activateErrorStep, userEmail, userName, userPhone]);
@@ -386,13 +377,21 @@ const PaymentForm = (): JSX.Element => {
             <div className="column is-8">
               <div
                 id="card-expiration-date"
-                className={clsx(commonClasses.input, commonClasses.outlinedInput, accessLock && commonClasses.divDisabled)}
+                className={clsx(
+                  commonClasses.input,
+                  commonClasses.outlinedInput,
+                  accessLock && commonClasses.divDisabled,
+                )}
               />
             </div>
             <div className="column is-4">
               <div
                 id="card-ccv"
-                className={clsx(commonClasses.input, commonClasses.outlinedInput, accessLock && commonClasses.divDisabled)}
+                className={clsx(
+                  commonClasses.input,
+                  commonClasses.outlinedInput,
+                  accessLock && commonClasses.divDisabled,
+                )}
               />
             </div>
           </div>

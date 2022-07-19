@@ -1,4 +1,4 @@
-const prefix = '@qubic-pay-sdk';
+const prefix = '@payment-form-web';
 
 export const STORAGE_KEYS = {
   LOCALE: `${prefix}/locale`,

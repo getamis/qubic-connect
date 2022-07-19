@@ -5,8 +5,8 @@ import { SdkConfig } from '../types/QubicCreator';
 import { Currency } from '../types/price';
 import { getBatchBuyAssetResult } from '../api/purchase';
 
-const IFRAME_ID = 'qubic-pay-iframe';
-const IFRAME_DOMAIN = 'http://qubic-pay-sdk.surge.sh';
+const IFRAME_ID = 'payment-form-web-iframe';
+const IFRAME_DOMAIN = 'http://payment-form-web.surge.sh';
 
 export interface PaymentFormProps {
   tokenId?: string;
@@ -126,7 +126,14 @@ export function createPaymentFormElement(
       }, [iframeLoaded]);
 
       return (
-        <iframe id={IFRAME_ID} title="qubic-pay" src={IFRAME_DOMAIN} width={300} height={450} onLoad={iframeOnLoad} />
+        <iframe
+          id={IFRAME_ID}
+          title="payment-form-web"
+          src={IFRAME_DOMAIN}
+          width={300}
+          height={450}
+          onLoad={iframeOnLoad}
+        />
       );
     },
   );
