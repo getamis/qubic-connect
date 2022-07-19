@@ -14,6 +14,7 @@
     "build": "tsc -p tsconfig.json & yarn copy-assets",
     "start": "yarn watch & yarn copy-assets && cd example && yarn start",
     "watch": "tsc -p tsconfig.json --watch",
+    "deploy:payment:dev": "cd payment-form-web && yarn deploy:dev && cd ..",
     "copy-assets": "mkdir -p ./dist/assets && cp ./src/assets/* \"$_\"",
     "convert-svgs": "npx @svgr/cli --out-dir ./src/components/svg  ./src/assets/*.svg",
     "release": "release-it",

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { TFunction, useTranslation } from 'react-i18next';
 
-import { TAPPAY_APP_ID, TAPPAY_APP_KEY, TAPPAY_ENV } from '../constants/env';
+import { TAPPAY_APP_ID, TAPPAY_APP_KEY, TAPPAY_ENV, TAPPAY_MERCHANT_ID } from '../constants/env';
 import { validateName, validateEmail, validatePhone } from '../utils/validators';
 import ErrorContent from './ErrorContent';
 import { getCommonClasses } from './styles';
@@ -149,6 +149,7 @@ const PaymentForm = (): JSX.Element => {
       };
       // @ts-ignore
       TPDirect.setupSDK(TAPPAY_APP_ID, TAPPAY_APP_KEY, TAPPAY_ENV);
+      // @ts-ignore
       TPDirect.card.setup({
         // @ts-ignore
         fields,
@@ -266,17 +267,13 @@ const PaymentForm = (): JSX.Element => {
       if (prime) {
         setAccessLock(true);
 
-        // eslint-disable-next-line no-console
-        console.log('AAA, prime', prime);
-
         window.parent.postMessage(
           {
-            primeData: {
-              prime: result.card?.prime,
-              userEmail,
-              userName,
-              userPhone,
-            },
+            prime: result.card?.prime,
+            userEmail,
+            userName,
+            userPhone,
+            merchantId: TAPPAY_MERCHANT_ID,
           },
           '*',
         );

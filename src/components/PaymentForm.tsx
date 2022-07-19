@@ -18,7 +18,6 @@ export interface PaymentFormProps {
   assetQuantity?: number;
   assetBatchId?: number;
   currency: Currency;
-  tapPayMerchantId: string;
 
   stop3DValidation?: boolean;
 }
@@ -47,7 +46,6 @@ export function createPaymentFormElement(
         assetQuantity,
         assetBatchId,
         currency,
-        tapPayMerchantId,
         stop3DValidation,
       } = getFormProps() || {};
 
@@ -60,10 +58,11 @@ export function createPaymentFormElement(
       useEffect(() => {
         async function onMessageHandler(ev: MessageEvent) {
           if (ev.origin !== IFRAME_DOMAIN) return;
+
           const { data } = ev;
 
           try {
-            const { prime, userEmail, userName, userPhone } = JSON.parse(data);
+            const { prime, userEmail, userName, userPhone, merchantId } = data || {};
 
             if (prime && userEmail && userName && userPhone) {
               const response = await getBatchBuyAssetResult({
@@ -81,7 +80,7 @@ export function createPaymentFormElement(
                 userEmail,
                 userName,
                 userPhone,
-                tapPayMerchantId,
+                tapPayMerchantId: merchantId,
                 stop3DValidation,
                 tapPayPrime: prime,
               });
@@ -109,7 +108,6 @@ export function createPaymentFormElement(
         currency,
         onSuccessCallback,
         stop3DValidation,
-        tapPayMerchantId,
         tokenId,
       ]);
 

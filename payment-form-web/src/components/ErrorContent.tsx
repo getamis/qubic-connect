@@ -4,14 +4,14 @@ import { useTranslation } from 'react-i18next';
 
 import { getCommonClasses } from './styles';
 
-type ErrorContent = {
+type ErrorContentType = {
   reason?: string;
   detail?: string | JSX.Element;
 };
 
 const DEFAULT_TEXT = 'Something went wrong...';
 
-const ErrorContent = ({ reason, detail }: ErrorContent): JSX.Element => {
+const ErrorContent = ({ reason, detail }: ErrorContentType): JSX.Element => {
   const [loadedAnim, setLoadAnim] = useState(false);
   const lottieContainerRef = useRef(null);
 

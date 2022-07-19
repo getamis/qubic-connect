@@ -1,6 +1,7 @@
 const TAPPAY_APP_KEY = process.env.REACT_APP_TAPPAY_APP_KEY as string;
 const TAPPAY_APP_ID = process.env.REACT_APP_TAPPAY_APP_ID as string;
 const TAPPAY_ENV = process.env.REACT_APP_TAPPAY_ENV as string;
+const TAPPAY_MERCHANT_ID = process.env.REACT_APP_TAPPAY_MERCHANT_ID as string;
 
 if (!TAPPAY_APP_KEY) {
   throw Error('env variable TAPPAY_APP_KEY not found');
@@ -14,4 +15,8 @@ if (!TAPPAY_ENV) {
   throw Error('env variable TAPPAY_ENV not found');
 }
 
-export { TAPPAY_APP_KEY, TAPPAY_APP_ID, TAPPAY_ENV };
+if (!TAPPAY_MERCHANT_ID) {
+  throw Error('env variable TAPPAY_MERCHANT_ID not found');
+}
+
+export { TAPPAY_APP_KEY, TAPPAY_APP_ID, TAPPAY_ENV, TAPPAY_MERCHANT_ID };
