@@ -1,6 +1,6 @@
 import './index.css';
 
-import QubicCreatorSdk from '@qubic-creator/core';
+import QubicCreatorSdk, { Currency } from '@qubic-creator/core';
 import {
   CHAIN_ID,
   INFURA_ID,
@@ -10,8 +10,6 @@ import {
   QUBIC_API_KEY,
   QUBIC_API_SECRET,
 } from './environment';
-import { Currency } from '@qubic-creator/core/dist/types/price';
-import { TappayResult } from '@qubic-creator/core/dist/api/purchase';
 
 const mockData = {
   tokenId: undefined,
@@ -46,47 +44,59 @@ function main() {
   function onAccessTokenChange(value?: string) {
     if (value && !isFormRendered) {
       isFormRendered = true;
-      const { setPaymentFormProps } = qubicCreatorSdk.createCreatorPaymentForm(
-        document.getElementById('pay-form'),
-        (result: TappayResult) => {
+      const { setOrder } = qubicCreatorSdk.createPaymentForm(document.getElementById('pay-form'), {
+        onPaymentDone: (error, result) => {
           console.log('PayFormResult', result);
-          alert(`購買成功！ 結尾號碼為 ${result.tappay.cardInfo.lastFour}`);
+          if (error) {
+            window.alert(error.message);
+          }
+          window.alert(`購買成功！ 結尾號碼為 ${result?.tappay.cardInfo.lastFour}`);
         },
-      );
+      });
 
-      setPaymentFormProps(mockData);
+      setOrder(mockData);
     }
   }
 
   qubicCreatorSdk.createLoginButton(document.getElementById('login-qubic'), {
     method: 'qubic',
-    onLogin: (e, response) => {
-      console.log({ accessToken: response?.accessToken });
-      onAccessTokenChange(response?.accessToken);
+    onLogin: (error, result) => {
+      if (error) {
+        window.alert(error.message);
+      }
+      onAccessTokenChange(result?.accessToken);
     },
   });
 
   qubicCreatorSdk.createLoginButton(document.getElementById('login-metamask'), {
     method: 'metamask',
-    onLogin: (e, response) => {
-      console.log({ accessToken: response?.accessToken });
-      onAccessTokenChange(response?.accessToken);
+    onLogin: (error, result) => {
+      if (error) {
+        window.alert(error.message);
+      }
+      onAccessTokenChange(result?.accessToken);
     },
   });
 
   qubicCreatorSdk.createLoginButton(document.getElementById('login-walletconnect'), {
     method: 'walletconnect',
-    onLogin: (e, response) => {
-      console.log({ accessToken: response?.accessToken });
-      onAccessTokenChange(response?.accessToken);
+    onLogin: (error, result) => {
+      if (error) {
+        window.alert(error.message);
+      }
+      console.log({ accessToken: result?.accessToken });
+      onAccessTokenChange(result?.accessToken);
     },
   });
 
   qubicCreatorSdk.createLoginPanel(document.getElementById('login-modal'), {
     methods: ['metamask', 'qubic', 'walletconnect'],
-    onLogin: (e, response) => {
-      console.log({ accessToken: response?.accessToken });
-      onAccessTokenChange(response?.accessToken);
+    onLogin: (error, result) => {
+      if (error) {
+        window.alert(error.message);
+      }
+      console.log({ accessToken: result?.accessToken });
+      onAccessTokenChange(result?.accessToken);
     },
   });
 }

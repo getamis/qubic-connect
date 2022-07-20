@@ -1,23 +1,28 @@
 import { render } from 'preact';
-import { LoginFullScreen } from './components/LoginPanel';
-import { SdkConfig } from './types/QubicCreator';
+import { CSSProperties } from 'preact/compat';
+import { LoginPanelModal, LoginPanelModalProps } from './components/LoginPanelModal';
+import { QubicCreatorConfig, OnPaymentDone } from './types/QubicCreator';
 import { createLoginButtonElement, LoginButtonProps } from './components/LoginButton';
 import { ExtendedExternalProvider, ExtendedExternalProviderType } from './types/ExtendedExternalProvider';
-import { createPaymentFormElement, PaymentFormProps } from './components/PaymentForm';
+import { createPaymentFormElement } from './components/PaymentForm';
+import { Order } from './types';
 
 const ALLOWED_METHODS: ExtendedExternalProviderType[] = ['qubic', 'metamask', 'walletconnect'];
 
-interface LoginPanelProps extends Omit<LoginButtonProps, 'method'> {
+export interface LoginPanelProps
+  extends Omit<LoginButtonProps, 'method' | 'style'>,
+    Omit<LoginPanelModalProps, 'children'> {
   methods?: ExtendedExternalProviderType[];
+  itemStyle?: CSSProperties;
 }
 
 export class QubicCreatorSdk {
-  private readonly config: SdkConfig;
+  private readonly config: QubicCreatorConfig;
   public provider?: ExtendedExternalProvider;
   public address?: string;
   public accessToken?: string;
 
-  constructor(config: SdkConfig) {
+  constructor(config: QubicCreatorConfig) {
     this.config = config;
   }
 
@@ -54,45 +59,46 @@ export class QubicCreatorSdk {
     },
   ): void {
     if (!element) throw Error(`${element} not found`);
-    const { methods, ...restProps } = props;
+    const { methods, onLogin, onLogout, itemStyle, ...restProps } = props;
+    const LoginButton = createLoginButtonElement(this.config);
+
     const LoginButtons = methods?.map(method => {
       if (!ALLOWED_METHODS.includes(method)) return null;
-      const LoginButton = createLoginButtonElement(this.config);
-
-      return <LoginButton key={method} method={method} {...restProps} />;
+      return <LoginButton key={method} method={method} onLogin={onLogin} onLogout={onLogout} style={itemStyle} />;
     });
 
-    render(<LoginFullScreen>{LoginButtons}</LoginFullScreen>, element);
+    render(<LoginPanelModal {...restProps}>{LoginButtons}</LoginPanelModal>, element);
   }
 
-  public createCreatorPaymentForm(
+  public createPaymentForm(
     element: HTMLElement | null,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSuccessCallback: (result: any) => void,
+    props: {
+      onPaymentDone: OnPaymentDone;
+    },
   ): {
-    setPaymentFormProps: (value: PaymentFormProps) => void;
+    setOrder: (value: Order) => void;
   } {
     if (!element) throw Error(`${element} not found`);
     if (!this.accessToken) {
       throw new Error('Not logged in yet');
     }
 
-    let paymentFormProps: PaymentFormProps | undefined;
+    let order: Order | undefined;
 
-    function setPaymentFormProps(value: PaymentFormProps) {
-      paymentFormProps = value;
+    function setOrder(value: Order) {
+      order = value;
     }
 
-    function getFormProps(): PaymentFormProps | undefined {
-      return paymentFormProps;
+    function getOrder(): Order | undefined {
+      return order;
     }
 
     const PaymentForm = createPaymentFormElement(this.config);
 
-    render(<PaymentForm getFormProps={getFormProps} onSuccessCallback={onSuccessCallback} />, element);
+    render(<PaymentForm getOrder={getOrder} onPaymentDone={props.onPaymentDone} />, element);
 
     return {
-      setPaymentFormProps,
+      setOrder,
     };
   }
 

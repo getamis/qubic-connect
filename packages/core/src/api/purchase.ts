@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { requestGraphql } from '../utils/graphql';
 import { FINISH_PURCHASE_FLAG } from '../constants/tappay';
 import { Currency } from '../types/price';
+import { PaymentResult } from '../types/Purchase';
 
 export enum PayType {
   TAPPAY = 'TAPPAY',
@@ -116,19 +117,8 @@ interface BatchBuyAssetInput {
   tapPayPrime: string;
 }
 
-export interface TappayResult {
-  tappay: {
-    status: string;
-    msg: string;
-    paymentUrl: string;
-    cardInfo: {
-      lastFour: string;
-    };
-  };
-}
-
 interface BatchBuyAssetResult {
-  batchBuyAsset: TappayResult;
+  batchBuyAsset: PaymentResult;
 }
 
 export async function getBatchBuyAssetResult({

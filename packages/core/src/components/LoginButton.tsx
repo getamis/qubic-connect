@@ -5,7 +5,7 @@ import WalletConnectProvider from '@walletconnect/web3-provider';
 import jss from 'jss';
 import clsx from 'clsx';
 import { ComponentChildren } from 'preact';
-import { SdkConfig, SdkOnLogin, SdkOnLogout } from '../types/QubicCreator';
+import { QubicCreatorConfig, OnLogin, OnLogout } from '../types/QubicCreator';
 
 import { ExtendedExternalProvider, ExtendedExternalProviderType } from '../types/ExtendedExternalProvider';
 import { createSingMessageAndLogin } from './utils/singMessageAndLogin';
@@ -18,9 +18,9 @@ import SvgWalletconnectCircleBlue from './svg/WalletconnectCircleBlue';
 
 export interface LoginButtonProps {
   method: ExtendedExternalProviderType;
-  onLogin?: SdkOnLogin;
-  onLogout?: SdkOnLogout;
-  itemStyle?: CSSProperties;
+  onLogin?: OnLogin;
+  onLogout?: OnLogout;
+  style?: CSSProperties;
 }
 
 const { classes } = jss
@@ -33,7 +33,7 @@ const { classes } = jss
 
 let globalQubicProvider: QubicProvider | undefined;
 
-export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponent<LoginButtonProps> {
+export function createLoginButtonElement(sdkConfig: QubicCreatorConfig): FunctionComponent<LoginButtonProps> {
   const {
     name: authAppName,
     service: authServiceName,
@@ -85,16 +85,17 @@ export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponen
     },
   };
 
-  const LoginButton = memo<LoginButtonProps>(props => {
-    const { method, onLogin, itemStyle } = props;
+  const singMessageAndLogin = createSingMessageAndLogin({
+    authAppName,
+    authAppUrl,
+    authServiceName,
+    apiKey: key,
+    apiSecret: secret,
+  });
 
-    const singMessageAndLogin = createSingMessageAndLogin({
-      authAppName,
-      authAppUrl,
-      authServiceName,
-      apiKey: key,
-      apiSecret: secret,
-    });
+  const LoginButton = memo<LoginButtonProps>(props => {
+    const { method, onLogin, style } = props;
+
     const { buttonIcon, buttonText, provider } = externalProviderMap[method];
 
     const handleWalletLogin = useCallback(
@@ -102,6 +103,7 @@ export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponen
         try {
           event.preventDefault();
           event.stopPropagation();
+
           if (isWalletconnectProvider(method, provider)) {
             // https://github.com/WalletConnect/walletconnect-monorepo/issues/747
             await provider.enable();
@@ -115,17 +117,17 @@ export function createLoginButtonElement(sdkConfig: SdkConfig): FunctionComponen
           });
         } catch (error) {
           if (error instanceof Error) {
-            onLogin?.(error.message);
+            onLogin?.(error);
           }
         }
       },
-      [method, onLogin, provider, singMessageAndLogin],
+      [method, onLogin, provider],
     );
 
     return (
       <button
         type="button"
-        style={itemStyle}
+        style={style}
         className={clsx(commonClasses.button, commonClasses.buttonWhite)}
         onClick={handleWalletLogin}
       >

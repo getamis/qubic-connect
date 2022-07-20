@@ -1,6 +1,7 @@
 import { ExtendedExternalProvider, ExtendedExternalProviderType } from './ExtendedExternalProvider';
+import { PaymentResult } from './Purchase';
 
-export interface SdkConfig {
+export interface QubicCreatorConfig {
   name: string;
   service: string;
   domain: string;
@@ -14,12 +15,14 @@ export interface SdkConfig {
   tapPayMerchantId?: string;
 }
 
-export interface SdkLoginSuccessData {
+export interface LoginResult {
   type: ExtendedExternalProviderType;
   address: string;
   accessToken: string;
   provider: ExtendedExternalProvider;
 }
 
-export type SdkOnLogin = (errorMessage: string | null, data?: SdkLoginSuccessData) => void;
-export type SdkOnLogout = () => void;
+export type OnLogin = (error: Error | null, result?: LoginResult) => void;
+export type OnLogout = () => void;
+
+export type OnPaymentDone = (error: Error | null, result?: PaymentResult) => void;

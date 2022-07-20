@@ -3,7 +3,7 @@
 ## Usage
 
 ```ts
-const creatorHelper = new CreatorHelper({
+const qubicCreatorSdk = new QubicCreatorSdk({
   name: 'xxx',
   service: 'xxx',
   domain: 'xxx',
@@ -14,16 +14,18 @@ const creatorHelper = new CreatorHelper({
   infuraId: 'xxx',
   creatorUrl: 'xxx', //optional
   chainId: 'xxx', //optional
+  tapPayMerchantId: 'xxx',
 });
 ```
 
 // 預設 style 顯示成 pop 中間
 
 ```ts
-createHelper.createLoginPanel(element: DomElement, {
+qubicCreatorSdk.createLoginPanel(element: HTMLElement, {
+  methods?: Array<'metamask','walletconnect' | 'qubic'>,
   onLogin: (
-    errorMessage: string,
-    data: {
+    error: Error,
+    result: {
       type: 'metamask' | 'walletconnect' | 'qubic',
       address: string,
       accessToken: string,
@@ -31,18 +33,17 @@ createHelper.createLoginPanel(element: DomElement, {
       provider: ExternalProvider
     }
   ) => void,
-  // onLogout: () => void
+  onLogout: () => void
   titleText?: string, // default: 'Connect your wallet'
   containerStyle?: CSSStyle,
   backdropStyle?: CSSStyle,
-  itemStyle?: CSSStyle,
+  itemStyle?: CSSStyle, // each login button item
 })
 
 
-// iframe
-createHelper.createPaymentPanel(element: DomElement, {
-  onOrderCreated: (order: Order) => void,
-  onError: (errorMessage: string) => void
+// payment panel
+qubicCreatorSdk.createPaymentPanel(element: HTMLElement, {
+  onOrderCreated: (error: Error | null, order?: Order) => void,
 })
 ```
 

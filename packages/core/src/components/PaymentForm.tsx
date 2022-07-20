@@ -1,140 +1,119 @@
-import { memo } from 'preact/compat';
+import { CSSProperties, FunctionComponent, memo } from 'preact/compat';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
-import { SdkConfig } from '../types/QubicCreator';
-import { Currency } from '../types/price';
+import { QubicCreatorConfig, OnPaymentDone } from '../types/QubicCreator';
+import { Order } from '../types/Purchase';
 import { getBatchBuyAssetResult } from '../api/purchase';
 
 const IFRAME_ID = 'payment-form-web-iframe';
 const IFRAME_DOMAIN = 'http://payment-form-web.surge.sh';
 
 export interface PaymentFormProps {
-  tokenId?: string;
-  assetImage: string;
-  assetName: string;
-  assetPrice: number;
-  contractId?: number;
-  assetId?: number;
-  assetQuantity?: number;
-  assetBatchId?: number;
-  currency: Currency;
-
-  stop3DValidation?: boolean;
+  containerStyle?: CSSProperties;
+  containerWidth?: number;
+  containerHeight?: number;
+  getOrder: () => Order | undefined;
+  onPaymentDone: OnPaymentDone;
 }
 
-export function createPaymentFormElement(
-  sdkConfig: SdkConfig,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any {
+export function createPaymentFormElement(sdkConfig: QubicCreatorConfig): FunctionComponent<PaymentFormProps> {
   const { key: apiKey, secret: apiSecret } = sdkConfig;
 
-  const PaymentForm = memo(
-    ({
-      getFormProps,
-      onSuccessCallback,
-    }: {
-      getFormProps: () => PaymentFormProps;
-      onSuccessCallback: (result: any) => void;
-    }) => {
-      const {
-        tokenId,
-        assetImage,
-        assetName,
-        assetPrice,
-        contractId,
-        assetId,
-        assetQuantity,
-        assetBatchId,
-        currency,
-        stop3DValidation,
-      } = getFormProps() || {};
+  const PaymentForm = memo<PaymentFormProps>(props => {
+    const { getOrder, onPaymentDone, containerStyle, containerWidth = 300, containerHeight = 400 } = props;
 
-      const [iframeLoaded, setIframeLoaded] = useState(false);
+    const [iframeLoaded, setIframeLoaded] = useState(false);
 
-      const iframeOnLoad = useCallback(() => {
-        setIframeLoaded(true);
-      }, []);
+    const iframeOnLoad = useCallback(() => {
+      setIframeLoaded(true);
+    }, []);
 
-      useEffect(() => {
-        async function onMessageHandler(ev: MessageEvent) {
-          if (ev.origin !== IFRAME_DOMAIN) return;
+    useEffect(() => {
+      async function onMessageHandler(event: MessageEvent) {
+        if (event.origin !== IFRAME_DOMAIN) return;
 
-          const { data } = ev;
+        const { data } = event;
+        const order = getOrder();
+        try {
+          if (!data || !order) {
+            return;
+          }
+          const { prime, userEmail, userName, userPhone, merchantId } = data;
+          if (!prime || !userEmail || !userName || !userPhone) {
+            return;
+          }
+          const {
+            tokenId,
+            assetImage,
+            assetName,
+            assetPrice,
+            contractId,
+            assetId,
+            assetQuantity,
+            assetBatchId,
+            currency,
+            stop3DValidation,
+          } = order;
 
-          try {
-            const { prime, userEmail, userName, userPhone, merchantId } = data || {};
+          const response = await getBatchBuyAssetResult({
+            apiKey,
+            apiSecret,
+            tokenId,
+            assetImage,
+            assetName,
+            assetPrice,
+            contractId,
+            assetId,
+            assetQuantity,
+            assetBatchId,
+            currency,
+            userEmail,
+            userName,
+            userPhone,
+            tapPayMerchantId: merchantId,
+            stop3DValidation,
+            tapPayPrime: prime,
+          });
 
-            if (prime && userEmail && userName && userPhone) {
-              const response = await getBatchBuyAssetResult({
-                apiKey,
-                apiSecret,
-                tokenId,
-                assetImage,
-                assetName,
-                assetPrice,
-                contractId,
-                assetId,
-                assetQuantity,
-                assetBatchId,
-                currency,
-                userEmail,
-                userName,
-                userPhone,
-                tapPayMerchantId: merchantId,
-                stop3DValidation,
-                tapPayPrime: prime,
-              });
-
-              onSuccessCallback(response.batchBuyAsset);
-            }
-          } catch (e) {
-            console.error(e);
+          onPaymentDone(null, response.batchBuyAsset);
+        } catch (error) {
+          if (error instanceof Error) {
+            onPaymentDone(error);
           }
         }
+      }
 
-        window.addEventListener('message', onMessageHandler);
+      window.addEventListener('message', onMessageHandler);
 
-        return () => {
-          window.removeEventListener('message', onMessageHandler);
-        };
-      }, [
-        assetBatchId,
-        assetId,
-        assetImage,
-        assetName,
-        assetPrice,
-        assetQuantity,
-        contractId,
-        currency,
-        onSuccessCallback,
-        stop3DValidation,
-        tokenId,
-      ]);
+      return () => {
+        window.removeEventListener('message', onMessageHandler);
+      };
+    }, [getOrder, onPaymentDone]);
 
-      useEffect(() => {
-        if (iframeLoaded) {
-          const iframeDOM = document.getElementById(IFRAME_ID) as HTMLIFrameElement;
-          iframeDOM.contentWindow?.postMessage(
-            {
-              // primaryColor: 'red',
-            },
-            IFRAME_DOMAIN,
-          );
-        }
-      }, [iframeLoaded]);
+    useEffect(() => {
+      if (iframeLoaded) {
+        const iframeDOM = document.getElementById(IFRAME_ID) as HTMLIFrameElement;
+        iframeDOM.contentWindow?.postMessage(
+          {
+            // primaryColor: 'red',
+          },
+          IFRAME_DOMAIN,
+        );
+      }
+    }, [iframeLoaded]);
 
-      return (
-        <iframe
-          id={IFRAME_ID}
-          title="payment-form-web"
-          src={IFRAME_DOMAIN}
-          width={300}
-          height={450}
-          onLoad={iframeOnLoad}
-        />
-      );
-    },
-  );
+    return (
+      <iframe
+        id={IFRAME_ID}
+        title="payment-form-web"
+        src={IFRAME_DOMAIN}
+        width={containerWidth}
+        height={containerHeight}
+        onLoad={iframeOnLoad}
+        style={containerStyle}
+      />
+    );
+  });
 
   return PaymentForm;
 }

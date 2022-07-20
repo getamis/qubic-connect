@@ -5,7 +5,7 @@ import jss from 'jss';
 import clsx from 'clsx';
 import { commonClasses } from './styles';
 
-export interface LoginPanelProps {
+export interface LoginPanelModalProps {
   children: ComponentChildren;
   titleText?: string;
   containerStyle?: CSSProperties;
@@ -37,7 +37,7 @@ const { classes } = jss
   })
   .attach();
 
-export const LoginFullScreen = memo<LoginPanelProps>(props => {
+export const LoginPanelModal = memo<LoginPanelModalProps>(props => {
   const { children, titleText = 'Login', containerStyle, backdropStyle } = props;
   const [isVisible, setIsVisible] = useState(false);
 

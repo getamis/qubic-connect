@@ -16,7 +16,7 @@ enum INPUT_ID {
 export type PaymentInputRequirement = 'hide' | 'optional' | 'required';
 export type SubmitButtonVariant = 'fill' | 'border';
 
-export type PaymentFormProps = {
+export type Order = {
   primaryColor: string;
   submitButtonVariant: SubmitButtonVariant;
 };
