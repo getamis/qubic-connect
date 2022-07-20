@@ -14,6 +14,7 @@
     "build": "tsc -p tsconfig.json & yarn copy-assets",
     "start": "yarn watch & yarn copy-assets && cd example && yarn start",
     "watch": "tsc -p tsconfig.json --watch",
+    "deploy:payment:dev": "cd payment-form-web && yarn deploy:dev && cd ..",
     "copy-assets": "mkdir -p ./dist/assets && cp ./src/assets/* \"$_\"",
     "convert-svgs": "npx @svgr/cli --out-dir ./src/components/svg  ./src/assets/*.svg",
     "release": "release-it",
@@ -44,12 +45,16 @@
     "release-it": "^15.1.0"
   },
   "dependencies": {
+    "@apollo/client": "^3.6.9",
     "@ethersproject/providers": "^5.6.8",
     "@qubic-js/browser": "^1.2.8",
     "@qubic-js/core": "^1.2.8",
     "@qubic-js/react": "^1.2.8",
     "@types/crypto-js": "^4.1.1",
+    "@types/uuid": "^8.3.4",
     "@walletconnect/web3-provider": "^1.7.8",
+    "@web3-react/core": "^6.1.9",
+    "bignumber.js": "^9.0.2",
     "clsx": "^1.1.1",
     "cross-fetch": "^3.1.5",
     "crypto-js": "^4.1.1",
@@ -60,6 +65,7 @@
     "preact": "^10.8.2",
     "query-string": "^7.1.1",
     "typescript": "^4.7.4",
+    "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   }
 }

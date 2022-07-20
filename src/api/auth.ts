@@ -16,13 +16,15 @@ interface Login {
 
 interface LoginResult {
   accessToken: string;
-  // eslint-disable-next-line camelcase
-  access_token: string;
   expiredAt: number;
-  // eslint-disable-next-line camelcase
-  expired_at: number;
   isQubicUser: boolean;
 }
+
+let globalAccessToken: string | null = null;
+
+export const getAccessToken = (): string | null => {
+  return globalAccessToken;
+};
 
 export const login = async ({
   accountAddress,
@@ -69,5 +71,7 @@ export const login = async ({
     body: payload,
   });
   const data = await result.json();
+
+  globalAccessToken = data?.accessToken || null;
   return data as LoginResult;
 };
