@@ -3,8 +3,6 @@
     "airbnb",
     "preact",
     "prettier",
-    "prettier/react",
-    "prettier/@typescript-eslint",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended"
   ],
@@ -27,6 +25,8 @@
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-unused-vars": "error",
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": ["error"],
     "arrow-body-style": 0,
     "import/prefer-default-export": 0,
     "import/extensions": [
