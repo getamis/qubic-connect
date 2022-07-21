@@ -25,7 +25,7 @@ const qubicCreatorSdk = new QubicCreatorSdk({
 // 預設 style 顯示成 pop 中間
 
 ```ts
-qubicCreatorSdk.createLoginPanel(element: HTMLElement, {
+qubicCreatorSdk.createLoginModal(element: HTMLElement, {
   methods?: Array<'metamask','walletconnect' | 'qubic'>,
   onLogin: (
     error: Error,
@@ -39,7 +39,6 @@ qubicCreatorSdk.createLoginPanel(element: HTMLElement, {
   ) => void,
   onLogout: () => void
   titleText?: string, // default: 'Connect your wallet'
-  containerStyle?: CSSStyle,
   backdropStyle?: CSSStyle,
   itemStyle?: CSSStyle, // each login button item
 })
@@ -86,7 +85,7 @@ function Demo() {
 
   return (
     <>
-      <LoginPanel onLogin={handleLogin} />
+      <LoginModal onLogin={handleLogin} />
       {accessToken && <PaymentForm order={mockOrder} onPaymentDone={handlePaymentDone} />}
     </>
   );

@@ -1,19 +1,10 @@
 {
+  "extends": "./tsconfig.build.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./packages",
     "paths": {
-      "@qubic-creator/*": ["./packages/*/src"]
+      "@qubic-creator/*": ["*/src"]
     },
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "isolatedModules": true,
-    "lib": ["esnext", "dom"],
-    "moduleResolution": "node",
-    "noEmit": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
-  },
-  "exclude": ["coverage", "dist/**", "node_modules", "**/__tests__", "**/__mocks__"]
+    "noEmit": true
+  }
 }

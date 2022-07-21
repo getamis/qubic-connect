@@ -1,4 +1,4 @@
-import { logout } from '../../api/auth';
+import { logout } from '../api/auth';
 
 export const createLogout =
   (options: { creatorUrl: string; apiKey: string; apiSecret: string }) => async (): Promise<void> => {

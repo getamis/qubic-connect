@@ -5,19 +5,12 @@ import { useQubicCreator } from './QubicCreatorContext';
 export type LoginButtonProps = Omit<PreactLoginButtonProps, 'children'>;
 
 const LoginButton = React.memo<LoginButtonProps>(props => {
-  const { method, onLogin, style, onLogout } = props;
-
   const { qubicCreatorSdkRef } = useQubicCreator();
   const buttonRef = useRef(null);
 
   useEffect(() => {
-    qubicCreatorSdkRef.current.createLoginButton(buttonRef.current, {
-      method,
-      onLogin,
-      style,
-      onLogout,
-    });
-  }, [method, onLogin, onLogout, qubicCreatorSdkRef, style]);
+    qubicCreatorSdkRef.current.createLoginButton(buttonRef.current, props);
+  }, [props, qubicCreatorSdkRef]);
 
   return <div ref={buttonRef} />;
 });

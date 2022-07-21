@@ -3,6 +3,8 @@
   "include": ["src/**/*"],
   "compilerOptions": {
     "outDir": "dist",
-    "jsx": "react"
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "types": ["preact"]
   }
 }

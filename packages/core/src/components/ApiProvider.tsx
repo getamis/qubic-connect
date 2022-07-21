@@ -12,9 +12,9 @@ import {
   OnLogout,
   QubicCreatorConfig,
 } from '../types';
-import { createSingMessageAndLogin } from './utils/singMessageAndLogin';
+import { createSingMessageAndLogin } from '../utils/singMessageAndLogin';
 import { BatchBuyAssetInput, BatchBuyAssetResult, createFetchBatchBuyAssetResult } from '../api/purchase';
-import { createLogout } from './utils/logout';
+import { createLogout } from '../utils/logout';
 
 interface ApiContextValue {
   login: (method: ExtendedExternalProviderMethod) => Promise<LoginResult>;

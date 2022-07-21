@@ -1,73 +1,83 @@
-import { render } from 'preact';
-import { CSSProperties } from 'preact/compat';
-import { LoginPanelModal, LoginPanelModalProps } from './components/LoginPanelModal';
-import { QubicCreatorConfig, OnPaymentDone } from './types/QubicCreator';
-import { createLoginButtonElement, LoginButtonProps } from './components/LoginButton';
-import { ExtendedExternalProvider, ExtendedExternalProviderType } from './types/ExtendedExternalProvider';
-import { createPaymentFormElement } from './components/PaymentForm';
+import { ComponentChild, render, VNode } from 'preact';
+import { createPortal } from 'preact/compat';
+import { QubicCreatorConfig, OnPaymentDone, OnLogin, OnLogout } from './types/QubicCreator';
+import LoginButton, { LoginButtonProps } from './components/LoginButton';
+import { ExtendedExternalProvider } from './types/ExtendedExternalProvider';
+import PaymentForm from './components/PaymentForm';
 import { Order } from './types';
-
-const ALLOWED_METHODS: ExtendedExternalProviderType[] = ['qubic', 'metamask', 'walletconnect'];
-
-export interface LoginPanelProps
-  extends Omit<LoginButtonProps, 'method' | 'style'>,
-    Omit<LoginPanelModalProps, 'children'> {
-  methods?: ExtendedExternalProviderType[];
-  itemStyle?: CSSProperties;
-}
+import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
+import App from './components/App';
 
 export class QubicCreatorSdk {
   private readonly config: QubicCreatorConfig;
-  public provider?: ExtendedExternalProvider;
-  public address?: string;
-  public accessToken?: string;
+  private rootDiv: HTMLDivElement;
+  private children: Array<ComponentChild> = [];
+  private vNodeMap = new Map<HTMLElement, ComponentChild>();
+  public provider: ExtendedExternalProvider | null = null;
+  public address: string | null = null;
+  public accessToken: string | null = null;
 
   constructor(config: QubicCreatorConfig) {
     this.config = config;
+
+    this.rootDiv = document.createElement('div');
+    document.body.appendChild(this.rootDiv);
   }
 
-  private logoutCallbacks: Array<() => void> = [];
-  public createLoginButton(element: HTMLElement | null, props: LoginButtonProps): void {
-    if (!element) throw Error(`${element} not found`);
-    const LoginButton = createLoginButtonElement(this.config);
-
-    const { method, onLogin, onLogout } = props;
-
-    if (onLogout) {
-      this.logoutCallbacks.push(onLogout);
+  private handleLogin: OnLogin = (error, data) => {
+    if (!error && data) {
+      this.accessToken = data.accessToken;
+      this.provider = data.provider;
+      this.address = data.address;
     }
+  };
+
+  private handleLogout: OnLogout = error => {
+    if (!error) {
+      this.accessToken = null;
+      this.provider = null;
+      this.address = null;
+    }
+  };
+
+  private forceUpdate(): void {
     render(
-      <LoginButton
-        method={method}
-        onLogin={(errorMessage, data) => {
-          if (!errorMessage && data) {
-            this.accessToken = data.accessToken;
-            this.provider = data.provider;
-            this.address = data.address;
-          }
-          onLogin?.(errorMessage, data);
-        }}
-      />,
-      element,
+      <App key="app" config={this.config} onLogin={this.handleLogin} onLogout={this.handleLogout}>
+        {this.children}
+      </App>,
+      this.rootDiv,
     );
   }
 
-  public createLoginPanel(
-    element: HTMLElement | null,
-    props: LoginPanelProps = {
-      methods: ALLOWED_METHODS,
-    },
-  ): void {
+  private renderToChildren(node: VNode, element: HTMLElement) {
+    const existingVNode = this.vNodeMap.get(element);
+    if (existingVNode) {
+      this.children = this.children.map(child => {
+        if (child === existingVNode) {
+          const newVNode = createPortal(node, element);
+          this.vNodeMap.set(element, newVNode);
+          return newVNode;
+        }
+        return child;
+      });
+    } else {
+      const newVNode = createPortal(node, element);
+      this.vNodeMap.set(element, newVNode);
+      this.children = [...this.children, newVNode];
+    }
+    this.forceUpdate();
+  }
+
+  public createLoginButton(element: HTMLElement | null, props: LoginButtonProps): void {
     if (!element) throw Error(`${element} not found`);
-    const { methods, onLogin, onLogout, itemStyle, ...restProps } = props;
-    const LoginButton = createLoginButtonElement(this.config);
 
-    const LoginButtons = methods?.map(method => {
-      if (!ALLOWED_METHODS.includes(method)) return null;
-      return <LoginButton key={method} method={method} onLogin={onLogin} onLogout={onLogout} style={itemStyle} />;
-    });
+    this.renderToChildren(<LoginButton {...props} />, element);
+  }
 
-    render(<LoginPanelModal {...restProps}>{LoginButtons}</LoginPanelModal>, element);
+  public createLoginModal(element: HTMLElement | null, props: LoginModalProps): void {
+    if (!element) throw Error(`${element} not found`);
+
+    this.renderToChildren(<LoginModal {...props} />, element);
   }
 
   public createPaymentForm(
@@ -79,9 +89,6 @@ export class QubicCreatorSdk {
     setOrder: (value: Order) => void;
   } {
     if (!element) throw Error(`${element} not found`);
-    if (!this.accessToken) {
-      throw new Error('Not logged in yet');
-    }
 
     let order: Order | undefined;
 
@@ -93,22 +100,9 @@ export class QubicCreatorSdk {
       return order;
     }
 
-    const PaymentForm = createPaymentFormElement(this.config);
-
-    render(<PaymentForm getOrder={getOrder} onPaymentDone={props.onPaymentDone} />, element);
-
+    this.renderToChildren(<PaymentForm getOrder={getOrder} onPaymentDone={props.onPaymentDone} />, element);
     return {
       setOrder,
     };
-  }
-
-  public logout(): void {
-    this.logoutCallbacks.forEach(logoutCallback => {
-      logoutCallback();
-    });
-    this.logoutCallbacks = [];
-    this.accessToken = undefined;
-    this.provider = undefined;
-    this.address = undefined;
   }
 }

@@ -1,23 +1,20 @@
-import { useCallback } from 'preact/hooks';
-import { CSSProperties, FunctionComponent, memo } from 'preact/compat';
-import QubicProvider from '@qubic-js/browser';
-import WalletConnectProvider from '@walletconnect/web3-provider';
+import { useCallback, useState } from 'preact/hooks';
+import { CSSProperties, memo } from 'preact/compat';
 import jss from 'jss';
 import clsx from 'clsx';
 import { ComponentChildren } from 'preact';
-import { QubicCreatorConfig, OnLogin, OnLogout } from '../types/QubicCreator';
+import { OnLogin, OnLogout } from '../types/QubicCreator';
 
-import { ExtendedExternalProvider, ExtendedExternalProviderType } from '../types/ExtendedExternalProvider';
-import { createSingMessageAndLogin } from './utils/singMessageAndLogin';
-import { isWalletconnectProvider } from '../utils/isWalletconnectProvider';
+import { ExtendedExternalProviderMethod } from '../types/ExtendedExternalProvider';
 import '../utils/fixWalletConnect';
 import { commonClasses } from './styles';
-import SvgQubicLogo from './svg/QubicLogo';
-import SvgMetamaskFox from './svg/MetamaskFox';
-import SvgWalletconnectCircleBlue from './svg/WalletconnectCircleBlue';
+import SvgQubicLogo from './icons/QubicLogo';
+import SvgMetamaskFox from './icons/MetamaskFox';
+import SvgWalletconnectCircleBlue from './icons/WalletconnectCircleBlue';
+import { useApi } from './ApiProvider';
 
 export interface LoginButtonProps {
-  method: ExtendedExternalProviderType;
+  method: ExtendedExternalProviderMethod;
   onLogin?: OnLogin;
   onLogout?: OnLogout;
   style?: CSSProperties;
@@ -31,111 +28,88 @@ const { classes } = jss
   })
   .attach();
 
-let globalQubicProvider: QubicProvider | undefined;
+const EXTERNAL_PROVIDER_MAP: Record<
+  ExtendedExternalProviderMethod,
+  {
+    buttonText: string;
+    buttonIcon: ComponentChildren;
+  }
+> = {
+  qubic: {
+    buttonText: 'Qubic Wallet',
+    buttonIcon: <SvgQubicLogo className={classes.icon} />,
+  },
+  metamask: {
+    buttonText: 'MetaMask',
+    buttonIcon: <SvgMetamaskFox className={classes.icon} />,
+  },
+  walletconnect: {
+    buttonText: 'WalletConnect',
+    buttonIcon: <SvgWalletconnectCircleBlue className={classes.icon} />,
+  },
+};
 
-export function createLoginButtonElement(sdkConfig: QubicCreatorConfig): FunctionComponent<LoginButtonProps> {
-  const {
-    name: authAppName,
-    service: authServiceName,
-    domain: authAppUrl,
-    key,
-    secret,
-    qubicWalletKey,
-    qubicWalletSecret,
-    infuraId,
-    chainId,
-  } = sdkConfig;
+export const LoginButton = memo<LoginButtonProps>(props => {
+  const { method, onLogin, onLogout, style } = props;
 
-  globalQubicProvider =
-    globalQubicProvider ||
-    new QubicProvider({
-      apiKey: qubicWalletKey,
-      apiSecret: qubicWalletSecret,
-      chainId: chainId || 1,
-      infuraProjectId: infuraId,
-      enableIframe: true,
-    });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { buttonIcon, buttonText } = EXTERNAL_PROVIDER_MAP[method];
+  const { login, logout } = useApi();
 
-  const externalProviderMap: Record<
-    ExtendedExternalProviderType,
-    {
-      buttonText: string;
-      buttonIcon: ComponentChildren;
-      provider: ExtendedExternalProvider;
-    }
-  > = {
-    qubic: {
-      buttonText: 'Qubic Wallet',
-      buttonIcon: <SvgQubicLogo className={classes.icon} />,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      provider: globalQubicProvider as any,
-    },
-    metamask: {
-      buttonText: 'MetaMask',
-      buttonIcon: <SvgMetamaskFox className={classes.icon} />,
-      provider: window.ethereum,
-    },
-    walletconnect: {
-      buttonText: 'WalletConnect',
-      buttonIcon: <SvgWalletconnectCircleBlue className={classes.icon} />,
-      provider: new WalletConnectProvider({
-        chainId,
-        infuraId,
-      }),
-    },
-  };
+  const handleWalletLogin = useCallback(
+    async (event: MouseEvent) => {
+      try {
+        event.preventDefault();
+        event.stopPropagation();
 
-  const singMessageAndLogin = createSingMessageAndLogin({
-    authAppName,
-    authAppUrl,
-    authServiceName,
-    apiKey: key,
-    apiSecret: secret,
-  });
-
-  const LoginButton = memo<LoginButtonProps>(props => {
-    const { method, onLogin, style } = props;
-
-    const { buttonIcon, buttonText, provider } = externalProviderMap[method];
-
-    const handleWalletLogin = useCallback(
-      async (event: MouseEvent) => {
-        try {
-          event.preventDefault();
-          event.stopPropagation();
-
-          if (isWalletconnectProvider(method, provider)) {
-            // https://github.com/WalletConnect/walletconnect-monorepo/issues/747
-            await provider.enable();
-          }
-          const result = await singMessageAndLogin(method, provider);
-          onLogin?.(null, {
-            type: method,
-            accessToken: result.accessToken,
-            address: result.address,
-            provider,
-          });
-        } catch (error) {
-          if (error instanceof Error) {
-            onLogin?.(error);
-          }
+        const result = await login(method);
+        setIsLoggedIn(true);
+        onLogin?.(null, result);
+      } catch (error) {
+        if (error instanceof Error) {
+          onLogin?.(error);
         }
-      },
-      [method, onLogin, provider],
-    );
+      }
+    },
+    [login, method, onLogin],
+  );
 
-    return (
-      <button
-        type="button"
-        style={style}
-        className={clsx(commonClasses.button, commonClasses.buttonWhite)}
-        onClick={handleWalletLogin}
-      >
-        {buttonIcon}
-        <span className={clsx(commonClasses.text)}>{buttonText}</span>
-      </button>
-    );
-  });
+  const handleLogout = useCallback(
+    async (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      try {
+        await logout?.();
+        onLogout?.(null);
+      } catch (error) {
+        if (error instanceof Error) {
+          onLogout?.(error);
+        }
+      }
+    },
+    [logout, onLogout],
+  );
 
-  return LoginButton;
-}
+  return isLoggedIn ? (
+    <button
+      type="button"
+      style={style}
+      className={clsx(commonClasses.button, commonClasses.buttonWhite)}
+      onClick={handleLogout}
+    >
+      <span className={clsx(commonClasses.text)}>Logout</span>
+    </button>
+  ) : (
+    <button
+      type="button"
+      style={style}
+      className={clsx(commonClasses.button, commonClasses.buttonWhite)}
+      onClick={handleWalletLogin}
+    >
+      {buttonIcon}
+      <span className={clsx(commonClasses.text)}>{buttonText}</span>
+    </button>
+  );
+});
+
+export default LoginButton;

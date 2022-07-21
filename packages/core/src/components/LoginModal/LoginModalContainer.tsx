@@ -8,7 +8,6 @@ import { commonClasses } from '../styles';
 export interface LoginModalContainerProps {
   children: ComponentChildren;
   titleText?: string;
-  containerStyle?: CSSProperties;
   backdropStyle?: CSSProperties;
 }
 
@@ -22,7 +21,6 @@ const { classes } = jss
       height: '100vh',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
       display: 'flex',
     },
     modalHidden: {
@@ -30,6 +28,7 @@ const { classes } = jss
     },
     backdrop: {
       zIndex: -1,
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
       position: 'fixed',
       width: '100vw',
       height: '100vh',
@@ -38,7 +37,7 @@ const { classes } = jss
   .attach();
 
 export const LoginModalContainer = memo<LoginModalContainerProps>(props => {
-  const { children, titleText = 'Login', containerStyle, backdropStyle } = props;
+  const { children, titleText = 'Login', backdropStyle } = props;
   const [isVisible, setIsVisible] = useState(false);
 
   const handleVisibilitySwitch = useCallback(() => {
@@ -55,15 +54,13 @@ export const LoginModalContainer = memo<LoginModalContainerProps>(props => {
         <div className={classes.backdrop} style={backdropStyle} onClick={handleVisibilitySwitch} />
         <div>{children}</div>
       </div>
-      <div style={containerStyle}>
-        <button
-          type="button"
-          onClick={handleVisibilitySwitch}
-          className={clsx(commonClasses.button, commonClasses.buttonWhite)}
-        >
-          <span className={commonClasses.text}>{titleText} </span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleVisibilitySwitch}
+        className={clsx(commonClasses.button, commonClasses.buttonWhite)}
+      >
+        <span className={commonClasses.text}>{titleText} </span>
+      </button>
     </>
   );
 });
