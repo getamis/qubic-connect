@@ -1,9 +1,8 @@
 {
   "extends": "./tsconfig.build.json",
   "compilerOptions": {
-    "baseUrl": "./packages",
     "paths": {
-      "@qubic-creator/*": ["*/src"]
+      "@qubic-creator/*": ["./packages/*/src"]
     },
     "noEmit": true
   }
