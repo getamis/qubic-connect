@@ -31,5 +31,9 @@
     "@qubic-creator/core": "^0.1.0",
     "@types/react": "^18.0.14",
     "typescript": "^4.7.3"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "872ea0420cf64a12f6b20fda73c6621b8e94834e"
 }

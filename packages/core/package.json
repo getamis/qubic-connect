@@ -51,5 +51,9 @@
     "query-string": "^7.1.1",
     "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "872ea0420cf64a12f6b20fda73c6621b8e94834e"
 }
