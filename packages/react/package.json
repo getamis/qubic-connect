@@ -23,12 +23,12 @@
   },
   "peerDependencies": {
     "@qubic-creator/core": "*",
-    "react": "^18.1.0",
     "lint-staged": "^13.0.2",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "react": "^18.1.0"
   },
   "devDependencies": {
-    "@qubic-creator/core": "*",
+    "@qubic-creator/core": "^0.1.0",
     "@types/react": "^18.0.14",
     "typescript": "^4.7.3"
   }
