@@ -1,6 +1,6 @@
 {
   "name": "@qubic-creator/react",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "license": "Apache License 2.0",
   "source": "./src/index.ts",
@@ -28,7 +28,7 @@
     "react": "^18.1.0"
   },
   "devDependencies": {
-    "@qubic-creator/core": "^0.1.1",
+    "@qubic-creator/core": "^0.1.2",
     "@types/react": "^18.0.14",
     "typescript": "^4.7.3"
   },
