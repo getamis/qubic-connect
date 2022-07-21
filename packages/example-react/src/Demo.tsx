@@ -25,6 +25,7 @@ function Demo() {
   const handlePaymentDone: OnPaymentDone = useCallback((error, result) => {
     if (error) {
       window.alert(error.message);
+      return;
     }
     console.log('PayFormResult', result);
     alert(`購買成功！ 結尾號碼為 ${result?.tappay.cardInfo.lastFour}`);
@@ -33,19 +34,27 @@ function Demo() {
   const handleLogin: OnLogin = useCallback((error, result) => {
     if (error) {
       window.alert(error);
+      return;
     }
     setAccessToken(result?.accessToken || '');
   }, []);
 
   return (
     <div className="container">
-      <div className="login-button-group">
+      <div className="group">
+        <p>createLoginButton</p>
         <LoginButton method="qubic" onLogin={handleLogin} />
         <LoginButton method="metamask" onLogin={handleLogin} />
         <LoginButton method="walletconnect" onLogin={handleLogin} />
+      </div>
+      <div className="group">
+        <p>createLoginPanel</p>
         <LoginPanel methods={['qubic', 'metamask', 'walletconnect']} onLogin={handleLogin} />
       </div>
-      {accessToken && <PaymentForm order={mockOrder} onPaymentDone={handlePaymentDone} />}
+      <div className="group">
+        <p>createPaymentForm</p>
+        {accessToken && <PaymentForm order={mockOrder} onPaymentDone={handlePaymentDone} />}
+      </div>
     </div>
   );
 }

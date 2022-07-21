@@ -22,7 +22,7 @@
     "@typescript-eslint/parser": "^5.29.0"
   },
   "scripts": {
-    "deploy:payment:dev": " yarn workspace @qubic-creator/payment-form-web deploy:dev && cd ..",
+    "deploy:payment:dev": " yarn workspace @qubic-creator/payment-form-web deploy:dev",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -26,15 +26,19 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div class="container">
-      <div class="login-button-group">
+      <div class="group">
+        <p>createLoginButton</p>
         <div id="login-qubic" class="login-button"></div>
         <div id="login-metamask" class="login-button"></div>
         <div id="login-walletconnect" class="login-button"></div>
-        <div id="login-modal" class="login-button"></div>
-        <div id="pay-form" class="login-button"></div>
       </div>
-      <div>
-        <div id="access-token"></div>
+      <div class="group">
+        <p>createLoginPanel</p>
+        <div id="login-modal" class="login-button"></div>
+      </div>
+      <div class="group">
+        <p>createPaymentForm</p>
+        <div id="pay-form" class="login-button"></div>
       </div>
     </div>
   </body>

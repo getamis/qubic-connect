@@ -49,6 +49,7 @@ function main() {
           console.log('PayFormResult', result);
           if (error) {
             window.alert(error.message);
+            return;
           }
           window.alert(`購買成功！ 結尾號碼為 ${result?.tappay.cardInfo.lastFour}`);
         },
@@ -63,6 +64,7 @@ function main() {
     onLogin: (error, result) => {
       if (error) {
         window.alert(error.message);
+        return;
       }
       onAccessTokenChange(result?.accessToken);
     },
@@ -73,6 +75,7 @@ function main() {
     onLogin: (error, result) => {
       if (error) {
         window.alert(error.message);
+        return;
       }
       onAccessTokenChange(result?.accessToken);
     },
@@ -83,6 +86,7 @@ function main() {
     onLogin: (error, result) => {
       if (error) {
         window.alert(error.message);
+        return;
       }
       console.log({ accessToken: result?.accessToken });
       onAccessTokenChange(result?.accessToken);
@@ -94,6 +98,7 @@ function main() {
     onLogin: (error, result) => {
       if (error) {
         window.alert(error.message);
+        return;
       }
       console.log({ accessToken: result?.accessToken });
       onAccessTokenChange(result?.accessToken);

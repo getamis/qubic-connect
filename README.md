@@ -2,7 +2,11 @@
 
 ## Usage
 
+### JS
+
 ```ts
+import QubicCreatorSdk from '@qubic-creator/core';
+
 const qubicCreatorSdk = new QubicCreatorSdk({
   name: 'xxx',
   service: 'xxx',
@@ -41,12 +45,54 @@ qubicCreatorSdk.createLoginPanel(element: HTMLElement, {
 })
 
 
-// payment panel
-qubicCreatorSdk.createPaymentPanel(element: HTMLElement, {
-  onOrderCreated: (error: Error | null, order?: Order) => void,
+// payment form
+const {setOrder} = qubicCreatorSdk.createPaymentForm(element: HTMLElement, {
+  onPaymentDone: (error: Error | null, order?: Order) => void,
 })
+
+setOrder(yourOrderHere)
+```
+
+### React
+
+```tsx
+import { QubicCreatorContextProvider } from '@qubic-creator/react';
+
+function App() {
+  return (
+    <QubicCreatorContextProvider config={SDK_CONFIG}>
+      <Demo />
+    </QubicCreatorContextProvider>
+  );
+}
+function Demo() {
+  const [accessToken, setAccessToken] = useState('');
+
+  const handlePaymentDone: OnPaymentDone = useCallback((error, result) => {
+    if (error) {
+      console.error(error.message);
+      return;
+    }
+    console.log('PayFormResult', result);
+  }, []);
+
+  const handleLogin: OnLogin = useCallback((error, result) => {
+    if (error) {
+      console.error(error);
+      return;
+    }
+    setAccessToken(result?.accessToken || '');
+  }, []);
+
+  return (
+    <>
+      <LoginPanel onLogin={handleLogin} />
+      {accessToken && <PaymentForm order={mockOrder} onPaymentDone={handlePaymentDone} />}
+    </>
+  );
+}
 ```
 
 ## TODO
 
-- try to cache createOrGetRoot for handling same element createRoot again
+-
