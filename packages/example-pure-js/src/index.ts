@@ -9,6 +9,7 @@ import {
   CREATOR_API_URL,
   QUBIC_API_KEY,
   QUBIC_API_SECRET,
+  QUBIC_WALLET_URL,
 } from './environment';
 
 const mockData = {
@@ -32,6 +33,7 @@ const qubicCreatorSdk = new QubicCreatorSdk({
   domain: 'creator.dev.qubic.market',
   key: API_KEY,
   secret: API_SECRET,
+  qubicWalletUrl: QUBIC_WALLET_URL,
   qubicWalletKey: QUBIC_API_KEY,
   qubicWalletSecret: QUBIC_API_SECRET,
   creatorUrl: CREATOR_API_URL,
@@ -93,7 +95,7 @@ function main() {
     },
   });
 
-  qubicCreatorSdk.createLoginPanel(document.getElementById('login-modal'), {
+  qubicCreatorSdk.createLoginModal(document.getElementById('login-modal'), {
     methods: ['metamask', 'qubic', 'walletconnect'],
     onLogin: (error, result) => {
       if (error) {

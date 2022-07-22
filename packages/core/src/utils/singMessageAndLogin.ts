@@ -1,18 +1,25 @@
-import { ExtendedExternalProviderType, ExtendedExternalProvider } from '../../types/ExtendedExternalProvider';
-import { isWalletconnectProvider } from '../../utils/isWalletconnectProvider';
-import convertStringToHex from '../../utils/convertStringToHex';
-import { login } from '../../api/auth';
+import { ExtendedExternalProviderMethod, ExtendedExternalProvider } from '../types/ExtendedExternalProvider';
+import { isWalletconnectProvider } from './isWalletconnectProvider';
+import convertStringToHex from './convertStringToHex';
+import { login } from '../api/auth';
 
 export const createSingMessageAndLogin =
-  (options: { authAppName: string; authAppUrl: string; authServiceName: string; apiKey: string; apiSecret: string }) =>
+  (options: {
+    creatorUrl: string;
+    authAppName: string;
+    authAppUrl: string;
+    authServiceName: string;
+    apiKey: string;
+    apiSecret: string;
+  }) =>
   async (
-    providerType: ExtendedExternalProviderType,
+    providerType: ExtendedExternalProviderMethod,
     provider: ExtendedExternalProvider,
   ): Promise<{
     accessToken: string;
     address: string;
   }> => {
-    const { authAppName, authAppUrl, authServiceName, apiKey, apiSecret } = options;
+    const { creatorUrl, authAppName, authAppUrl, authServiceName, apiKey, apiSecret } = options;
     if (!provider?.request) {
       throw Error('provider.request not found');
     }
@@ -32,6 +39,7 @@ export const createSingMessageAndLogin =
         signature,
         dataString: '',
         isQubicUser: true,
+        creatorUrl,
         apiKey,
         apiSecret,
       });
@@ -57,6 +65,7 @@ export const createSingMessageAndLogin =
       signature,
       dataString,
       isQubicUser: false,
+      creatorUrl,
       apiKey,
       apiSecret,
     });

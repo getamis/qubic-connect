@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Currency, OnLogin, OnPaymentDone } from '@qubic-creator/core';
 import './App.css';
 
-import { LoginButton, LoginPanel, PaymentForm } from '@qubic-creator/react';
+import { LoginButton, LoginModal, PaymentForm } from '@qubic-creator/react';
 
 const mockOrder = {
   tokenId: undefined,
@@ -42,17 +42,17 @@ function Demo() {
   return (
     <div className="container">
       <div className="group">
-        <p>createLoginButton</p>
-        <LoginButton method="qubic" onLogin={handleLogin} />
+        <p>{`<LoginButton />`}</p>
+        <LoginButton style={{ backgroundColor: 'red' }} method="qubic" onLogin={handleLogin} />
         <LoginButton method="metamask" onLogin={handleLogin} />
         <LoginButton method="walletconnect" onLogin={handleLogin} />
       </div>
       <div className="group">
-        <p>createLoginPanel</p>
-        <LoginPanel methods={['qubic', 'metamask', 'walletconnect']} onLogin={handleLogin} />
+        <p>{`<LoginModal />`}</p>
+        <LoginModal methods={['qubic', 'metamask', 'walletconnect']} onLogin={handleLogin} />
       </div>
       <div className="group">
-        <p>createPaymentForm</p>
+        <p>{`<PaymentForm />`}</p>
         {accessToken && <PaymentForm order={mockOrder} onPaymentDone={handlePaymentDone} />}
       </div>
     </div>

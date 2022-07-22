@@ -10,23 +10,23 @@ interface Props extends Omit<PreactPaymentFormProps, 'getOrder'> {
 }
 
 const PaymentForm = React.memo<Props>(props => {
-  const { order, onPaymentDone, ...restProps } = props;
+  const { order, ...restProps } = props;
   const { qubicCreatorSdkRef } = useQubicCreator();
   const paymentFormRef = useRef(null);
   const setOrderRef = useRef<(value: Order) => void>();
 
   useEffect(() => {
     const { setOrder } = qubicCreatorSdkRef.current.createPaymentForm(paymentFormRef.current, {
-      onPaymentDone,
+      ...restProps,
     });
     setOrderRef.current = setOrder;
-  }, [onPaymentDone, qubicCreatorSdkRef]);
+  }, [qubicCreatorSdkRef, restProps]);
 
   useEffect(() => {
     setOrderRef.current?.(order);
   }, [order]);
 
-  return <div ref={paymentFormRef} {...restProps} />;
+  return <div ref={paymentFormRef} />;
 });
 
 export default PaymentForm;

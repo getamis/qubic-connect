@@ -1,6 +1,6 @@
 {
   "name": "@qubic-creator/payment-form-web",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.4.3",
@@ -24,7 +24,7 @@
     "build": "craco build",
     "test": "craco test",
     "eject": "craco eject",
-    "deploy:dev": "yarn build && cd build && surge --domain payment-form-web.surge.sh && cd .."
+    "deploy:dev": "yarn build && cd build && surge --domain payment-form-web.surge.sh"
   },
   "eslintConfig": {
     "extends": [

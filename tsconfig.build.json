@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "lib": ["esnext", "dom"],
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "target": "ES5",
+    "module": "commonjs"
+  },
+  "exclude": ["coverage", "dist/**", "node_modules", "**/__tests__", "**/__mocks__"]
+}

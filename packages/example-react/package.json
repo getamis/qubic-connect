@@ -1,23 +1,23 @@
 {
   "name": "@qubic-creator/example-react",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "dependencies": {
+    "@qubic-creator/core": "^0.1.2",
+    "@qubic-creator/react": "^0.1.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.11.39",
-    "@types/react": "^18.0.12",
+    "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
     "process": "^0.11.10",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.7.3",
-    "web-vitals": "^2.1.4",
-    "@qubic-creator/react": "*",
-    "@qubic-creator/core": "*"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "GENERATE_SOURCEMAP=false react-app-rewired start",

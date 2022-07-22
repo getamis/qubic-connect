@@ -97,9 +97,7 @@ export const BATCH_BUY_ASSET_FIAT = gql`
   }
 `;
 
-interface BatchBuyAssetInput {
-  apiKey: string;
-  apiSecret: string;
+export interface BatchBuyAssetInput {
   tokenId?: string;
   assetImage: string;
   assetName: string;
@@ -117,80 +115,80 @@ interface BatchBuyAssetInput {
   tapPayPrime: string;
 }
 
-interface BatchBuyAssetResult {
+export interface BatchBuyAssetResult {
   batchBuyAsset: PaymentResult;
 }
 
-export async function getBatchBuyAssetResult({
-  apiKey,
-  apiSecret,
-  tokenId,
-  assetImage,
-  assetName,
-  assetPrice,
-  contractId,
-  assetId,
-  assetQuantity = 1,
-  assetBatchId,
-  currency: itemCurrency = Currency.TWD,
-  userEmail,
-  userName,
-  userPhone,
-  tapPayMerchantId,
-  stop3DValidation,
-  tapPayPrime,
-}: BatchBuyAssetInput): Promise<BatchBuyAssetResult> {
-  const requestId = uuidv4();
-  const buyPrice = assetPrice;
-  const price = buyPrice;
-  const amount = String(buyPrice * assetQuantity);
-  const priceRate = undefined;
-  const redirectUrl = stop3DValidation ? '' : `${window.location.href}?action=${FINISH_PURCHASE_FLAG}`;
+export const createFetchBatchBuyAssetResult =
+  ({ apiKey, apiSecret }: { apiKey: string; apiSecret: string }) =>
+  async ({
+    tokenId,
+    assetImage,
+    assetName,
+    assetPrice,
+    contractId,
+    assetId,
+    assetQuantity = 1,
+    assetBatchId,
+    currency: itemCurrency = Currency.TWD,
+    userEmail,
+    userName,
+    userPhone,
+    tapPayMerchantId,
+    stop3DValidation,
+    tapPayPrime,
+  }: BatchBuyAssetInput): Promise<BatchBuyAssetResult> => {
+    const requestId = uuidv4();
+    const buyPrice = assetPrice;
+    const price = buyPrice;
+    const amount = String(buyPrice * assetQuantity);
+    const priceRate = undefined;
+    const redirectUrl = stop3DValidation ? '' : `${window.location.href}?action=${FINISH_PURCHASE_FLAG}`;
 
-  // tappay restrict to 100 words
-  const tappayDetail =
-    assetName && typeof assetName === 'string'
-      ? assetName
-          .replaceAll(/[<>&'"]/g, ' ')
-          .slice(0, 100)
-          .trim()
-      : `購買 NFT: ${contractId}/${tokenId}`;
+    // tappay restrict to 100 words
+    const tappayDetail =
+      assetName && typeof assetName === 'string'
+        ? assetName
+            .replaceAll(/[<>&'"]/g, ' ')
+            .slice(0, 100)
+            .trim()
+        : `購買 NFT: ${contractId}/${tokenId}`;
 
-  const response = await requestGraphql({
-    query: BATCH_BUY_ASSET_FIAT,
-    apiKey,
-    apiSecret,
-    variables: {
-      assetId,
-      requestId,
-      email: userEmail?.trim(),
-      name: userName?.trim(),
-      phone: userPhone?.trim(),
-      // donateInvoice: isDonateInvoice,
-      // billingAddress: invoiceAddress?.trim(),
-      // note: getBuyNoteString(),
-      type: PayType.TAPPAY,
-      price, // pass the value from DB
-      quantity: assetQuantity,
-      batchId: assetBatchId,
-      currency: itemCurrency,
-      priceRate,
-      tappay: {
-        amount,
-        merchantId: tapPayMerchantId,
-        currency: Currency.TWD,
-        details: tappayDetail,
-        productImageUrl: assetImage,
-        redirectUrl,
-        payOption: {
-          payByPrime: {
-            prime: tapPayPrime,
-            remember: false,
+    const response = await requestGraphql({
+      query: BATCH_BUY_ASSET_FIAT,
+      apiKey,
+      apiSecret,
+      variables: {
+        assetId,
+        requestId,
+        email: userEmail?.trim(),
+        name: userName?.trim(),
+        phone: userPhone?.trim(),
+        // donateInvoice: isDonateInvoice,
+        // billingAddress: invoiceAddress?.trim(),
+        // note: getBuyNoteString(),
+        type: PayType.TAPPAY,
+        price, // pass the value from DB
+        quantity: assetQuantity,
+        batchId: assetBatchId,
+        currency: itemCurrency,
+        priceRate,
+        tappay: {
+          amount,
+          merchantId: tapPayMerchantId,
+          currency: Currency.TWD,
+          details: tappayDetail,
+          productImageUrl: assetImage,
+          redirectUrl,
+          payOption: {
+            payByPrime: {
+              prime: tapPayPrime,
+              remember: false,
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  return response;
-}
+    return response;
+  };

@@ -26,21 +26,3 @@ code {
 .group {
   margin-bottom: 24px;
 }
-
-.login-button:last-child {
-  margin-bottom: -20px;
-}
-
-.logout-button {
-  color: #212121;
-  background-color: #fff;
-  width: auto;
-  border: 0;
-  margin: 20px 0;
-  display: flex;
-  outline: none;
-  padding: 6px 16px;
-  align-items: center;
-  border-radius: 4px;
-  justify-content: center;
-}

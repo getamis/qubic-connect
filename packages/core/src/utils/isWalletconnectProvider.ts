@@ -1,8 +1,8 @@
 import WalletConnectProvider from '@walletconnect/web3-provider';
-import { ExtendedExternalProvider, ExtendedExternalProviderType } from '../types/ExtendedExternalProvider';
+import { ExtendedExternalProvider, ExtendedExternalProviderMethod } from '../types/ExtendedExternalProvider';
 
 export function isWalletconnectProvider(
-  providerType: ExtendedExternalProviderType,
+  providerType: ExtendedExternalProviderMethod,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   provider: ExtendedExternalProvider,
 ): provider is WalletConnectProvider {
