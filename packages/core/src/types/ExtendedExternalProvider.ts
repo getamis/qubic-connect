@@ -1,7 +1,15 @@
 import { ExternalProvider } from '@ethersproject/providers';
 
-export type ExtendedExternalProviderMethod = 'metamask' | 'qubic' | 'walletconnect';
+export type ExtendedExternalProviderMethod = 'metamask' | 'qubic' | 'walletconnect' | 'custom';
 export interface ExtendedExternalProvider extends ExternalProvider {
   isQubic?: boolean;
-  isWalletconnect?: boolean;
+  isWalletConnect?: boolean;
+}
+
+export interface ProviderOption {
+  display?: {
+    logo?: string;
+    name?: string;
+  };
+  provider: ExtendedExternalProvider;
 }

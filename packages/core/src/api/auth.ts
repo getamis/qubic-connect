@@ -37,7 +37,7 @@ export const login = async ({
   signature,
   dataString,
   isQubicUser,
-  creatorUrl = CREATOR_API_URL,
+  creatorUrl,
   apiKey,
   apiSecret,
 }: LoginParams): Promise<LoginResult> => {
@@ -57,7 +57,7 @@ export const login = async ({
         data: convertStringToHex(dataString),
       });
 
-  const serviceUri = isQubicUser ? `https://${creatorUrl}/services/auth/qubic` : `https://${creatorUrl}/services/auth`;
+  const serviceUri = isQubicUser ? `${creatorUrl}/services/auth/qubic` : `${creatorUrl}/services/auth`;
 
   const httpMethod = 'POST';
   const headers = serviceHeaderBuilder({
@@ -87,7 +87,7 @@ export const logout = async ({
   apiKey,
   apiSecret,
 }: LogoutParams): Promise<LoginResult> => {
-  const serviceUri = `https://${creatorUrl}/services/auth/revoke`;
+  const serviceUri = `${creatorUrl}/services/auth/revoke`;
 
   const httpMethod = 'POST';
   const headers = serviceHeaderBuilder({

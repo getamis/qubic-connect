@@ -1,19 +1,15 @@
-import { ExtendedExternalProvider, ExtendedExternalProviderMethod } from './ExtendedExternalProvider';
+import { ExtendedExternalProvider, ExtendedExternalProviderMethod, ProviderOption } from './ExtendedExternalProvider';
 import { PaymentResult } from './Purchase';
+
+export type ProviderOptions = Partial<Record<ExtendedExternalProviderMethod, ProviderOption>>;
 
 export interface QubicCreatorConfig {
   name: string;
   service: string;
-  domain: string;
   key: string;
   secret: string;
-  qubicWalletUrl?: string;
-  qubicWalletKey: string;
-  qubicWalletSecret: string;
-  infuraId: string;
+  providerOptions: ProviderOptions;
   creatorUrl?: string;
-  chainId?: number;
-  tapPayMerchantId?: string;
 }
 
 export interface LoginResult {

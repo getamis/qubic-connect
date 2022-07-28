@@ -1,5 +1,9 @@
-import WalletConnectProvider from '@walletconnect/web3-provider';
 import { ExtendedExternalProvider, ExtendedExternalProviderMethod } from '../types/ExtendedExternalProvider';
+
+interface WalletConnectProvider extends ExtendedExternalProvider {
+  accounts: string[];
+  enable: () => Promise<string[]>;
+}
 
 export function isWalletconnectProvider(
   providerType: ExtendedExternalProviderMethod,

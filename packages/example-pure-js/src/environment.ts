@@ -1,4 +1,5 @@
-export const CHAIN_ID = process.env.REACT_APP_CHAIN_ID || '';
+export const DEBUG = process.env.REACT_APP_DEBUG === 'true';
+export const CHAIN_ID = Number(process.env.REACT_APP_CHAIN_ID) || 1;
 export const INFURA_ID = process.env.REACT_APP_INFURA_ID || '';
 
 export const API_KEY = process.env.REACT_APP_CREATOR_API_KEY || '';
