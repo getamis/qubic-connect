@@ -9,7 +9,7 @@ import {
   OnLogout,
   QubicCreatorConfig,
 } from '../types';
-import { createSingMessageAndLogin } from '../utils/singMessageAndLogin';
+import { createSignMessageAndLogin } from '../utils/signMessageAndLogin';
 import { BatchBuyAssetInput, BatchBuyAssetResult, createFetchBatchBuyAssetResult } from '../api/purchase';
 import { createLogout } from '../utils/logout';
 import { CREATOR_API_URL } from '../constants/backend';
@@ -64,7 +64,7 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
       if (!optionProvider) {
         throw Error(`optionProvider not found`);
       }
-      const singMessageAndLogin = createSingMessageAndLogin({
+      const signMessageAndLogin = createSignMessageAndLogin({
         authAppName,
         authAppUrl: APP_AUTH_URL,
         authServiceName,
@@ -77,7 +77,7 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
           // https://github.com/WalletConnect/walletconnect-monorepo/issues/747
           await optionProvider.enable();
         }
-        const { accessToken, address } = await singMessageAndLogin(method, optionProvider);
+        const { accessToken, address } = await signMessageAndLogin(method, optionProvider);
         const result = {
           method,
           accessToken,

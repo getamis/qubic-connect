@@ -20,7 +20,7 @@ export class QubicCreatorSdk {
   private static checkProviderOptions(providerOptions: ProviderOptions): void {
     if (providerOptions.qubic) {
       if (!providerOptions.qubic.provider.isQubic) {
-        throw Error('Qubic only accept Qubic provider');
+        throw Error('qubic only accept Qubic provider');
       }
     }
     if (providerOptions.metamask) {
@@ -29,7 +29,7 @@ export class QubicCreatorSdk {
         return;
       }
       if (!providerOptions.metamask.provider.isMetaMask) {
-        throw Error('metamask only accept metamask provider');
+        throw Error('metamask only accept MetaMask provider');
       }
     }
 

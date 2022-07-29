@@ -3,7 +3,7 @@ import { isWalletconnectProvider } from './isWalletconnectProvider';
 import convertStringToHex from './convertStringToHex';
 import { login } from '../api/auth';
 
-export const createSingMessageAndLogin =
+export const createSignMessageAndLogin =
   (options: {
     creatorUrl: string;
     authAppName: string;
