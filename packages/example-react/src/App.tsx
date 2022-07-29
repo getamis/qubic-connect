@@ -1,30 +1,35 @@
+import QubicProvider from '@qubic-js/browser';
+import WalletConnectProvider from '@walletconnect/web3-provider';
 import { QubicCreatorConfig } from '@qubic-creator/core';
 import { QubicCreatorContextProvider } from '@qubic-creator/react';
+import { SDK_DEBUG_CONFIG } from './debugConfig';
+
 import Demo from './Demo';
 import './App.css';
-import {
-  CHAIN_ID,
-  INFURA_ID,
-  API_KEY,
-  API_SECRET,
-  CREATOR_API_URL,
-  QUBIC_API_KEY,
-  QUBIC_API_SECRET,
-  QUBIC_WALLET_URL,
-} from './environment';
+import { INFURA_ID, API_KEY, API_SECRET } from './environment';
 
-const SDK_CONFIG: QubicCreatorConfig = {
+const SDK_CONFIG: QubicCreatorConfig = SDK_DEBUG_CONFIG || {
   name: 'Qubic Creator',
   service: 'qubee-creator',
-  domain: 'creator.dev.qubic.market',
   key: API_KEY,
   secret: API_SECRET,
-  qubicWalletUrl: QUBIC_WALLET_URL,
-  qubicWalletKey: QUBIC_API_KEY,
-  qubicWalletSecret: QUBIC_API_SECRET,
-  creatorUrl: CREATOR_API_URL,
-  chainId: parseInt(CHAIN_ID),
-  infuraId: INFURA_ID,
+  providerOptions: {
+    qubic: {
+      provider: new QubicProvider(),
+    },
+    walletconnect: {
+      provider: new WalletConnectProvider({
+        infuraId: INFURA_ID,
+      }),
+    },
+    custom: {
+      display: {
+        logo: 'https://commonwealth.maicoin.com/favicon.ico',
+        name: 'Custom Injected',
+      },
+      provider: window.ethereum,
+    },
+  },
 };
 
 function App() {

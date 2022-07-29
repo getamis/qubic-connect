@@ -4,7 +4,6 @@ import HmacSHA256 from 'crypto-js/hmac-sha256';
 import Base64 from 'crypto-js/enc-base64';
 
 import { getAccessToken } from '../api/auth';
-import { CREATOR_API_URL } from '../constants/backend';
 
 function extractOperationName(document: DocumentNode): string | undefined {
   let operationName;
@@ -117,11 +116,11 @@ export function requestGraphql({
   variables,
   apiKey,
   apiSecret,
-  creatorUrl = CREATOR_API_URL,
+  creatorUrl,
   isPublic = false,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 RequestGraphqlInput): Promise<any> {
-  const endPoint = `https://${creatorUrl}/services/graphql-${isPublic ? 'public' : 'acc'}`;
+  const endPoint = `${creatorUrl}/services/graphql-${isPublic ? 'public' : 'acc'}`;
 
   const headers = graphqlHeaderBuilder({
     serviceUrl: endPoint,

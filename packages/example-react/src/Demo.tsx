@@ -43,7 +43,7 @@ function Demo() {
     <div className="container">
       <div className="group">
         <p>{`<LoginButton />`}</p>
-        <LoginButton style={{ backgroundColor: 'red' }} method="qubic" onLogin={handleLogin} />
+        <LoginButton method="qubic" onLogin={handleLogin} />
         <LoginButton method="metamask" onLogin={handleLogin} />
         <LoginButton method="walletconnect" onLogin={handleLogin} />
       </div>

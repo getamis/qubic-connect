@@ -1,17 +1,13 @@
-import { useCallback, useState } from 'preact/hooks';
+import { useCallback, useMemo, useState } from 'preact/hooks';
 import { CSSProperties, memo } from 'preact/compat';
 import jss from 'jss';
 import clsx from 'clsx';
-import { ComponentChildren } from 'preact';
+import { commonClasses } from './styles';
 import { OnLogin, OnLogout } from '../types/QubicCreator';
-
 import { ExtendedExternalProviderMethod } from '../types/ExtendedExternalProvider';
 import '../utils/fixWalletConnect';
-import { commonClasses } from './styles';
-import SvgQubicLogo from './icons/QubicLogo';
-import SvgMetamaskFox from './icons/MetamaskFox';
-import SvgWalletconnectCircleBlue from './icons/WalletconnectCircleBlue';
 import { useApi } from './ApiProvider';
+import { EXTERNAL_PROVIDER_MAP } from '../constants/externalProvider';
 
 export interface LoginButtonProps {
   method: ExtendedExternalProviderMethod;
@@ -23,38 +19,19 @@ export interface LoginButtonProps {
 const { classes } = jss
   .createStyleSheet({
     icon: {
-      marginRight: '8px',
+      marginRight: 8,
+      width: 24,
+      height: 24,
     },
   })
   .attach();
 
-const EXTERNAL_PROVIDER_MAP: Record<
-  ExtendedExternalProviderMethod,
-  {
-    buttonText: string;
-    buttonIcon: ComponentChildren;
-  }
-> = {
-  qubic: {
-    buttonText: 'Qubic Wallet',
-    buttonIcon: <SvgQubicLogo className={classes.icon} />,
-  },
-  metamask: {
-    buttonText: 'MetaMask',
-    buttonIcon: <SvgMetamaskFox className={classes.icon} />,
-  },
-  walletconnect: {
-    buttonText: 'WalletConnect',
-    buttonIcon: <SvgWalletconnectCircleBlue className={classes.icon} />,
-  },
-};
-
 export const LoginButton = memo<LoginButtonProps>(props => {
   const { method, onLogin, onLogout, style } = props;
+  const { IconComponent, displayName } = EXTERNAL_PROVIDER_MAP[method];
 
+  const { login, logout, providerOptions } = useApi();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { buttonIcon, buttonText } = EXTERNAL_PROVIDER_MAP[method];
-  const { login, logout } = useApi();
 
   const handleWalletLogin = useCallback(
     async (event: MouseEvent) => {
@@ -90,6 +67,31 @@ export const LoginButton = memo<LoginButtonProps>(props => {
     [logout, onLogout],
   );
 
+  const DisplayIcon = useMemo(() => {
+    const display = providerOptions[method]?.display;
+    if (display?.logo) {
+      return <img src={display.logo} className={classes.icon} alt="logo" />;
+    }
+    return IconComponent && <IconComponent className={classes.icon} />;
+  }, [IconComponent, method, providerOptions]);
+
+  const DisplayName = useMemo(() => {
+    const display = providerOptions[method]?.display;
+    if (display?.name) {
+      return <span className={clsx(commonClasses.text)}>{display.name}</span>;
+    }
+    return <span className={clsx(commonClasses.text)}>{displayName}</span>;
+  }, [displayName, method, providerOptions]);
+
+  if (!providerOptions[method]) {
+    console.error(`providerOptions[method] ${method} not found`);
+    return null;
+  }
+  if (method === 'metamask' && providerOptions.metamask && !providerOptions.metamask.provider) {
+    console.warn(`no metamask plugin detected, skip`);
+    return null;
+  }
+
   return isLoggedIn ? (
     <button
       type="button"
@@ -106,8 +108,8 @@ export const LoginButton = memo<LoginButtonProps>(props => {
       className={clsx(commonClasses.button, commonClasses.buttonWhite)}
       onClick={handleWalletLogin}
     >
-      {buttonIcon}
-      <span className={clsx(commonClasses.text)}>{buttonText}</span>
+      {DisplayIcon}
+      {DisplayName}
     </button>
   );
 });

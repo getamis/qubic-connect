@@ -8,17 +8,30 @@
 import QubicCreatorSdk from '@qubic-creator/core';
 
 const qubicCreatorSdk = new QubicCreatorSdk({
-  name: 'xxx',
-  service: 'xxx',
-  domain: 'xxx',
-  key: 'xxx',
-  secret: 'xxx',
-  qubicWalletKey: 'xxx',
-  qubicWalletSecret: 'xxx',
-  infuraId: 'xxx',
-  creatorUrl: 'xxx', //optional
-  chainId: 'xxx', //optional
-  tapPayMerchantId: 'xxx',
+  name: 'Display Name',
+  service: 'service-name',
+  key: 'API_KEY',
+  secret: 'API_SECRET',
+  providerOptions: {
+    qubic: {
+      provider: new QubicProvider(),
+    },
+    metamask: {
+      provider: window.ethereum,
+    },
+    walletconnect: {
+      provider: new WalletConnectProvider({
+        infuraId: INFURA_ID,
+      }),
+    },
+    custom: {
+      display: {
+        logo: 'https://commonwealth.maicoin.com/favicon.ico',
+        name: 'Custom Injected',
+      },
+      provider: window.ethereum,
+    },
+  },
 });
 ```
 

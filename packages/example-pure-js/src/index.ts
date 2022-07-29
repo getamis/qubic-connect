@@ -1,16 +1,38 @@
-import './index.css';
-
+import QubicProvider from '@qubic-js/browser';
+import WalletConnectProvider from '@walletconnect/web3-provider';
+import { QubicCreatorConfig } from '@qubic-creator/core';
 import QubicCreatorSdk, { Currency } from '@qubic-creator/core';
-import {
-  CHAIN_ID,
-  INFURA_ID,
-  API_KEY,
-  API_SECRET,
-  CREATOR_API_URL,
-  QUBIC_API_KEY,
-  QUBIC_API_SECRET,
-  QUBIC_WALLET_URL,
-} from './environment';
+import './index.css';
+import { INFURA_ID, API_KEY, API_SECRET } from './environment';
+import { SDK_DEBUG_CONFIG } from './debugConfig';
+
+const SDK_CONFIG: QubicCreatorConfig = SDK_DEBUG_CONFIG || {
+  name: 'Qubic Creator',
+  service: 'qubee-creator',
+  key: API_KEY,
+  secret: API_SECRET,
+  providerOptions: {
+    qubic: {
+      provider: new QubicProvider(),
+    },
+    metamask: {
+      provider: window.ethereum,
+    },
+    walletconnect: {
+      provider: new WalletConnectProvider({
+        infuraId: INFURA_ID,
+      }),
+    },
+    custom: {
+      display: {
+        logo: 'https://commonwealth.maicoin.com/favicon.ico',
+        name: 'Custom Injected',
+      },
+      provider: window.ethereum,
+    },
+  },
+};
+const qubicCreatorSdk = new QubicCreatorSdk(SDK_CONFIG);
 
 const mockData = {
   tokenId: undefined,
@@ -26,20 +48,6 @@ const mockData = {
   tapPayMerchantId: 'AMIS_TAISHIN',
   stop3DValidation: false,
 };
-
-const qubicCreatorSdk = new QubicCreatorSdk({
-  name: 'Qubic Creator',
-  service: 'qubee-creator',
-  domain: 'creator.dev.qubic.market',
-  key: API_KEY,
-  secret: API_SECRET,
-  qubicWalletUrl: QUBIC_WALLET_URL,
-  qubicWalletKey: QUBIC_API_KEY,
-  qubicWalletSecret: QUBIC_API_SECRET,
-  creatorUrl: CREATOR_API_URL,
-  chainId: parseInt(CHAIN_ID),
-  infuraId: INFURA_ID,
-});
 
 function main() {
   let isFormRendered = false;
@@ -96,7 +104,7 @@ function main() {
   });
 
   qubicCreatorSdk.createLoginModal(document.getElementById('login-modal'), {
-    methods: ['metamask', 'qubic', 'walletconnect'],
+    methods: ['metamask', 'qubic', 'walletconnect', 'custom'],
     onLogin: (error, result) => {
       if (error) {
         window.alert(error.message);

@@ -1,8 +1,5 @@
 import { ComponentChildren, createContext } from 'preact';
 import { memo, useCallback, useContext, useMemo, useState } from 'preact/compat';
-import QubicProvider from '@qubic-js/browser';
-import WalletConnectProvider from '@walletconnect/web3-provider';
-import { CREATOR_API_URL } from '../constants/backend';
 import { isWalletconnectProvider } from '../utils/isWalletconnectProvider';
 import {
   ExtendedExternalProvider,
@@ -12,9 +9,11 @@ import {
   OnLogout,
   QubicCreatorConfig,
 } from '../types';
-import { createSingMessageAndLogin } from '../utils/singMessageAndLogin';
+import { createSignMessageAndLogin } from '../utils/signMessageAndLogin';
 import { BatchBuyAssetInput, BatchBuyAssetResult, createFetchBatchBuyAssetResult } from '../api/purchase';
 import { createLogout } from '../utils/logout';
+import { CREATOR_API_URL } from '../constants/backend';
+import { ProviderOptions } from '../types/ExtendedExternalProvider';
 
 interface ApiContextValue {
   login: (method: ExtendedExternalProviderMethod) => Promise<LoginResult>;
@@ -23,6 +22,8 @@ interface ApiContextValue {
   accessToken: string | null;
   address: string | null;
   fetchBatchBuyAssetResult: (input: BatchBuyAssetInput) => Promise<BatchBuyAssetResult>;
+
+  providerOptions: ProviderOptions;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,68 +36,53 @@ interface ApiContextProviderProps {
   onLogout: OnLogout;
 }
 
+const APP_AUTH_URL = window.location.origin;
+
 export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
   const { config, onLogin, onLogout } = props;
   const {
     name: authAppName,
     service: authServiceName,
-    domain: authAppUrl,
     key,
     secret,
-    qubicWalletUrl,
-    qubicWalletKey,
-    qubicWalletSecret,
-    infuraId,
-    chainId,
     creatorUrl = CREATOR_API_URL,
+    providerOptions,
   } = config;
 
   const [address, setAddress] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [provider, setProvider] = useState<ExtendedExternalProvider | null>(null);
 
-  const externalProviderMap = useMemo<Record<ExtendedExternalProviderMethod, ExtendedExternalProvider>>(
-    () => ({
-      qubic: new QubicProvider({
-        walletUrl: qubicWalletUrl,
-        apiKey: qubicWalletKey,
-        apiSecret: qubicWalletSecret,
-        chainId: chainId || 1,
-        infuraProjectId: infuraId,
-        enableIframe: true,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }) as any,
-      metamask: window.ethereum,
-      walletconnect: new WalletConnectProvider({
-        chainId,
-        infuraId,
-      }),
-    }),
-    [chainId, infuraId, qubicWalletKey, qubicWalletSecret, qubicWalletUrl],
-  );
-
   const login = useCallback(
     async (method: ExtendedExternalProviderMethod) => {
-      const singMessageAndLogin = createSingMessageAndLogin({
+      const option = providerOptions[method];
+      if (!option) {
+        throw Error(`providerOption.${method} not found`);
+      }
+
+      const { provider: optionProvider } = option;
+      if (!optionProvider) {
+        throw Error(`optionProvider not found`);
+      }
+      const signMessageAndLogin = createSignMessageAndLogin({
         authAppName,
-        authAppUrl,
+        authAppUrl: APP_AUTH_URL,
         authServiceName,
         creatorUrl,
         apiKey: key,
         apiSecret: secret,
       });
-      const provider = externalProviderMap[method];
       try {
-        if (isWalletconnectProvider(method, provider)) {
+        if (isWalletconnectProvider(method, optionProvider)) {
           // https://github.com/WalletConnect/walletconnect-monorepo/issues/747
-          await provider.enable();
+          await optionProvider.enable();
         }
-        const { accessToken, address } = await singMessageAndLogin(method, provider);
+        const { accessToken, address } = await signMessageAndLogin(method, optionProvider);
         const result = {
           method,
           accessToken,
           address,
-          provider,
+          provider: optionProvider,
         };
 
         setAccessToken(accessToken);
@@ -112,7 +98,7 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
         throw error;
       }
     },
-    [authAppName, authAppUrl, authServiceName, creatorUrl, externalProviderMap, key, onLogin, secret],
+    [authAppName, authServiceName, creatorUrl, key, onLogin, provider, providerOptions, secret],
   );
 
   const logout = useCallback(async () => {
@@ -151,6 +137,7 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
         login,
         logout,
         fetchBatchBuyAssetResult,
+        providerOptions,
       }}
     >
       {props.children}

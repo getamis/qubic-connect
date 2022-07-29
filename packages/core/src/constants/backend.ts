@@ -1,1 +1,1 @@
-export const CREATOR_API_URL = 'admin.dev.qubic.market/market';
+export const CREATOR_API_URL = 'https://admin.qubic.market/market';

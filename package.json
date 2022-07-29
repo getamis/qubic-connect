@@ -25,8 +25,8 @@
   },
   "scripts": {
     "deploy:payment:dev": " yarn workspace @qubic-creator/payment-form-web deploy:dev",
-    "build": "lerna run build",
-    "watch": "lerna run watch",
+    "build": "lerna run build --scope={'@qubic-creator/core,@qubic-creator/react'}",
+    "watch": "lerna run watch --scope={'@qubic-creator/core,@qubic-creator/react'}",
     "release": "lerna publish --force-publish",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1"
