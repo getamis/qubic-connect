@@ -2,7 +2,7 @@ import { ComponentChild, render, VNode } from 'preact';
 import { createPortal } from 'preact/compat';
 import { QubicCreatorConfig, OnPaymentDone, OnLogin, OnLogout } from './types/QubicCreator';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
-import { ExtendedExternalProvider } from './types/ExtendedExternalProvider';
+import { ExtendedExternalProvider, ProviderOptions } from './types/ExtendedExternalProvider';
 import PaymentForm from './components/PaymentForm';
 import { Order } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
@@ -17,8 +17,32 @@ export class QubicCreatorSdk {
   public address: string | null = null;
   public accessToken: string | null = null;
 
+  private static checkProviderOptions(providerOptions: ProviderOptions): void {
+    if (providerOptions.qubic) {
+      if (!providerOptions.qubic.provider.isQubic) {
+        throw Error('Qubic only accept Qubic provider');
+      }
+    }
+    if (providerOptions.metamask) {
+      if (!providerOptions.metamask.provider) {
+        // user did not install metamask
+        return;
+      }
+      if (!providerOptions.metamask.provider.isMetaMask) {
+        throw Error('metamask only accept metamask provider');
+      }
+    }
+
+    if (providerOptions.walletconnect) {
+      if (!providerOptions.walletconnect.provider.isWalletConnect) {
+        throw Error('walletconnect only accept WalletConnect provider');
+      }
+    }
+  }
+
   constructor(config: QubicCreatorConfig) {
     this.config = config;
+    QubicCreatorSdk.checkProviderOptions(config.providerOptions);
 
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);

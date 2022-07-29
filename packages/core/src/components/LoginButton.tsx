@@ -87,6 +87,10 @@ export const LoginButton = memo<LoginButtonProps>(props => {
     console.error(`providerOptions[method] ${method} not found`);
     return null;
   }
+  if (method === 'metamask' && providerOptions.metamask && !providerOptions.metamask.provider) {
+    console.warn(`no metamask plugin detected, skip`);
+    return null;
+  }
 
   return isLoggedIn ? (
     <button

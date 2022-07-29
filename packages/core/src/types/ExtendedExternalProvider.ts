@@ -13,3 +13,8 @@ export interface ProviderOption {
   };
   provider: ExtendedExternalProvider;
 }
+
+export type ProviderOptions = Partial<
+  Record<Exclude<ExtendedExternalProviderMethod, 'metamask'>, ProviderOption> &
+    Record<'metamask', Partial<ProviderOption>>
+>;

@@ -1,7 +1,5 @@
-import { ExtendedExternalProvider, ExtendedExternalProviderMethod, ProviderOption } from './ExtendedExternalProvider';
+import { ExtendedExternalProvider, ExtendedExternalProviderMethod, ProviderOptions } from './ExtendedExternalProvider';
 import { PaymentResult } from './Purchase';
-
-export type ProviderOptions = Partial<Record<ExtendedExternalProviderMethod, ProviderOption>>;
 
 export interface QubicCreatorConfig {
   name: string;

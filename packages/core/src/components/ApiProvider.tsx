@@ -12,8 +12,8 @@ import {
 import { createSingMessageAndLogin } from '../utils/singMessageAndLogin';
 import { BatchBuyAssetInput, BatchBuyAssetResult, createFetchBatchBuyAssetResult } from '../api/purchase';
 import { createLogout } from '../utils/logout';
-import { ProviderOptions } from '../types/QubicCreator';
 import { CREATOR_API_URL } from '../constants/backend';
+import { ProviderOptions } from '../types/ExtendedExternalProvider';
 
 interface ApiContextValue {
   login: (method: ExtendedExternalProviderMethod) => Promise<LoginResult>;
@@ -60,19 +60,10 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
         throw Error(`providerOption.${method} not found`);
       }
 
-      if (method === 'metamask' && !option.provider.isMetaMask) {
-        throw Error('metamask only accept metamask provider');
-      }
-
-      if (method === 'qubic' && !option.provider.isQubic) {
-        throw Error('Qubic only accept Qubic provider');
-      }
-
-      if (method === 'walletconnect' && !option.provider.isWalletConnect) {
-        throw Error('walletconnect only accept WalletConnect provider');
-      }
-
       const { provider: optionProvider } = option;
+      if (!optionProvider) {
+        throw Error(`optionProvider not found`);
+      }
       const singMessageAndLogin = createSingMessageAndLogin({
         authAppName,
         authAppUrl: APP_AUTH_URL,
