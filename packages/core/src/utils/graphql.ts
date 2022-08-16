@@ -1,9 +1,8 @@
 import { DocumentNode, OperationDefinitionNode, parse, print } from 'graphql';
 import request, { RequestDocument } from 'graphql-request';
-import HmacSHA256 from 'crypto-js/hmac-sha256';
-import Base64 from 'crypto-js/enc-base64';
 
 import { getAccessToken } from '../api/auth';
+import serviceHeaderBuilder from './serviceHeaderBuilder';
 
 function extractOperationName(document: DocumentNode): string | undefined {
   let operationName;
@@ -38,103 +37,46 @@ function resolveRequestDocument(document: RequestDocument): { query: string; ope
   return { query: print(document), operationName };
 }
 
-type BuilderInput = {
-  serviceUrl: string;
-  httpMethod: 'POST' | 'GET';
-  apiKey: string;
-  apiSecret: string;
-  graphQLQuery: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  variables: any;
-};
-
-function graphqlHeaderBuilder({
-  serviceUrl,
-  httpMethod = 'POST',
-  apiKey,
-  apiSecret,
-  graphQLQuery,
-  variables,
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-BuilderInput): any {
-  const headers: HeadersInit = {};
-
-  const accessToken = getAccessToken();
-
-  const now = Date.now();
-  const urlObj = new URL(serviceUrl);
-
-  const requestURI = `${urlObj.pathname}${urlObj.search}`;
-
-  const { operationName, query } = resolveRequestDocument(graphQLQuery);
-  const body =
-    operationName && query
-      ? JSON.stringify({
-          query,
-          variables,
-          operationName,
-        })
-      : undefined;
-
-  const msg = `${now}${httpMethod}${requestURI}${body}`;
-  const sig = apiSecret ? HmacSHA256(msg, apiSecret).toString(Base64) : undefined;
-
-  if (body) {
-    headers['X-Es-Encrypted'] = 'yes';
-  }
-
-  if (accessToken) {
-    headers['Access-Control-Allow-Credentials'] = 'true';
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return {
-    // CORS
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'cross-site',
-    // API Key
-    'X-Es-Api-Key': apiKey,
-    'X-Es-Ts': now.toString(),
-    'X-Es-Sign': sig,
-    ...headers,
-  };
-}
-
-interface RequestGraphqlInput {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface RequestGraphqlInput<TVariables> {
   query: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  variables?: any;
-  apiKey: string;
-  apiSecret: string;
-  creatorUrl?: string;
+  variables?: TVariables;
   isPublic?: boolean;
 }
 
-export function requestGraphql({
-  query,
-  variables,
-  apiKey,
-  apiSecret,
-  creatorUrl,
-  isPublic = false,
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-RequestGraphqlInput): Promise<any> {
-  const endPoint = `${creatorUrl}/services/graphql-${isPublic ? 'public' : 'acc'}`;
-
-  const headers = graphqlHeaderBuilder({
-    serviceUrl: endPoint,
-    httpMethod: 'POST',
-    apiKey,
-    apiSecret,
-    graphQLQuery: query,
-    variables,
-  });
-
-  return request({
-    url: endPoint,
-    document: query,
-    variables,
-    requestHeaders: headers,
-  });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface SdkRequestGraphql<TVariables = any, TResult = any> {
+  (input: RequestGraphqlInput<TVariables>): Promise<TResult>;
 }
+
+export const createRequestGraphql =
+  ({ apiKey, apiSecret, creatorUrl }: { apiKey: string; apiSecret: string; creatorUrl: string }): SdkRequestGraphql =>
+  ({ query, variables, isPublic = false }) => {
+    const endPoint = `${creatorUrl}/services/graphql-${isPublic ? 'public' : 'acc'}`;
+
+    const { operationName, query: graphQLQuery } = resolveRequestDocument(query);
+    const body =
+      operationName && query
+        ? JSON.stringify({
+            query: graphQLQuery,
+            variables,
+            operationName,
+          })
+        : undefined;
+
+    const headers = serviceHeaderBuilder({
+      serviceUri: endPoint,
+      httpMethod: 'POST',
+      apiKey,
+      apiSecret,
+      body,
+      accessToken: getAccessToken(),
+    });
+
+    return request({
+      url: endPoint,
+      document: query,
+      variables,
+      requestHeaders: headers,
+    });
+  };

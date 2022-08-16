@@ -1,7 +1,7 @@
 import { gql } from 'graphql-request';
 import { deserializedPriceByCurrency, exchangeCurrency } from '../utils/price';
 import { Currency } from '../types/price';
-import { requestGraphql } from '../utils/graphql';
+import { SdkRequestGraphql } from '../utils/graphql';
 
 export interface PriceRequest {
   fromCurrency: Currency;
@@ -33,14 +33,10 @@ export const PRICE = gql`
 
 interface GetPriceInput {
   value: number;
-  apiKey: string;
-  apiSecret: string;
 }
 
-export async function getPrice({ value, apiKey, apiSecret }: GetPriceInput): Promise<string> {
-  // const fiatCurrencyRate = await requestGraphql({
-  //   apiKey,
-  //   apiSecret,
+export async function getPrice(sdkRequestGraphql: SdkRequestGraphql, { value }: GetPriceInput): Promise<string> {
+  // const fiatCurrencyRate = await sdkRequestGraphql({
   //   query: PRICE,
   //   variables: {
   //     fromCurrency: Currency.TWD,
@@ -48,9 +44,7 @@ export async function getPrice({ value, apiKey, apiSecret }: GetPriceInput): Pro
   //   },
   // });
 
-  // const TWDToETHCurrencyData = await requestGraphql({
-  //   apiKey,
-  //   apiSecret,
+  // const TWDToETHCurrencyData = await sdkRequestGraphql({
   //   query: PRICE,
   //   variables: {
   //     fromCurrency: Currency.TWD,
@@ -58,9 +52,7 @@ export async function getPrice({ value, apiKey, apiSecret }: GetPriceInput): Pro
   //   },
   // });
 
-  const ETHToTWDCurrencyData = await requestGraphql({
-    apiKey,
-    apiSecret,
+  const ETHToTWDCurrencyData = await sdkRequestGraphql({
     query: PRICE,
     variables: {
       fromCurrency: Currency.ETH,
@@ -82,14 +74,13 @@ export async function getPrice({ value, apiKey, apiSecret }: GetPriceInput): Pro
 
 interface EthToTWDExchangeInput {
   value: number;
-  apiKey: string;
-  apiSecret: string;
 }
 
-export async function ethToTWDExchange({ value, apiKey, apiSecret }: EthToTWDExchangeInput): Promise<string> {
-  const ETHToTWDCurrencyData = await requestGraphql({
-    apiKey,
-    apiSecret,
+export async function ethToTWDExchange(
+  sdkRequestGraphql: SdkRequestGraphql,
+  { value }: EthToTWDExchangeInput,
+): Promise<string> {
+  const ETHToTWDCurrencyData = await sdkRequestGraphql({
     query: PRICE,
     variables: {
       fromCurrency: Currency.ETH,

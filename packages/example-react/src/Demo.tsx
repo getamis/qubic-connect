@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
 import { Currency, OnLogin, OnPaymentDone } from '@qubic-creator/core';
+import { gql } from 'graphql-request';
 import './App.css';
 
-import { LoginButton, LoginModal, PaymentForm } from '@qubic-creator/react';
+import { LoginButton, LoginModal, PaymentForm, useQubicCreator } from '@qubic-creator/react';
 
 const mockOrder = {
   tokenId: undefined,
@@ -38,6 +39,30 @@ function Demo() {
     }
     setAccessToken(result?.accessToken || '');
   }, []);
+  const { qubicCreatorSdkRef } = useQubicCreator();
+  const handleGetPrice = useCallback(async () => {
+    const PRICE = gql`
+      query PRICE_PUBLIC($fromCurrency: Currency!, $toCurrency: Currency!) {
+        price(input: { fromCurrency: $fromCurrency, toCurrency: $toCurrency }) {
+          fromCurrency
+          toCurrency
+          toCurrencyPrecision
+          exchangeRate
+          expiredAt
+          signature
+        }
+      }
+    `;
+
+    const ETHToTWDCurrencyData = await qubicCreatorSdkRef.current.requestGraphql({
+      query: PRICE,
+      variables: {
+        fromCurrency: Currency.ETH,
+        toCurrency: Currency.TWD,
+      },
+    });
+    window.alert(JSON.stringify(ETHToTWDCurrencyData));
+  }, [qubicCreatorSdkRef]);
 
   return (
     <div className="container">
@@ -54,6 +79,10 @@ function Demo() {
       <div className="group">
         <p>{`<PaymentForm />`}</p>
         {accessToken && <PaymentForm order={mockOrder} onPaymentDone={handlePaymentDone} />}
+      </div>
+      <div className="group">
+        <p>requestGraphql</p>
+        <button onClick={handleGetPrice}>Get Price</button>
       </div>
     </div>
   );

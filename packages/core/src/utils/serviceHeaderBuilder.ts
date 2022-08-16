@@ -2,51 +2,47 @@ import HmacSHA256 from 'crypto-js/hmac-sha256';
 import Base64 from 'crypto-js/enc-base64';
 
 type BuilderInput = {
+  httpMethod?: string;
   serviceUri: string;
-  body?: string;
-  httpMethod: 'POST' | 'GET';
-  apiSecret: string;
   apiKey: string;
-  isGQL?: boolean;
+  apiSecret: string;
+  body?: BodyInit | null;
+  accessToken?: string | null;
 };
 
 const serviceHeaderBuilder = ({
+  httpMethod = 'GET',
   serviceUri,
-  body = '',
-  httpMethod,
   apiSecret,
   apiKey,
-  isGQL = false,
-}: BuilderInput): Record<string, string> => {
-  const headers: Record<string, string> = {};
+  body = '',
+  accessToken,
+}: BuilderInput): HeadersInit => {
+  if (!apiKey || !apiSecret) {
+    return {};
+  }
 
   const now = Date.now();
   const urlObj = new URL(serviceUri);
   const requestURI = `${urlObj.pathname}${urlObj.search}`;
   const msg = `${now}${httpMethod}${requestURI}${body}`;
-  const sig = apiSecret ? HmacSHA256(msg, apiSecret).toString(Base64) : undefined;
-
-  if (sig) {
-    headers['X-Es-Sign'] = sig;
-  }
-
-  if (body) {
-    headers['X-Es-Encrypted'] = 'yes';
-  }
-
-  // CORS
-  // only suitable for GQL setting
-  if (isGQL) {
-    headers['sec-fetch-dest'] = 'empty';
-    headers['sec-fetch-mode'] = 'cors';
-    headers['sec-fetch-site'] = 'cross-site';
-  }
+  const sig = HmacSHA256(msg, apiSecret).toString(Base64);
 
   return {
+    // CORS
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'cross-site',
+
     // API Key
-    'X-Es-Api-Key': apiKey,
-    'X-Es-Ts': now.toString(),
-    ...headers,
+    'X-Qubic-Api-Key': apiKey,
+    'X-Qubic-Ts': now.toString(),
+    'X-Qubic-Sign': sig,
+
+    ...(accessToken && {
+      'Access-Control-Allow-Credentials': 'true',
+      Authorization: `Bearer ${accessToken}`,
+    }),
   };
 };
 

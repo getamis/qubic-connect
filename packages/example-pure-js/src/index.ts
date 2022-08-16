@@ -1,7 +1,7 @@
 import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
-import { QubicCreatorConfig } from '@qubic-creator/core';
-import QubicCreatorSdk, { Currency } from '@qubic-creator/core';
+import QubicCreatorSdk, { Currency, QubicCreatorConfig } from '@qubic-creator/core';
+import { gql } from 'graphql-request';
 import './index.css';
 import { INFURA_ID, API_KEY, API_SECRET } from './environment';
 import { SDK_DEBUG_CONFIG } from './debugConfig';
@@ -113,6 +113,31 @@ function main() {
       console.log({ accessToken: result?.accessToken });
       onAccessTokenChange(result?.accessToken);
     },
+  });
+
+  const PRICE = gql`
+    query PRICE_PUBLIC($fromCurrency: Currency!, $toCurrency: Currency!) {
+      price(input: { fromCurrency: $fromCurrency, toCurrency: $toCurrency }) {
+        fromCurrency
+        toCurrency
+        toCurrencyPrecision
+        exchangeRate
+        expiredAt
+        signature
+      }
+    }
+  `;
+
+  const priceDom = document.querySelector('#price');
+  priceDom?.addEventListener('click', async () => {
+    const ETHToTWDCurrencyData = await qubicCreatorSdk.requestGraphql({
+      query: PRICE,
+      variables: {
+        fromCurrency: Currency.ETH,
+        toCurrency: Currency.TWD,
+      },
+    });
+    window.alert(JSON.stringify(ETHToTWDCurrencyData));
   });
 }
 

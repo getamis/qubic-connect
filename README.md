@@ -105,6 +105,46 @@ function Demo() {
 }
 ```
 
+### Api
+
+#### fetch
+
+```ts
+const result = await qubicCreatorSdk.fetch('services/auth/revoke', {
+  method: httpMethod,
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  },
+});
+```
+
+#### requestGraphql
+
+```ts
+import { gql } from 'graphql-request';
+
+const PRICE = gql`
+  query PRICE_PUBLIC($fromCurrency: Currency!, $toCurrency: Currency!) {
+    price(input: { fromCurrency: $fromCurrency, toCurrency: $toCurrency }) {
+      fromCurrency
+      toCurrency
+      toCurrencyPrecision
+      exchangeRate
+      expiredAt
+      signature
+    }
+  }
+`;
+
+const ETHToTWDCurrencyData = await qubicCreatorSdk.requestGraphql({
+  query: PRICE,
+  variables: {
+    fromCurrency: Currency.ETH,
+    toCurrency: Currency.TWD,
+  },
+});
+```
+
 ## TODO
 
 -

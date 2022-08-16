@@ -1,17 +1,18 @@
+import { SdkFetch } from './sdkFetch';
 import { ExtendedExternalProviderMethod, ExtendedExternalProvider } from '../types/ExtendedExternalProvider';
 import { isWalletconnectProvider } from './isWalletconnectProvider';
 import convertStringToHex from './convertStringToHex';
 import { login } from '../api/auth';
 
 export const createSignMessageAndLogin =
-  (options: {
-    creatorUrl: string;
-    authAppName: string;
-    authAppUrl: string;
-    authServiceName: string;
-    apiKey: string;
-    apiSecret: string;
-  }) =>
+  (
+    sdkFetch: SdkFetch,
+    options: {
+      authAppName: string;
+      authAppUrl: string;
+      authServiceName: string;
+    },
+  ) =>
   async (
     providerType: ExtendedExternalProviderMethod,
     provider: ExtendedExternalProvider,
@@ -19,7 +20,7 @@ export const createSignMessageAndLogin =
     accessToken: string;
     address: string;
   }> => {
-    const { creatorUrl, authAppName, authAppUrl, authServiceName, apiKey, apiSecret } = options;
+    const { authAppName, authAppUrl, authServiceName } = options;
     if (!provider?.request) {
       throw Error('provider.request not found');
     }
@@ -34,14 +35,11 @@ export const createSignMessageAndLogin =
         params: [],
       });
       const signature = signatureResult[0];
-      const resultData = await login({
+      const resultData = await login(sdkFetch, {
         accountAddress,
         signature,
         dataString: '',
         isQubicUser: true,
-        creatorUrl,
-        apiKey,
-        apiSecret,
       });
       return {
         accessToken: resultData.accessToken,
@@ -60,14 +58,11 @@ export const createSignMessageAndLogin =
       params: [convertStringToHex(dataString), accountAddress],
     });
     const signature = signatureResult;
-    const resultData = await login({
+    const resultData = await login(sdkFetch, {
       accountAddress,
       signature,
       dataString,
       isQubicUser: false,
-      creatorUrl,
-      apiKey,
-      apiSecret,
     });
     return {
       accessToken: resultData.accessToken,
