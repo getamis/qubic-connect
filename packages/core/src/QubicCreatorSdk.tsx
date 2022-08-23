@@ -4,9 +4,13 @@ import { QubicCreatorConfig, OnPaymentDone, OnLogin, OnLogout } from './types/Qu
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
 import { ExtendedExternalProvider, ProviderOptions } from './types/ExtendedExternalProvider';
 import PaymentForm from './components/PaymentForm';
+
 import { Order } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
 import App from './components/App';
+import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
+import { CREATOR_API_URL } from './constants/backend';
+import { createFetch, SdkFetch } from './utils/sdkFetch';
 
 export class QubicCreatorSdk {
   private readonly config: QubicCreatorConfig;
@@ -40,9 +44,23 @@ export class QubicCreatorSdk {
     }
   }
 
+  public fetch: SdkFetch;
+  public requestGraphql: SdkRequestGraphql;
+
   constructor(config: QubicCreatorConfig) {
     this.config = config;
     QubicCreatorSdk.checkProviderOptions(config.providerOptions);
+    const { key: apiKey, secret: apiSecret, creatorUrl = CREATOR_API_URL } = this.config;
+    this.fetch = createFetch({
+      apiKey,
+      apiSecret,
+      creatorUrl,
+    });
+    this.requestGraphql = createRequestGraphql({
+      apiKey,
+      apiSecret,
+      creatorUrl,
+    });
 
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
@@ -66,7 +84,14 @@ export class QubicCreatorSdk {
 
   private forceUpdate(): void {
     render(
-      <App key="app" config={this.config} onLogin={this.handleLogin} onLogout={this.handleLogout}>
+      <App
+        key="app"
+        sdkFetch={this.fetch}
+        sdkRequestGraphql={this.requestGraphql}
+        config={this.config}
+        onLogin={this.handleLogin}
+        onLogout={this.handleLogout}
+      >
         {this.children}
       </App>,
       this.rootDiv,

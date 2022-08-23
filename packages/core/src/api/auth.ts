@@ -1,17 +1,12 @@
-import fetch from 'cross-fetch';
 import querystring from 'query-string';
-import serviceHeaderBuilder from '../utils/serviceHeaderBuilder';
 import convertStringToHex from '../utils/convertStringToHex';
-import { CREATOR_API_URL } from '../constants/backend';
+import { SdkFetch } from '../utils/sdkFetch';
 
 interface LoginParams {
   accountAddress: string | null;
   signature: string;
   dataString: string;
   isQubicUser: boolean;
-  apiKey: string;
-  apiSecret: string;
-  creatorUrl: string;
 }
 
 interface LoginResult {
@@ -20,27 +15,16 @@ interface LoginResult {
   isQubicUser: boolean;
 }
 
-interface LogoutParams {
-  apiKey: string;
-  apiSecret: string;
-  creatorUrl: string;
-}
-
 let globalAccessToken: string | null = null;
 
 export const getAccessToken = (): string | null => {
   return globalAccessToken;
 };
 
-export const login = async ({
-  accountAddress,
-  signature,
-  dataString,
-  isQubicUser,
-  creatorUrl,
-  apiKey,
-  apiSecret,
-}: LoginParams): Promise<LoginResult> => {
+export const login = async (
+  sdkFetch: SdkFetch,
+  { accountAddress, signature, dataString, isQubicUser }: LoginParams,
+): Promise<LoginResult> => {
   if (!accountAddress || !signature || (!isQubicUser && !dataString)) {
     throw new Error('Missing login data');
   }
@@ -57,22 +41,14 @@ export const login = async ({
         data: convertStringToHex(dataString),
       });
 
-  const serviceUri = isQubicUser ? `${creatorUrl}/services/auth/qubic` : `${creatorUrl}/services/auth`;
+  const serviceUri = isQubicUser ? `services/auth/qubic` : `services/auth`;
 
   const httpMethod = 'POST';
-  const headers = serviceHeaderBuilder({
-    serviceUri,
-    httpMethod,
-    body: payload,
-    apiKey,
-    apiSecret,
-  });
 
-  const result = await fetch(serviceUri, {
+  const result = await sdkFetch(serviceUri, {
     method: httpMethod,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      ...headers,
     },
     body: payload,
   });
@@ -82,30 +58,12 @@ export const login = async ({
   return data as LoginResult;
 };
 
-export const logout = async ({
-  creatorUrl = CREATOR_API_URL,
-  apiKey,
-  apiSecret,
-}: LogoutParams): Promise<LoginResult> => {
-  const serviceUri = `${creatorUrl}/services/auth/revoke`;
-
+export const logout = async (sdkFetch: SdkFetch): Promise<LoginResult> => {
   const httpMethod = 'POST';
-  const headers = serviceHeaderBuilder({
-    serviceUri,
-    httpMethod,
-    apiKey,
-    apiSecret,
-  });
-
-  if (globalAccessToken) {
-    headers['Access-Control-Allow-Credentials'] = 'true';
-    headers.Authorization = `Bearer ${globalAccessToken}`;
-  }
-  const result = await fetch(serviceUri, {
+  const result = await sdkFetch('services/auth/revoke', {
     method: httpMethod,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      ...headers,
     },
   });
   const data = await result.json();

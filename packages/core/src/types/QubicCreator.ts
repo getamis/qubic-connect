@@ -4,9 +4,9 @@ import { PaymentResult } from './Purchase';
 export interface QubicCreatorConfig {
   name: string;
   service: string;
+  providerOptions: ProviderOptions;
   key: string;
   secret: string;
-  providerOptions: ProviderOptions;
   creatorUrl?: string;
 }
 

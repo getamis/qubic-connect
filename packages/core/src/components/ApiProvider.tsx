@@ -11,9 +11,10 @@ import {
 } from '../types';
 import { createSignMessageAndLogin } from '../utils/signMessageAndLogin';
 import { BatchBuyAssetInput, BatchBuyAssetResult, createFetchBatchBuyAssetResult } from '../api/purchase';
-import { createLogout } from '../utils/logout';
-import { CREATOR_API_URL } from '../constants/backend';
 import { ProviderOptions } from '../types/ExtendedExternalProvider';
+import { logout as apiLogout } from '../api/auth';
+import { SdkFetch } from '../utils/sdkFetch';
+import { SdkRequestGraphql } from '../utils/graphql';
 
 interface ApiContextValue {
   login: (method: ExtendedExternalProviderMethod) => Promise<LoginResult>;
@@ -22,7 +23,8 @@ interface ApiContextValue {
   accessToken: string | null;
   address: string | null;
   fetchBatchBuyAssetResult: (input: BatchBuyAssetInput) => Promise<BatchBuyAssetResult>;
-
+  sdkFetch: SdkFetch;
+  sdkRequestGraphql: SdkRequestGraphql;
   providerOptions: ProviderOptions;
 }
 
@@ -34,20 +36,15 @@ interface ApiContextProviderProps {
   config: QubicCreatorConfig;
   onLogin: OnLogin;
   onLogout: OnLogout;
+  sdkFetch: SdkFetch;
+  sdkRequestGraphql: SdkRequestGraphql;
 }
 
 const APP_AUTH_URL = window.location.origin;
 
 export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
-  const { config, onLogin, onLogout } = props;
-  const {
-    name: authAppName,
-    service: authServiceName,
-    key,
-    secret,
-    creatorUrl = CREATOR_API_URL,
-    providerOptions,
-  } = config;
+  const { config, onLogin, onLogout, sdkFetch, sdkRequestGraphql } = props;
+  const { name: authAppName, service: authServiceName, providerOptions } = config;
 
   const [address, setAddress] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -64,13 +61,10 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
       if (!optionProvider) {
         throw Error(`optionProvider not found`);
       }
-      const signMessageAndLogin = createSignMessageAndLogin({
+      const signMessageAndLogin = createSignMessageAndLogin(sdkFetch, {
         authAppName,
         authAppUrl: APP_AUTH_URL,
         authServiceName,
-        creatorUrl,
-        apiKey: key,
-        apiSecret: secret,
       });
       try {
         if (isWalletconnectProvider(method, optionProvider)) {
@@ -98,17 +92,12 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
         throw error;
       }
     },
-    [authAppName, authServiceName, creatorUrl, key, onLogin, provider, providerOptions, secret],
+    [authAppName, authServiceName, onLogin, provider, providerOptions, sdkFetch],
   );
 
   const logout = useCallback(async () => {
-    const logout = createLogout({
-      creatorUrl,
-      apiKey: key,
-      apiSecret: secret,
-    });
     try {
-      await logout();
+      await apiLogout(sdkFetch);
       setAccessToken(null);
       setAddress(null);
       setProvider(null);
@@ -119,14 +108,11 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
       }
       throw error;
     }
-  }, [creatorUrl, key, onLogout, secret]);
+  }, [onLogout, sdkFetch]);
 
   const fetchBatchBuyAssetResult = useMemo(() => {
-    return createFetchBatchBuyAssetResult({
-      apiKey: key,
-      apiSecret: secret,
-    });
-  }, [key, secret]);
+    return createFetchBatchBuyAssetResult(sdkRequestGraphql);
+  }, [sdkRequestGraphql]);
 
   return (
     <ApiContext.Provider
@@ -134,6 +120,8 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
         address,
         accessToken,
         provider,
+        sdkFetch,
+        sdkRequestGraphql,
         login,
         logout,
         fetchBatchBuyAssetResult,

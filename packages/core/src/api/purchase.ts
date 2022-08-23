@@ -1,7 +1,6 @@
 import { gql } from 'graphql-request';
 import { v4 as uuidv4 } from 'uuid';
-
-import { requestGraphql } from '../utils/graphql';
+import { SdkRequestGraphql } from '../utils/graphql';
 import { FINISH_PURCHASE_FLAG } from '../constants/tappay';
 import { Currency } from '../types/price';
 import { PaymentResult } from '../types/Purchase';
@@ -120,7 +119,7 @@ export interface BatchBuyAssetResult {
 }
 
 export const createFetchBatchBuyAssetResult =
-  ({ apiKey, apiSecret }: { apiKey: string; apiSecret: string }) =>
+  (sdkRequestGraphql: SdkRequestGraphql) =>
   async ({
     tokenId,
     assetImage,
@@ -154,10 +153,8 @@ export const createFetchBatchBuyAssetResult =
             .trim()
         : `購買 NFT: ${contractId}/${tokenId}`;
 
-    const response = await requestGraphql({
+    const response = await sdkRequestGraphql({
       query: BATCH_BUY_ASSET_FIAT,
-      apiKey,
-      apiSecret,
       variables: {
         assetId,
         requestId,
