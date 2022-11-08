@@ -68,7 +68,7 @@ export const LoginButton = memo<LoginButtonProps>(props => {
   );
 
   const DisplayIcon = useMemo(() => {
-    const display = providerOptions[method]?.display;
+    const display = providerOptions?.[method]?.display;
     if (display?.logo) {
       return <img src={display.logo} className={classes.icon} alt="logo" />;
     }
@@ -76,15 +76,20 @@ export const LoginButton = memo<LoginButtonProps>(props => {
   }, [IconComponent, method, providerOptions]);
 
   const DisplayName = useMemo(() => {
-    const display = providerOptions[method]?.display;
+    const display = providerOptions?.[method]?.display;
     if (display?.name) {
       return <span className={clsx(commonClasses.text)}>{display.name}</span>;
     }
     return <span className={clsx(commonClasses.text)}>{displayName}</span>;
   }, [displayName, method, providerOptions]);
 
-  if (!providerOptions[method]) {
-    console.error(`providerOptions[method] ${method} not found`);
+  if (!providerOptions) {
+    console.warn('providerOptions not found');
+    return null;
+  }
+
+  if (!providerOptions?.[method]) {
+    console.error(`providerOptions?.[method] ${method} not found`);
     return null;
   }
   if (method === 'metamask' && providerOptions.metamask && !providerOptions.metamask.provider) {

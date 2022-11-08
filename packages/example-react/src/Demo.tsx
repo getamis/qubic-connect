@@ -76,6 +76,18 @@ function Demo() {
         <p>{`<LoginModal />`}</p>
         <LoginModal methods={['qubic', 'metamask', 'walletconnect']} onLogin={handleLogin} />
       </div>
+
+      <div className="group">
+        <p>qubicCreatorSdk.loginWithRedirect</p>
+        <button
+          onClick={() => {
+            qubicCreatorSdkRef.current.loginWithRedirect();
+          }}
+        >
+          loginWithRedirect
+        </button>
+      </div>
+
       <div className="group">
         <p>{`<PaymentForm />`}</p>
         {accessToken && <PaymentForm order={mockOrder} onPaymentDone={handlePaymentDone} />}

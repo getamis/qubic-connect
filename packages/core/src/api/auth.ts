@@ -2,14 +2,14 @@ import querystring from 'query-string';
 import convertStringToHex from '../utils/convertStringToHex';
 import { SdkFetch } from '../utils/sdkFetch';
 
-interface LoginParams {
+export interface LoginParams {
   accountAddress: string | null;
   signature: string;
   dataString: string;
   isQubicUser: boolean;
 }
 
-interface LoginResult {
+export interface LoginResult {
   accessToken: string;
   expiredAt: number;
   isQubicUser: boolean;

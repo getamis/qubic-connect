@@ -26,4 +26,7 @@ export const EXTERNAL_PROVIDER_MAP: Record<
   custom: {
     displayName: 'Custom',
   },
+  redirect: {
+    displayName: 'redirect',
+  },
 };

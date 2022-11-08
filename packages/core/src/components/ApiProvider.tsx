@@ -4,7 +4,7 @@ import { isWalletconnectProvider } from '../utils/isWalletconnectProvider';
 import {
   ExtendedExternalProvider,
   ExtendedExternalProviderMethod,
-  LoginResult,
+  ProviderLoginResult,
   OnLogin,
   OnLogout,
   QubicCreatorConfig,
@@ -17,7 +17,7 @@ import { SdkFetch } from '../utils/sdkFetch';
 import { SdkRequestGraphql } from '../utils/graphql';
 
 interface ApiContextValue {
-  login: (method: ExtendedExternalProviderMethod) => Promise<LoginResult>;
+  login: (method: ExtendedExternalProviderMethod) => Promise<ProviderLoginResult>;
   logout: () => Promise<void>;
   provider: ExtendedExternalProvider | null;
   accessToken: string | null;
@@ -25,7 +25,7 @@ interface ApiContextValue {
   fetchBatchBuyAssetResult: (input: BatchBuyAssetInput) => Promise<BatchBuyAssetResult>;
   sdkFetch: SdkFetch;
   sdkRequestGraphql: SdkRequestGraphql;
-  providerOptions: ProviderOptions;
+  providerOptions?: ProviderOptions;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,7 +52,7 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
 
   const login = useCallback(
     async (method: ExtendedExternalProviderMethod) => {
-      const option = providerOptions[method];
+      const option = providerOptions?.[method];
       if (!option) {
         throw Error(`providerOption.${method} not found`);
       }

@@ -2,15 +2,36 @@ import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import QubicCreatorSdk, { Currency, QubicCreatorConfig } from '@qubic-creator/core';
 import { gql } from 'graphql-request';
-import './index.css';
-import { INFURA_ID, API_KEY, API_SECRET } from './environment';
-import { SDK_DEBUG_CONFIG } from './debugConfig';
+import querystring from 'query-string';
 
-const SDK_CONFIG: QubicCreatorConfig = SDK_DEBUG_CONFIG || {
+import './index.css';
+import { INFURA_ID, API_KEY, API_SECRET, CREATOR_API_URL } from './environment';
+
+const SDK_CONFIG: QubicCreatorConfig = {
   name: 'Qubic Creator',
   service: 'qubee-creator',
   key: API_KEY,
   secret: API_SECRET,
+  creatorUrl: CREATOR_API_URL,
+  creatorAuthUrl: 'http://localhost:3001',
+  onCreatorAuthSuccess(result) {
+    window.alert('login success');
+    const verifyUrl = querystring.stringifyUrl({
+      url: 'https://auth.dev.qubics.org/verify',
+      query: {
+        access_token: result.accessToken,
+        service: 'qubic-creator',
+      },
+    });
+    const answer = window.confirm('Open verify Url');
+    if (answer) {
+      window.open(verifyUrl, '_newWindow');
+    }
+  },
+  onCreatorAuthError(errorMessage) {
+    window.alert(`login failed: ${errorMessage}`);
+    console.error(errorMessage);
+  },
   providerOptions: {
     qubic: {
       provider: new QubicProvider(),
@@ -138,6 +159,10 @@ function main() {
       },
     });
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
+  });
+
+  document.getElementById('redirect-login')?.addEventListener('click', async () => {
+    qubicCreatorSdk.loginWithRedirect();
   });
 }
 
