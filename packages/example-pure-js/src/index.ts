@@ -5,7 +5,7 @@ import { gql } from 'graphql-request';
 import querystring from 'query-string';
 
 import './index.css';
-import { INFURA_ID, API_KEY, API_SECRET, CREATOR_API_URL } from './environment';
+import { INFURA_ID, API_KEY, API_SECRET, CREATOR_API_URL, CREATOR_AUTH_URL } from './environment';
 
 const SDK_CONFIG: QubicCreatorConfig = {
   name: 'Qubic Creator',
@@ -13,7 +13,7 @@ const SDK_CONFIG: QubicCreatorConfig = {
   key: API_KEY,
   secret: API_SECRET,
   creatorUrl: CREATOR_API_URL,
-  creatorAuthUrl: 'http://localhost:3001',
+  creatorAuthUrl: CREATOR_AUTH_URL,
   onCreatorAuthSuccess(result) {
     window.alert('login success');
     const verifyUrl = querystring.stringifyUrl({
@@ -30,7 +30,6 @@ const SDK_CONFIG: QubicCreatorConfig = {
   },
   onCreatorAuthError(errorMessage) {
     window.alert(`login failed: ${errorMessage}`);
-    console.error(errorMessage);
   },
   providerOptions: {
     qubic: {
@@ -161,7 +160,7 @@ function main() {
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
   });
 
-  document.getElementById('redirect-login')?.addEventListener('click', async () => {
+  document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicCreatorSdk.loginWithRedirect();
   });
 }

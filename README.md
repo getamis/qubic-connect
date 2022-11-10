@@ -2,7 +2,61 @@
 
 ## Usage
 
-### JS
+### JS (direct sign in, without wallet provider)
+
+```ts
+import QubicCreatorSdk, { Currency, QubicCreatorConfig } from '@qubic-creator/core';
+
+const qubicCreatorSdk = new QubicCreatorSdk({
+  name: 'Display Name',
+  service: 'service-name',
+  key: 'API_KEY',
+  secret: 'API_SECRET',
+  onCreatorAuthSuccess(result) {
+    window.alert('Now you are logged in');
+  },
+  onCreatorAuthError(errorMessage) {
+    window.alert(`login failed: ${errorMessage}`);
+  },
+});
+
+document.getElementById('login')?.addEventListener('click', () => {
+  qubicCreatorSdk.loginWithRedirect();
+});
+```
+
+after onCreatorAuthSuccess
+
+```ts
+const PRICE = gql`
+  query PRICE_PUBLIC($fromCurrency: Currency!, $toCurrency: Currency!) {
+    price(input: { fromCurrency: $fromCurrency, toCurrency: $toCurrency }) {
+      fromCurrency
+      toCurrency
+      toCurrencyPrecision
+      exchangeRate
+      expiredAt
+      signature
+    }
+  }
+`;
+
+const ETHToTWDCurrencyData = await qubicCreatorSdk.requestGraphql({
+  query: PRICE,
+  variables: {
+    fromCurrency: Currency.ETH,
+    toCurrency: Currency.TWD,
+  },
+});
+
+// you can fetch
+// qubicCreatorSdk.fetch(path, options);
+
+// or logout
+// qubicCreatorSdk.logout();
+```
+
+### JS (with wallet provider)
 
 ```ts
 import QubicCreatorSdk from '@qubic-creator/core';
@@ -65,7 +119,7 @@ const {setOrder} = qubicCreatorSdk.createPaymentForm(element: HTMLElement, {
 setOrder(yourOrderHere)
 ```
 
-### React
+### React (with wallet provider)
 
 ```tsx
 import { QubicCreatorContextProvider } from '@qubic-creator/react';

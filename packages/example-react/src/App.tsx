@@ -30,7 +30,6 @@ const SDK_CONFIG: QubicCreatorConfig = {
   },
   onCreatorAuthError(errorMessage) {
     window.alert(`login failed: ${errorMessage}`);
-    console.error(errorMessage);
   },
   providerOptions: {
     qubic: {
