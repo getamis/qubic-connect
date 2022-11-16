@@ -1,27 +1,33 @@
 import { ComponentChild, render, VNode } from 'preact';
 import { createPortal } from 'preact/compat';
+import qs from 'query-string';
 import { QubicCreatorConfig, OnPaymentDone, OnLogin, OnLogout } from './types/QubicCreator';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
 import { ExtendedExternalProvider, ProviderOptions } from './types/ExtendedExternalProvider';
 import PaymentForm from './components/PaymentForm';
-
 import { Order } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
-import { CREATOR_API_URL } from './constants/backend';
+import { CREATOR_API_URL, CREATOR_AUTH_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
+import { login, logout, LoginParams, LoginResult } from './api/auth';
 
 export class QubicCreatorSdk {
   private readonly config: QubicCreatorConfig;
   private rootDiv: HTMLDivElement;
   private children: Array<ComponentChild> = [];
   private vNodeMap = new Map<HTMLElement, ComponentChild>();
+  private creatorAuthUrl: string;
   public provider: ExtendedExternalProvider | null = null;
   public address: string | null = null;
   public accessToken: string | null = null;
 
-  private static checkProviderOptions(providerOptions: ProviderOptions): void {
+  private static checkProviderOptions(providerOptions?: ProviderOptions): void {
+    if (!providerOptions) {
+      // no need to check, since no provider options
+      return;
+    }
     if (providerOptions.qubic) {
       if (!providerOptions.qubic.provider.isQubic) {
         throw Error('qubic only accept Qubic provider');
@@ -49,8 +55,15 @@ export class QubicCreatorSdk {
 
   constructor(config: QubicCreatorConfig) {
     this.config = config;
-    QubicCreatorSdk.checkProviderOptions(config.providerOptions);
-    const { key: apiKey, secret: apiSecret, creatorUrl = CREATOR_API_URL } = this.config;
+    QubicCreatorSdk.checkProviderOptions(config?.providerOptions);
+    const {
+      key: apiKey,
+      secret: apiSecret,
+      creatorUrl = CREATOR_API_URL,
+      creatorAuthUrl = CREATOR_AUTH_URL,
+      onCreatorAuthSuccess = result => console.warn(result),
+      onCreatorAuthError = errorMessage => console.error(errorMessage),
+    } = this.config;
     this.fetch = createFetch({
       apiKey,
       apiSecret,
@@ -62,8 +75,22 @@ export class QubicCreatorSdk {
       creatorUrl,
     });
 
+    this.creatorAuthUrl = creatorAuthUrl;
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
+
+    this.handleRedirectResult()
+      .then(result => {
+        if (result) {
+          onCreatorAuthSuccess(result);
+        }
+        // if no result just skip
+      })
+      .catch(error => {
+        if (error instanceof Error) {
+          onCreatorAuthError(error.message);
+        }
+      });
   }
 
   private handleLogin: OnLogin = (error, data) => {
@@ -153,5 +180,97 @@ export class QubicCreatorSdk {
     return {
       setOrder,
     };
+  }
+
+  private static removeResultQueryFromUrl(currentUrl: string): string {
+    const {
+      url,
+      // remove previous result, key of LoginParams and errorMessage but keep other query params
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      query: { accountAddress, signature, dataString, isQubicUser, errorMessage, ...restQuery },
+    } = qs.parseUrl(currentUrl);
+
+    const removedResultUrl = qs.stringifyUrl({
+      url,
+      query: restQuery,
+    });
+    return removedResultUrl;
+  }
+
+  public async logout(): Promise<void> {
+    try {
+      await logout(this.fetch);
+      this.handleLogout(null);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleLogout(error);
+      }
+    }
+  }
+
+  /** No any web3 provider will be used, only for get access token  */
+  /**
+   * 1. loginWithRedirect() will go to auth helper url with `redirectUrl`, `dataString`
+   * 2. auth helper url shows Qubic wallet and other wallets
+   *    a. Qubic wallet: redirect to Qubic wallet, after user sign in success, get `ticket` from backend
+   *    b. Other wallet: sign `dataString` and get `signature`
+   * 3. then go to `redirectUrl` with results which includes signature or ticket
+   * 4. handleRedirectResult() uses results to get creator access token
+   * 5. now user can use fetch() or requestGraphql() to call api
+   */
+  public loginWithRedirect(): void {
+    const removedResultUrl = QubicCreatorSdk.removeResultQueryFromUrl(window.location.href);
+    const dataString = JSON.stringify({
+      name: this.config.name,
+      service: this.config.service,
+      url: window.location.origin,
+      permissions: ['wallet.permission.access_email_address'],
+      nonce: Date.now(),
+    });
+    window.location.href = qs.stringifyUrl({
+      url: `${this.creatorAuthUrl}/creator-login`,
+      query: {
+        redirectUrl: encodeURIComponent(removedResultUrl),
+        dataString: encodeURIComponent(dataString),
+      },
+    });
+  }
+
+  private async handleRedirectResult(): Promise<LoginResult | null> {
+    try {
+      const { query } = qs.parseUrl(window.location.href);
+
+      const parsedQuery = {
+        ...query,
+        // isQubicUser need to convert from string to boolean to match type
+        isQubicUser: query.isQubicUser === 'true',
+      } as LoginParams | { errorMessage: string };
+
+      const removedResultUrl = QubicCreatorSdk.removeResultQueryFromUrl(window.location.href);
+      window.history.replaceState({}, '', removedResultUrl);
+
+      if ('errorMessage' in parsedQuery) {
+        throw Error(parsedQuery.errorMessage);
+      }
+      if (!parsedQuery.signature || !parsedQuery.accountAddress) {
+        // not detecting valid query, just skip
+        return null;
+      }
+
+      const result = await login(this.fetch, parsedQuery);
+
+      this.handleLogin(null, {
+        method: 'redirect',
+        address: parsedQuery.accountAddress,
+        accessToken: result.accessToken,
+        provider: null,
+      });
+      return result;
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleLogin(error);
+      }
+      throw error;
+    }
   }
 }
