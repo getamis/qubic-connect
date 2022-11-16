@@ -208,7 +208,16 @@ export class QubicCreatorSdk {
     }
   }
 
-  /** No any provider will be used, only for get access token  */
+  /** No any web3 provider will be used, only for get access token  */
+  /**
+   * 1. loginWithRedirect() will go to auth helper url with `redirectUrl`, `dataString`
+   * 2. auth helper url shows Qubic wallet and other wallets
+   *    a. Qubic wallet: redirect to Qubic wallet, after user sign in success, get `ticket` from backend
+   *    b. Other wallet: sign `dataString` and get `signature`
+   * 3. then go to `redirectUrl` with results which includes signature or ticket
+   * 4. handleRedirectResult() uses results to get creator access token
+   * 5. now user can use fetch() or requestGraphql() to call api
+   */
   public loginWithRedirect(): void {
     const removedResultUrl = QubicCreatorSdk.removeResultQueryFromUrl(window.location.href);
     const dataString = JSON.stringify({
