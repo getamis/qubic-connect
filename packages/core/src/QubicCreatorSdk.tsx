@@ -12,6 +12,7 @@ import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
 import { CREATOR_API_URL, CREATOR_AUTH_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
 import { login, logout, LoginParams, LoginResult } from './api/auth';
+import { Deferred } from './utils/Deferred';
 
 export class QubicCreatorSdk {
   private readonly config: QubicCreatorConfig;
@@ -61,8 +62,6 @@ export class QubicCreatorSdk {
       secret: apiSecret,
       creatorUrl = CREATOR_API_URL,
       creatorAuthUrl = CREATOR_AUTH_URL,
-      onCreatorAuthSuccess = result => console.warn(result),
-      onCreatorAuthError = errorMessage => console.error(errorMessage),
     } = this.config;
     this.fetch = createFetch({
       apiKey,
@@ -79,18 +78,7 @@ export class QubicCreatorSdk {
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
-    this.handleRedirectResult()
-      .then(result => {
-        if (result) {
-          onCreatorAuthSuccess(result);
-        }
-        // if no result just skip
-      })
-      .catch(error => {
-        if (error instanceof Error) {
-          onCreatorAuthError(error.message);
-        }
-      });
+    this.handleRedirectResult();
   }
 
   private handleLogin: OnLogin = (error, data) => {
@@ -236,23 +224,35 @@ export class QubicCreatorSdk {
     });
   }
 
+  private cachedRedirectResult?: LoginResult;
+  private cachedRedirectError?: Error;
+
+  private static getLoginParamsFromUrlAndClearUrl(): LoginParams | null {
+    const { query } = qs.parseUrl(window.location.href);
+
+    const parsedQuery = {
+      ...query,
+      // isQubicUser need to convert from string to boolean to match type
+      isQubicUser: query.isQubicUser === 'true',
+    } as LoginParams | { errorMessage: string };
+
+    const removedResultUrl = QubicCreatorSdk.removeResultQueryFromUrl(window.location.href);
+    window.history.replaceState({}, '', removedResultUrl);
+
+    if ('errorMessage' in parsedQuery) {
+      throw Error(parsedQuery.errorMessage);
+    }
+    if (!parsedQuery.signature || !parsedQuery.accountAddress) {
+      // not detecting valid query, just skip
+      return null;
+    }
+    return parsedQuery;
+  }
+
   private async handleRedirectResult(): Promise<LoginResult | null> {
     try {
-      const { query } = qs.parseUrl(window.location.href);
-
-      const parsedQuery = {
-        ...query,
-        // isQubicUser need to convert from string to boolean to match type
-        isQubicUser: query.isQubicUser === 'true',
-      } as LoginParams | { errorMessage: string };
-
-      const removedResultUrl = QubicCreatorSdk.removeResultQueryFromUrl(window.location.href);
-      window.history.replaceState({}, '', removedResultUrl);
-
-      if ('errorMessage' in parsedQuery) {
-        throw Error(parsedQuery.errorMessage);
-      }
-      if (!parsedQuery.signature || !parsedQuery.accountAddress) {
+      const parsedQuery = QubicCreatorSdk.getLoginParamsFromUrlAndClearUrl();
+      if (parsedQuery === null) {
         // not detecting valid query, just skip
         return null;
       }
@@ -265,12 +265,33 @@ export class QubicCreatorSdk {
         accessToken: result.accessToken,
         provider: null,
       });
+      this.cachedRedirectResult = result;
+      this.pendingGetRedirectResultDeferred.forEach(deferred => {
+        deferred.resolve(result);
+      });
       return result;
     } catch (error) {
       if (error instanceof Error) {
         this.handleLogin(error);
+        this.cachedRedirectError = error;
+        this.pendingGetRedirectResultDeferred.forEach(deferred => {
+          deferred.reject(error);
+        });
       }
       throw error;
     }
+  }
+
+  private pendingGetRedirectResultDeferred: Array<Deferred<LoginResult | null>> = [];
+  public async getRedirectResult(): Promise<LoginResult | null> {
+    if (this.cachedRedirectResult) {
+      return this.cachedRedirectResult;
+    }
+    if (this.cachedRedirectError) {
+      throw this.cachedRedirectError;
+    }
+    const deferred = new Deferred<LoginResult | null>();
+    this.pendingGetRedirectResultDeferred.push(deferred);
+    return deferred.promise;
   }
 }

@@ -14,23 +14,6 @@ const SDK_CONFIG: QubicCreatorConfig = {
   secret: API_SECRET,
   creatorUrl: CREATOR_API_URL,
   creatorAuthUrl: CREATOR_AUTH_URL,
-  onCreatorAuthSuccess(result) {
-    window.alert('login success');
-    const verifyUrl = querystring.stringifyUrl({
-      url: 'https://auth.dev.qubics.org/verify',
-      query: {
-        access_token: result.accessToken,
-        service: 'qubic-creator',
-      },
-    });
-    const answer = window.confirm('Open verify Url');
-    if (answer) {
-      window.open(verifyUrl, '_newWindow');
-    }
-  },
-  onCreatorAuthError(errorMessage) {
-    window.alert(`login failed: ${errorMessage}`);
-  },
   providerOptions: {
     qubic: {
       provider: new QubicProvider(),
@@ -53,6 +36,34 @@ const SDK_CONFIG: QubicCreatorConfig = {
   },
 };
 const qubicCreatorSdk = new QubicCreatorSdk(SDK_CONFIG);
+
+qubicCreatorSdk
+  .getRedirectResult()
+  .then(result => {
+    console.log('getRedirectResult');
+    console.log({ result });
+    if (result === null) {
+      // no redirect query parameters detected
+      return;
+    }
+    window.alert('login success');
+    const verifyUrl = querystring.stringifyUrl({
+      url: 'https://auth.dev.qubics.org/verify',
+      query: {
+        access_token: result.accessToken,
+        service: 'qubic-creator',
+      },
+    });
+    const answer = window.confirm('Open verify Url');
+    if (answer) {
+      window.open(verifyUrl, '_newWindow');
+    }
+  })
+  .catch(error => {
+    if (error instanceof Error) {
+      window.alert(`login failed: ${error.message}`);
+    }
+  });
 
 const mockData = {
   tokenId: undefined,

@@ -12,20 +12,23 @@ const qubicCreatorSdk = new QubicCreatorSdk({
   service: 'service-name',
   key: 'API_KEY',
   secret: 'API_SECRET',
-  onCreatorAuthSuccess(result) {
-    window.alert('Now you are logged in');
-  },
-  onCreatorAuthError(errorMessage) {
-    window.alert(`login failed: ${errorMessage}`);
-  },
 });
+
+qubicCreatorSdk
+  .getRedirectResult()
+  .then((result) {
+    window.alert('Now you are logged in');
+  })
+  .catch((error) {
+    window.alert(`login failed: ${error.message}`);
+  });
 
 document.getElementById('login')?.addEventListener('click', () => {
   qubicCreatorSdk.loginWithRedirect();
 });
 ```
 
-after onCreatorAuthSuccess
+after login success
 
 ```ts
 const PRICE = gql`
