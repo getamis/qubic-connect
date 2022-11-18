@@ -14,14 +14,15 @@ export interface QubicCreatorConfig {
   creatorAuthUrl?: string;
 }
 
-export interface ProviderLoginResult {
+export interface WalletUser {
   method: ExtendedExternalProviderMethod;
   address: string;
   accessToken: string;
+  expiredAt: number;
   provider: ExtendedExternalProvider | null;
 }
 
-export type OnLogin = (error: Error | null, result?: ProviderLoginResult) => void;
+export type OnLogin = (error: Error | null, result?: WalletUser) => void;
 export type OnLogout = (error: Error | null) => void;
 
 export type OnPaymentDone = (error: Error | null, result?: PaymentResult) => void;

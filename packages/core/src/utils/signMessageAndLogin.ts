@@ -18,6 +18,7 @@ export const createSignMessageAndLogin =
     provider: ExtendedExternalProvider,
   ): Promise<{
     accessToken: string;
+    expiredAt: number;
     address: string;
   }> => {
     const { authAppName, authAppUrl, authServiceName } = options;
@@ -43,6 +44,7 @@ export const createSignMessageAndLogin =
       });
       return {
         accessToken: resultData.accessToken,
+        expiredAt: resultData.expiredAt,
         address: accountAddress,
       };
     }
@@ -66,6 +68,7 @@ export const createSignMessageAndLogin =
     });
     return {
       accessToken: resultData.accessToken,
+      expiredAt: resultData.expiredAt,
       address: accountAddress,
     };
   };

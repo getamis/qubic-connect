@@ -4,7 +4,7 @@ import { isWalletconnectProvider } from '../utils/isWalletconnectProvider';
 import {
   ExtendedExternalProvider,
   ExtendedExternalProviderMethod,
-  ProviderLoginResult,
+  WalletUser,
   OnLogin,
   OnLogout,
   QubicCreatorConfig,
@@ -17,7 +17,7 @@ import { SdkFetch } from '../utils/sdkFetch';
 import { SdkRequestGraphql } from '../utils/graphql';
 
 interface ApiContextValue {
-  login: (method: ExtendedExternalProviderMethod) => Promise<ProviderLoginResult>;
+  login: (method: ExtendedExternalProviderMethod) => Promise<WalletUser>;
   logout: () => Promise<void>;
   provider: ExtendedExternalProvider | null;
   accessToken: string | null;
@@ -71,10 +71,11 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
           // https://github.com/WalletConnect/walletconnect-monorepo/issues/747
           await optionProvider.enable();
         }
-        const { accessToken, address } = await signMessageAndLogin(method, optionProvider);
-        const result = {
+        const { accessToken, expiredAt, address } = await signMessageAndLogin(method, optionProvider);
+        const result: WalletUser = {
           method,
           accessToken,
+          expiredAt,
           address,
           provider: optionProvider,
         };

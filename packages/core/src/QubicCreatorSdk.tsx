@@ -1,7 +1,8 @@
 import { ComponentChild, render, VNode } from 'preact';
 import { createPortal } from 'preact/compat';
 import qs from 'query-string';
-import { QubicCreatorConfig, OnPaymentDone, OnLogin, OnLogout } from './types/QubicCreator';
+import { EventEmitter } from 'events';
+import { QubicCreatorConfig, OnPaymentDone, OnLogin, OnLogout, WalletUser } from './types/QubicCreator';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
 import { ExtendedExternalProvider, ProviderOptions } from './types/ExtendedExternalProvider';
 import PaymentForm from './components/PaymentForm';
@@ -11,8 +12,12 @@ import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
 import { CREATOR_API_URL, CREATOR_AUTH_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
-import { login, logout, LoginParams, LoginResult } from './api/auth';
+import { login, logout, LoginRequest, LoginResponse } from './api/auth';
 import { Deferred } from './utils/Deferred';
+
+enum Events {
+  AuthStateChanged = 'AuthStateChanged',
+}
 
 export class QubicCreatorSdk {
   private readonly config: QubicCreatorConfig;
@@ -23,6 +28,8 @@ export class QubicCreatorSdk {
   public provider: ExtendedExternalProvider | null = null;
   public address: string | null = null;
   public accessToken: string | null = null;
+  public expiredAt: number | null = null;
+  private eventEmitter = new EventEmitter();
 
   private static checkProviderOptions(providerOptions?: ProviderOptions): void {
     if (!providerOptions) {
@@ -83,17 +90,21 @@ export class QubicCreatorSdk {
 
   private handleLogin: OnLogin = (error, data) => {
     if (!error && data) {
-      this.accessToken = data.accessToken;
-      this.provider = data.provider;
       this.address = data.address;
+      this.accessToken = data.accessToken;
+      this.expiredAt = data.expiredAt;
+      this.provider = data.provider;
+      this.eventEmitter.emit(Events.AuthStateChanged, data);
     }
   };
 
   private handleLogout: OnLogout = error => {
     if (!error) {
-      this.accessToken = null;
-      this.provider = null;
       this.address = null;
+      this.accessToken = null;
+      this.expiredAt = null;
+      this.provider = null;
+      this.eventEmitter.emit(Events.AuthStateChanged, null);
     }
   };
 
@@ -173,7 +184,7 @@ export class QubicCreatorSdk {
   private static removeResultQueryFromUrl(currentUrl: string): string {
     const {
       url,
-      // remove previous result, key of LoginParams and errorMessage but keep other query params
+      // remove previous result, key of LoginRequest and errorMessage but keep other query params
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       query: { accountAddress, signature, dataString, isQubicUser, errorMessage, ...restQuery },
     } = qs.parseUrl(currentUrl);
@@ -224,17 +235,24 @@ export class QubicCreatorSdk {
     });
   }
 
-  private cachedRedirectResult?: LoginResult;
+  public onAuthStateChanged(callback: (result: WalletUser | null) => void): () => void {
+    this.eventEmitter.addListener(Events.AuthStateChanged, callback);
+    return () => {
+      this.eventEmitter.removeListener(Events.AuthStateChanged, callback);
+    };
+  }
+
+  private cachedRedirectResult?: WalletUser;
   private cachedRedirectError?: Error;
 
-  private static getLoginParamsFromUrlAndClearUrl(): LoginParams | null {
+  private static getLoginRequestFromUrlAndClearUrl(): LoginRequest | null {
     const { query } = qs.parseUrl(window.location.href);
 
     const parsedQuery = {
       ...query,
       // isQubicUser need to convert from string to boolean to match type
       isQubicUser: query.isQubicUser === 'true',
-    } as LoginParams | { errorMessage: string };
+    } as LoginRequest | { errorMessage: string };
 
     const removedResultUrl = QubicCreatorSdk.removeResultQueryFromUrl(window.location.href);
     window.history.replaceState({}, '', removedResultUrl);
@@ -249,25 +267,26 @@ export class QubicCreatorSdk {
     return parsedQuery;
   }
 
-  private async handleRedirectResult(): Promise<LoginResult | null> {
+  private async handleRedirectResult(): Promise<LoginResponse | null> {
     try {
-      const parsedQuery = QubicCreatorSdk.getLoginParamsFromUrlAndClearUrl();
-      if (parsedQuery === null) {
+      const loginRequest = QubicCreatorSdk.getLoginRequestFromUrlAndClearUrl();
+      if (loginRequest === null) {
         // not detecting valid query, just skip
         return null;
       }
 
-      const result = await login(this.fetch, parsedQuery);
-
-      this.handleLogin(null, {
+      const result = await login(this.fetch, loginRequest);
+      const user: WalletUser = {
         method: 'redirect',
-        address: parsedQuery.accountAddress,
+        address: loginRequest.accountAddress,
         accessToken: result.accessToken,
+        expiredAt: result.expiredAt,
         provider: null,
-      });
-      this.cachedRedirectResult = result;
+      };
+      this.handleLogin(null, user);
+      this.cachedRedirectResult = user;
       this.pendingGetRedirectResultDeferred.forEach(deferred => {
-        deferred.resolve(result);
+        deferred.resolve(user);
       });
       return result;
     } catch (error) {
@@ -282,15 +301,15 @@ export class QubicCreatorSdk {
     }
   }
 
-  private pendingGetRedirectResultDeferred: Array<Deferred<LoginResult | null>> = [];
-  public async getRedirectResult(): Promise<LoginResult | null> {
+  private pendingGetRedirectResultDeferred: Array<Deferred<WalletUser | null>> = [];
+  public async getRedirectResult(): Promise<WalletUser | null> {
     if (this.cachedRedirectResult) {
       return this.cachedRedirectResult;
     }
     if (this.cachedRedirectError) {
       throw this.cachedRedirectError;
     }
-    const deferred = new Deferred<LoginResult | null>();
+    const deferred = new Deferred<WalletUser | null>();
     this.pendingGetRedirectResultDeferred.push(deferred);
     return deferred.promise;
   }

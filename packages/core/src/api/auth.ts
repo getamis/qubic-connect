@@ -2,14 +2,14 @@ import querystring from 'query-string';
 import convertStringToHex from '../utils/convertStringToHex';
 import { SdkFetch } from '../utils/sdkFetch';
 
-export interface LoginParams {
+export interface LoginRequest {
   accountAddress: string;
   signature: string;
   dataString: string;
   isQubicUser: boolean;
 }
 
-export interface LoginResult {
+export interface LoginResponse {
   accessToken: string;
   expiredAt: number;
   isQubicUser: boolean;
@@ -23,8 +23,8 @@ export const getAccessToken = (): string | null => {
 
 export const login = async (
   sdkFetch: SdkFetch,
-  { accountAddress, signature, dataString, isQubicUser }: LoginParams,
-): Promise<LoginResult> => {
+  { accountAddress, signature, dataString, isQubicUser }: LoginRequest,
+): Promise<LoginResponse> => {
   if (!accountAddress || !signature || (!isQubicUser && !dataString)) {
     throw new Error('Missing login data');
   }
@@ -60,18 +60,15 @@ export const login = async (
   const data = await result.json();
 
   globalAccessToken = data?.accessToken || null;
-  return data as LoginResult;
+  return data as LoginResponse;
 };
 
-export const logout = async (sdkFetch: SdkFetch): Promise<LoginResult> => {
+export const logout = async (sdkFetch: SdkFetch): Promise<void> => {
   const httpMethod = 'POST';
-  const result = await sdkFetch('services/auth/revoke', {
+  await sdkFetch('services/auth/revoke', {
     method: httpMethod,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
   });
-  const data = await result.json();
-
-  return data as LoginResult;
 };
