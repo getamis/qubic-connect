@@ -41,6 +41,14 @@ function Demo() {
     setAccessToken(result?.accessToken || '');
   }, []);
   const { qubicCreatorSdkRef } = useQubicCreator();
+
+  useEffect(() => {
+    qubicCreatorSdkRef.current.onAuthStateChanged(user => {
+      console.log('onAuthStateChanged');
+      console.log(user);
+    });
+  }, [qubicCreatorSdkRef]);
+
   useEffect(() => {
     qubicCreatorSdkRef.current
       .getRedirectResult()
@@ -116,6 +124,15 @@ function Demo() {
         >
           loginWithRedirect
         </button>
+        {accessToken && (
+          <button
+            onClick={() => {
+              qubicCreatorSdkRef.current.logout();
+            }}
+          >
+            logout
+          </button>
+        )}
       </div>
 
       <div className="group">

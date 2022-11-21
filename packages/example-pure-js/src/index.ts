@@ -37,6 +37,11 @@ const SDK_CONFIG: QubicCreatorConfig = {
 };
 const qubicCreatorSdk = new QubicCreatorSdk(SDK_CONFIG);
 
+qubicCreatorSdk.onAuthStateChanged(user => {
+  console.log('onAuthStateChanged');
+  console.log(user);
+});
+
 qubicCreatorSdk
   .getRedirectResult()
   .then(result => {
@@ -173,6 +178,10 @@ function main() {
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicCreatorSdk.loginWithRedirect();
+  });
+
+  document.getElementById('logout')?.addEventListener('click', () => {
+    qubicCreatorSdk.logout();
   });
 }
 
