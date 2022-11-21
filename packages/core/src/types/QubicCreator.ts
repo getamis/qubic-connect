@@ -1,4 +1,3 @@
-import { LoginResult } from '../api/auth';
 import { ExtendedExternalProvider, ExtendedExternalProviderMethod, ProviderOptions } from './ExtendedExternalProvider';
 import { PaymentResult } from './Purchase';
 
@@ -13,8 +12,6 @@ export interface QubicCreatorConfig {
   // # fast login
   // creatorAuthUrl where have different type of wallet
   creatorAuthUrl?: string;
-  onCreatorAuthSuccess?: (result: LoginResult) => void;
-  onCreatorAuthError?: (errorMessage: string) => void;
 }
 
 export interface ProviderLoginResult {

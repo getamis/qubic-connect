@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Currency, OnLogin, OnPaymentDone } from '@qubic-creator/core';
 import { gql } from 'graphql-request';
+import querystring from 'query-string';
 import './App.css';
 
 import { LoginButton, LoginModal, PaymentForm, useQubicCreator } from '@qubic-creator/react';
@@ -40,6 +41,35 @@ function Demo() {
     setAccessToken(result?.accessToken || '');
   }, []);
   const { qubicCreatorSdkRef } = useQubicCreator();
+  useEffect(() => {
+    qubicCreatorSdkRef.current
+      .getRedirectResult()
+      .then(result => {
+        console.log('getRedirectResult');
+        console.log({ result });
+        if (result === null) {
+          // no redirect query parameters detected
+          return;
+        }
+        window.alert('login success');
+        const verifyUrl = querystring.stringifyUrl({
+          url: 'https://auth.dev.qubics.org/verify',
+          query: {
+            access_token: result.accessToken,
+            service: 'qubic-creator',
+          },
+        });
+        const answer = window.confirm('Open verify Url');
+        if (answer) {
+          window.open(verifyUrl, '_newWindow');
+        }
+      })
+      .catch(error => {
+        if (error instanceof Error) {
+          window.alert(`login failed: ${error.message}`);
+        }
+      });
+  }, [qubicCreatorSdkRef]);
   const handleGetPrice = useCallback(async () => {
     const PRICE = gql`
       query PRICE_PUBLIC($fromCurrency: Currency!, $toCurrency: Currency!) {

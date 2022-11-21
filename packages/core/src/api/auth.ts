@@ -3,7 +3,7 @@ import convertStringToHex from '../utils/convertStringToHex';
 import { SdkFetch } from '../utils/sdkFetch';
 
 export interface LoginParams {
-  accountAddress: string | null;
+  accountAddress: string;
   signature: string;
   dataString: string;
   isQubicUser: boolean;
