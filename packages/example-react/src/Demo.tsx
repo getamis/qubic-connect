@@ -126,6 +126,22 @@ function Demo() {
         </button>
         {accessToken && (
           <button
+            onClick={async () => {
+              const exampleMessage = 'Example `personal_sign` message';
+              const from = qubicCreatorSdkRef.current.address;
+              const msg = `0x${Buffer.from(exampleMessage, 'utf8').toString('hex')}`;
+              const signature = await qubicCreatorSdkRef.current.provider?.request?.({
+                method: 'personal_sign',
+                params: [msg, from, 'Example password'],
+              });
+              console.log({ signature });
+            }}
+          >
+            Personal Sign
+          </button>
+        )}
+        {accessToken && (
+          <button
             onClick={() => {
               qubicCreatorSdkRef.current.logout();
             }}
