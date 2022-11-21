@@ -5,7 +5,6 @@ import clsx from 'clsx';
 import { commonClasses } from './styles';
 import { OnLogin, OnLogout } from '../types/QubicCreator';
 import { ExtendedExternalProviderMethod } from '../types/ExtendedExternalProvider';
-import '../utils/fixWalletConnect';
 import { useApi } from './ApiProvider';
 import { EXTERNAL_PROVIDER_MAP } from '../constants/externalProvider';
 

@@ -21,6 +21,10 @@ export const getAccessToken = (): string | null => {
   return globalAccessToken;
 };
 
+export const setAccessToken = (token: string | null): void => {
+  globalAccessToken = token;
+};
+
 export const login = async (
   sdkFetch: SdkFetch,
   { accountAddress, signature, dataString, isQubicUser }: LoginRequest,
@@ -71,4 +75,22 @@ export const logout = async (sdkFetch: SdkFetch): Promise<void> => {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
   });
+};
+
+export const renewToken = async (sdkFetch: SdkFetch): Promise<LoginResponse> => {
+  const httpMethod = 'POST';
+  const result = await sdkFetch('services/auth/renew', {
+    method: httpMethod,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
+  if (result.status === 401) {
+    throw Error('401 Unauthorized');
+  }
+
+  const data = await result.json();
+
+  globalAccessToken = data?.accessToken || null;
+  return data as LoginResponse;
 };

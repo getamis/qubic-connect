@@ -12,12 +12,17 @@ import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
 import { CREATOR_API_URL, CREATOR_AUTH_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
-import { login, logout, LoginRequest, LoginResponse } from './api/auth';
+import { login, logout, LoginRequest, LoginResponse, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
+import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 
 enum Events {
   AuthStateChanged = 'AuthStateChanged',
 }
+
+const USER_STORAGE_KEY = '@qubic-creator/user';
+const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 10000;
+const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
 
 export class QubicCreatorSdk {
   private readonly config: QubicCreatorConfig;
@@ -30,6 +35,7 @@ export class QubicCreatorSdk {
   public accessToken: string | null = null;
   public expiredAt: number | null = null;
   private eventEmitter = new EventEmitter();
+  private user: WalletUser | null = null;
 
   private static checkProviderOptions(providerOptions?: ProviderOptions): void {
     if (!providerOptions) {
@@ -85,7 +91,43 @@ export class QubicCreatorSdk {
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
+    this.onAuthStateChanged(QubicCreatorSdk.persistUser);
     this.handleRedirectResult();
+    this.hydrateUser();
+  }
+
+  private static persistUser(user: WalletUser | null) {
+    if (!user) {
+      localStorage.removeItem(USER_STORAGE_KEY);
+    } else {
+      const {
+        // provider can not be stringify
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        provider,
+        ...restUser
+      } = user;
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(restUser));
+    }
+  }
+
+  private hydrateUser() {
+    const saved = localStorage.getItem(USER_STORAGE_KEY);
+    if (!saved) return;
+    try {
+      const user = JSON.parse(saved) as WalletUser;
+      setAccessToken(user.accessToken);
+      const provider = this.config.providerOptions?.[user.method]?.provider || null;
+      if (provider && isWalletconnectProvider(user.method, provider)) {
+        provider.enable();
+      }
+      this.handleLogin(null, {
+        ...user,
+        provider,
+      });
+    } catch (error) {
+      // ignore error
+      console.warn('can not recover user from localStorage');
+    }
   }
 
   private handleLogin: OnLogin = (error, data) => {
@@ -94,7 +136,9 @@ export class QubicCreatorSdk {
       this.accessToken = data.accessToken;
       this.expiredAt = data.expiredAt;
       this.provider = data.provider;
+      this.user = data;
       this.eventEmitter.emit(Events.AuthStateChanged, data);
+      this.startIntervalToCheckTokenExpired();
     }
   };
 
@@ -105,8 +149,45 @@ export class QubicCreatorSdk {
       this.expiredAt = null;
       this.provider = null;
       this.eventEmitter.emit(Events.AuthStateChanged, null);
+      this.stopIntervalToCheckTokenExpired();
     }
   };
+
+  private checkTokenExpiredIntervalId = 0;
+  private startIntervalToCheckTokenExpired() {
+    window.clearInterval(this.checkTokenExpiredIntervalId);
+    this.checkTokenExpiredIntervalId = window.setInterval(() => {
+      if (!this.expiredAt) {
+        this.stopIntervalToCheckTokenExpired();
+        return;
+      }
+      const expiresIn = this.expiredAt * 1000 - new Date().getTime();
+      if (expiresIn <= RENEW_TOKEN_BEFORE_EXPIRED_MS) {
+        this.renewToken();
+      }
+    }, CHECK_TOKEN_EXPIRED_INTERVAL_MS);
+  }
+
+  private stopIntervalToCheckTokenExpired() {
+    window.clearInterval(this.checkTokenExpiredIntervalId);
+    this.checkTokenExpiredIntervalId = 0;
+  }
+
+  private async renewToken(): Promise<void> {
+    if (!this.address || !this.expiredAt) {
+      return;
+    }
+
+    const result = await renewToken(this.fetch);
+    const user: WalletUser = {
+      method: 'redirect',
+      address: this.address,
+      accessToken: result.accessToken,
+      expiredAt: result.expiredAt,
+      provider: null,
+    };
+    this.handleLogin(null, user);
+  }
 
   private forceUpdate(): void {
     render(
@@ -196,6 +277,10 @@ export class QubicCreatorSdk {
     return removedResultUrl;
   }
 
+  // public async login() : Promise<LoginResponse> {
+  // TODO: ApiProvider
+  // }
+
   public async logout(): Promise<void> {
     try {
       await logout(this.fetch);
@@ -236,6 +321,9 @@ export class QubicCreatorSdk {
   }
 
   public onAuthStateChanged(callback: (result: WalletUser | null) => void): () => void {
+    if (this.user) {
+      callback(this.user);
+    }
     this.eventEmitter.addListener(Events.AuthStateChanged, callback);
     return () => {
       this.eventEmitter.removeListener(Events.AuthStateChanged, callback);

@@ -46,10 +46,12 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
   const { config, onLogin, onLogout, sdkFetch, sdkRequestGraphql } = props;
   const { name: authAppName, service: authServiceName, providerOptions } = config;
 
+  // TODO: these three state should be set by CreatorSdk
   const [address, setAddress] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [provider, setProvider] = useState<ExtendedExternalProvider | null>(null);
 
+  // TODO: login function should defined in CreatorSdk and pass from CreatorSdk
   const login = useCallback(
     async (method: ExtendedExternalProviderMethod) => {
       const option = providerOptions?.[method];

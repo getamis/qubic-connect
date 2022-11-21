@@ -37,11 +37,6 @@ const SDK_CONFIG: QubicCreatorConfig = {
 };
 const qubicCreatorSdk = new QubicCreatorSdk(SDK_CONFIG);
 
-qubicCreatorSdk.onAuthStateChanged(user => {
-  console.log('onAuthStateChanged');
-  console.log(user);
-});
-
 qubicCreatorSdk
   .getRedirectResult()
   .then(result => {
@@ -87,6 +82,7 @@ const mockData = {
 
 function main() {
   let isFormRendered = false;
+
   function onAccessTokenChange(value?: string) {
     if (value && !isFormRendered) {
       isFormRendered = true;
@@ -105,6 +101,13 @@ function main() {
     }
   }
 
+  qubicCreatorSdk.onAuthStateChanged(user => {
+    console.log('example onAuthStateChanged ');
+    console.log(user);
+
+    onAccessTokenChange(user?.accessToken);
+  });
+
   qubicCreatorSdk.createLoginButton(document.getElementById('login-qubic'), {
     method: 'qubic',
     onLogin: (error, result) => {
@@ -112,7 +115,6 @@ function main() {
         window.alert(error.message);
         return;
       }
-      onAccessTokenChange(result?.accessToken);
     },
   });
 
@@ -123,7 +125,6 @@ function main() {
         window.alert(error.message);
         return;
       }
-      onAccessTokenChange(result?.accessToken);
     },
   });
 
@@ -135,7 +136,6 @@ function main() {
         return;
       }
       console.log({ accessToken: result?.accessToken });
-      onAccessTokenChange(result?.accessToken);
     },
   });
 
@@ -147,7 +147,6 @@ function main() {
         return;
       }
       console.log({ accessToken: result?.accessToken });
-      onAccessTokenChange(result?.accessToken);
     },
   });
 
@@ -182,6 +181,17 @@ function main() {
 
   document.getElementById('logout')?.addEventListener('click', () => {
     qubicCreatorSdk.logout();
+  });
+
+  document.getElementById('personal-sign')?.addEventListener('click', async () => {
+    const exampleMessage = 'Example `personal_sign` message';
+    const from = qubicCreatorSdk.address;
+    const msg = `0x${Buffer.from(exampleMessage, 'utf8').toString('hex')}`;
+    const signature = await qubicCreatorSdk.provider?.request?.({
+      method: 'personal_sign',
+      params: [msg, from, 'Example password'],
+    });
+    console.log({ signature });
   });
 }
 
