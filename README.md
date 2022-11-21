@@ -16,12 +16,28 @@ const qubicCreatorSdk = new QubicCreatorSdk({
 
 qubicCreatorSdk
   .getRedirectResult()
-  .then((result) {
-    window.alert('Now you are logged in');
+  .then((user) {
+    if (!user) {
+      console.log('user not logged in');
+      return
+    }
+    console.log('user logged in');
+    console.log(user.address);
+    console.log(user.accessToken);
+    console.log(user.expiredAt);
   })
   .catch((error) {
-    window.alert(`login failed: ${error.message}`);
+    console.log(`login failed: ${error.message}`);
   });
+
+qubicCreatorSdk.onAuthStateChanged(user => {
+  if (!user) {
+    console.log('user not logged in');
+    return
+  }
+  onAccessTokenChange(user.accessToken);
+});
+
 
 document.getElementById('login')?.addEventListener('click', () => {
   qubicCreatorSdk.loginWithRedirect();
