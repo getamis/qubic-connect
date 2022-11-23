@@ -38,7 +38,6 @@ qubicCreatorSdk.onAuthStateChanged(user => {
   onAccessTokenChange(user.accessToken);
 });
 
-
 document.getElementById('login')?.addEventListener('click', () => {
   qubicCreatorSdk.loginWithRedirect();
 });
