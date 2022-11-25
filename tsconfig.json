@@ -2,7 +2,7 @@
   "extends": "./tsconfig.build.json",
   "compilerOptions": {
     "paths": {
-      "@qubic-creator/*": ["./packages/*/src"]
+      "@qubic-connect/*": ["./packages/*/src"]
     },
     "noEmit": true
   }

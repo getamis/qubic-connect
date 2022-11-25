@@ -1,20 +1,20 @@
-# Qubic creator SDK
+# Qubic Connect SDK
 
 ## Usage
 
 ### JS (direct sign in, without wallet provider)
 
 ```ts
-import QubicCreatorSdk, { Currency, QubicCreatorConfig } from '@qubic-creator/core';
+import QubicConnect, { Currency, QubicConnectConfig } from '@qubic-connect/core';
 
-const qubicCreatorSdk = new QubicCreatorSdk({
+const qubicConnect = new QubicConnect({
   name: 'Display Name',
   service: 'service-name',
   key: 'API_KEY',
   secret: 'API_SECRET',
 });
 
-qubicCreatorSdk
+qubicConnect
   .getRedirectResult()
   .then((user) {
     if (!user) {
@@ -30,7 +30,7 @@ qubicCreatorSdk
     console.log(`login failed: ${error.message}`);
   });
 
-qubicCreatorSdk.onAuthStateChanged(user => {
+qubicConnect.onAuthStateChanged(user => {
   if (!user) {
     console.log('user not logged in');
     return
@@ -39,7 +39,7 @@ qubicCreatorSdk.onAuthStateChanged(user => {
 });
 
 document.getElementById('login')?.addEventListener('click', () => {
-  qubicCreatorSdk.loginWithRedirect();
+  qubicConnect.loginWithRedirect();
 });
 ```
 
@@ -59,7 +59,7 @@ const PRICE = gql`
   }
 `;
 
-const ETHToTWDCurrencyData = await qubicCreatorSdk.requestGraphql({
+const ETHToTWDCurrencyData = await qubicConnect.requestGraphql({
   query: PRICE,
   variables: {
     fromCurrency: Currency.ETH,
@@ -68,18 +68,18 @@ const ETHToTWDCurrencyData = await qubicCreatorSdk.requestGraphql({
 });
 
 // you can fetch
-// qubicCreatorSdk.fetch(path, options);
+// qubicConnect.fetch(path, options);
 
 // or logout
-// qubicCreatorSdk.logout();
+// qubicConnect.logout();
 ```
 
 ### JS (with wallet provider)
 
 ```ts
-import QubicCreatorSdk from '@qubic-creator/core';
+import QubicConnect from '@qubic-connect/core';
 
-const qubicCreatorSdk = new QubicCreatorSdk({
+const qubicConnect = new QubicConnect({
   name: 'Display Name',
   service: 'service-name',
   key: 'API_KEY',
@@ -110,7 +110,7 @@ const qubicCreatorSdk = new QubicCreatorSdk({
 // 預設 style 顯示成 pop 中間
 
 ```ts
-qubicCreatorSdk.createLoginModal(element: HTMLElement, {
+qubicConnect.createLoginModal(element: HTMLElement, {
   methods?: Array<'metamask','walletconnect' | 'qubic'>,
   onLogin: (
     error: Error,
@@ -130,7 +130,7 @@ qubicCreatorSdk.createLoginModal(element: HTMLElement, {
 
 
 // payment form
-const {setOrder} = qubicCreatorSdk.createPaymentForm(element: HTMLElement, {
+const {setOrder} = qubicConnect.createPaymentForm(element: HTMLElement, {
   onPaymentDone: (error: Error | null, order?: Order) => void,
 })
 
@@ -140,13 +140,13 @@ setOrder(yourOrderHere)
 ### React (with wallet provider)
 
 ```tsx
-import { QubicCreatorContextProvider } from '@qubic-creator/react';
+import { QubicConnectContextProvider } from '@qubic-connect/react';
 
 function App() {
   return (
-    <QubicCreatorContextProvider config={SDK_CONFIG}>
+    <QubicConnectContextProvider config={SDK_CONFIG}>
       <Demo />
-    </QubicCreatorContextProvider>
+    </QubicConnectContextProvider>
   );
 }
 function Demo() {
@@ -182,7 +182,7 @@ function Demo() {
 #### fetch
 
 ```ts
-const result = await qubicCreatorSdk.fetch('services/auth/revoke', {
+const result = await qubicConnect.fetch('services/auth/revoke', {
   method: httpMethod,
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded',
@@ -208,7 +208,7 @@ const PRICE = gql`
   }
 `;
 
-const ETHToTWDCurrencyData = await qubicCreatorSdk.requestGraphql({
+const ETHToTWDCurrencyData = await qubicConnect.requestGraphql({
   query: PRICE,
   variables: {
     fromCurrency: Currency.ETH,

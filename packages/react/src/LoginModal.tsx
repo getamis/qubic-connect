@@ -1,17 +1,17 @@
-import { LoginModalProps as PreactLoginModalProps } from '@qubic-creator/core/dist/components/LoginModal';
+import { LoginModalProps as PreactLoginModalProps } from '@qubic-connect/core/dist/components/LoginModal';
 
 import React, { useEffect, useRef } from 'react';
-import { useQubicCreator } from './QubicCreatorContext';
+import { useQubicConnect } from './QubicConnectContext';
 
 export type LoginModalProps = Omit<PreactLoginModalProps, 'children'>;
 
 const LoginModal = React.memo<LoginModalProps>(props => {
-  const { qubicCreatorSdkRef } = useQubicCreator();
+  const { qubicConnectRef } = useQubicConnect();
   const buttonRef = useRef(null);
 
   useEffect(() => {
-    qubicCreatorSdkRef.current.createLoginModal(buttonRef.current, props);
-  }, [props, qubicCreatorSdkRef]);
+    qubicConnectRef.current.createLoginModal(buttonRef.current, props);
+  }, [props, qubicConnectRef]);
 
   return <div ref={buttonRef} />;
 });

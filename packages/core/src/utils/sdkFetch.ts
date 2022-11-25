@@ -7,9 +7,9 @@ export interface SdkFetch {
 }
 
 export const createFetch =
-  ({ apiKey, apiSecret, creatorUrl }: { apiKey: string; apiSecret: string; creatorUrl: string }): SdkFetch =>
+  ({ apiKey, apiSecret, apiUrl }: { apiKey: string; apiSecret: string; apiUrl: string }): SdkFetch =>
   (path, init) => {
-    const serviceUri = `${creatorUrl}/${path}`;
+    const serviceUri = `${apiUrl}/${path}`;
 
     const serviceHeaders = serviceHeaderBuilder({
       serviceUri,

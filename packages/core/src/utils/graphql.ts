@@ -50,10 +50,10 @@ export interface SdkRequestGraphql<TVariables = any, TResult = any> {
 }
 
 export const createRequestGraphql =
-  ({ apiKey, apiSecret, creatorUrl }: { apiKey: string; apiSecret: string; creatorUrl: string }): SdkRequestGraphql =>
+  ({ apiKey, apiSecret, apiUrl }: { apiKey: string; apiSecret: string; apiUrl: string }): SdkRequestGraphql =>
   ({ query, variables, isPublic = false }) => {
     // acc means access token
-    const endPoint = `${creatorUrl}/services/graphql-${isPublic ? 'public' : 'acc'}`;
+    const endPoint = `${apiUrl}/services/graphql-${isPublic ? 'public' : 'acc'}`;
 
     const { operationName, query: graphQLQuery } = resolveRequestDocument(query);
     const body =

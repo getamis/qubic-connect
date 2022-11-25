@@ -1,2 +1,2 @@
-export { QubicCreatorSdk as default } from './QubicCreatorSdk';
+export { QubicConnect as default } from './QubicConnect';
 export * from './types';

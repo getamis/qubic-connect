@@ -1,19 +1,19 @@
 import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
-import QubicCreatorSdk, { Currency, QubicCreatorConfig } from '@qubic-creator/core';
+import QubicConnect, { Currency, QubicConnectConfig } from '@qubic-connect/core';
 import { gql } from 'graphql-request';
 import querystring from 'query-string';
 
 import './index.css';
-import { INFURA_ID, API_KEY, API_SECRET, CREATOR_API_URL, CREATOR_AUTH_URL } from './environment';
+import { INFURA_ID, API_KEY, API_SECRET, API_URL, AUTH_REDIRECT_URL } from './environment';
 
-const SDK_CONFIG: QubicCreatorConfig = {
+const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator',
   service: 'qubee-creator',
   key: API_KEY,
   secret: API_SECRET,
-  creatorUrl: CREATOR_API_URL,
-  creatorAuthUrl: CREATOR_AUTH_URL,
+  apiUrl: API_URL,
+  authRedirectUrl: AUTH_REDIRECT_URL,
   providerOptions: {
     qubic: {
       provider: new QubicProvider(),
@@ -35,9 +35,9 @@ const SDK_CONFIG: QubicCreatorConfig = {
     },
   },
 };
-const qubicCreatorSdk = new QubicCreatorSdk(SDK_CONFIG);
+const qubicConnect = new QubicConnect(SDK_CONFIG);
 
-qubicCreatorSdk
+qubicConnect
   .getRedirectResult()
   .then(result => {
     console.log('getRedirectResult');
@@ -86,7 +86,7 @@ function main() {
   function onAccessTokenChange(value?: string) {
     if (value && !isFormRendered) {
       isFormRendered = true;
-      const { setOrder } = qubicCreatorSdk.createPaymentForm(document.getElementById('pay-form'), {
+      const { setOrder } = qubicConnect.createPaymentForm(document.getElementById('pay-form'), {
         onPaymentDone: (error, result) => {
           console.log('PayFormResult', result);
           if (error) {
@@ -101,14 +101,14 @@ function main() {
     }
   }
 
-  qubicCreatorSdk.onAuthStateChanged(user => {
+  qubicConnect.onAuthStateChanged(user => {
     console.log('example onAuthStateChanged ');
     console.log(user);
 
     onAccessTokenChange(user?.accessToken);
   });
 
-  qubicCreatorSdk.createLoginButton(document.getElementById('login-qubic'), {
+  qubicConnect.createLoginButton(document.getElementById('login-qubic'), {
     method: 'qubic',
     onLogin: (error, result) => {
       if (error) {
@@ -118,7 +118,7 @@ function main() {
     },
   });
 
-  qubicCreatorSdk.createLoginButton(document.getElementById('login-metamask'), {
+  qubicConnect.createLoginButton(document.getElementById('login-metamask'), {
     method: 'metamask',
     onLogin: (error, result) => {
       if (error) {
@@ -128,7 +128,7 @@ function main() {
     },
   });
 
-  qubicCreatorSdk.createLoginButton(document.getElementById('login-walletconnect'), {
+  qubicConnect.createLoginButton(document.getElementById('login-walletconnect'), {
     method: 'walletconnect',
     onLogin: (error, result) => {
       if (error) {
@@ -139,7 +139,7 @@ function main() {
     },
   });
 
-  qubicCreatorSdk.createLoginModal(document.getElementById('login-modal'), {
+  qubicConnect.createLoginModal(document.getElementById('login-modal'), {
     methods: ['metamask', 'qubic', 'walletconnect', 'custom'],
     onLogin: (error, result) => {
       if (error) {
@@ -165,7 +165,7 @@ function main() {
 
   const priceDom = document.querySelector('#price');
   priceDom?.addEventListener('click', async () => {
-    const ETHToTWDCurrencyData = await qubicCreatorSdk.requestGraphql({
+    const ETHToTWDCurrencyData = await qubicConnect.requestGraphql({
       query: PRICE,
       variables: {
         fromCurrency: Currency.ETH,
@@ -176,18 +176,18 @@ function main() {
   });
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
-    qubicCreatorSdk.loginWithRedirect();
+    qubicConnect.loginWithRedirect();
   });
 
   document.getElementById('logout')?.addEventListener('click', () => {
-    qubicCreatorSdk.logout();
+    qubicConnect.logout();
   });
 
   document.getElementById('personal-sign')?.addEventListener('click', async () => {
     const exampleMessage = 'Example `personal_sign` message';
-    const from = qubicCreatorSdk.address;
+    const from = qubicConnect.address;
     const msg = `0x${Buffer.from(exampleMessage, 'utf8').toString('hex')}`;
-    const signature = await qubicCreatorSdk.provider?.request?.({
+    const signature = await qubicConnect.provider?.request?.({
       method: 'personal_sign',
       params: [msg, from, 'Example password'],
     });

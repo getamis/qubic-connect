@@ -16,7 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@qubic-creator/*": ["../*/dist"]
+      "@qubic-connect/*": ["../*/dist"]
     }
   },
   "include": ["src", "config-overrides.js", "../sdk"]

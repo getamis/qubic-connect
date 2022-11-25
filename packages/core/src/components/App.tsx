@@ -1,13 +1,13 @@
 import { ComponentChildren } from 'preact';
 import { memo } from 'preact/compat';
-import { OnLogin, OnLogout, QubicCreatorConfig } from '../types';
+import { OnLogin, OnLogout, QubicConnectConfig } from '../types';
 import { SdkRequestGraphql } from '../utils/graphql';
 import { SdkFetch } from '../utils/sdkFetch';
 import { ApiContextProvider } from './ApiProvider';
 
 interface Props {
   children?: ComponentChildren;
-  config: QubicCreatorConfig;
+  config: QubicConnectConfig;
   sdkFetch: SdkFetch;
   sdkRequestGraphql: SdkRequestGraphql;
   onLogin: OnLogin;
