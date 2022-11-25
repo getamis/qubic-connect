@@ -307,7 +307,7 @@ export class QubicConnect {
       nonce: Date.now(),
     });
     window.location.href = qs.stringifyUrl({
-      url: `${this.authRedirectUrl}/creator-login`,
+      url: `${this.authRedirectUrl}/auth`,
       query: {
         redirectUrl: encodeURIComponent(removedResultUrl),
         dataString: encodeURIComponent(dataString),
