@@ -29,8 +29,7 @@ function main() {
       }
       window.alert('login success');
       const verifyUrl = querystring.stringifyUrl({
-        // https://auth.dev.qubics.org/verify
-        url: VERIFY_URL,
+        url: VERIFY_URL, // https://auth.qubic.app/verify
         query: {
           access_token: user.accessToken,
           service: API_SERVICE_NAME,
