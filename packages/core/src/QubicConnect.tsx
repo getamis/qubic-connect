@@ -24,6 +24,9 @@ const USER_STORAGE_KEY = '@qubic-connect/user';
 const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 10000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
 
+export type LoginRedirectWalletType = 'metamask' | 'qubic' | 'walletconnect';
+export type LoginRedirectSignInProvider = 'facebook' | 'google' | 'apple';
+
 export class QubicConnect {
   private readonly config: QubicConnectConfig;
   private rootDiv: HTMLDivElement;
@@ -297,7 +300,10 @@ export class QubicConnect {
    * 4. handleRedirectResult() uses results to get creator access token
    * 5. now user can use fetch() or requestGraphql() to call api
    */
-  public loginWithRedirect(): void {
+  public loginWithRedirect(options?: {
+    walletType: LoginRedirectWalletType;
+    qubicSignInProvider?: LoginRedirectSignInProvider;
+  }): void {
     const removedResultUrl = QubicConnect.removeResultQueryFromUrl(window.location.href);
     const dataString = JSON.stringify({
       name: this.config.name,
@@ -309,6 +315,8 @@ export class QubicConnect {
     window.location.href = qs.stringifyUrl({
       url: `${this.authRedirectUrl}/auth`,
       query: {
+        walletType: options?.walletType,
+        qubicSignInProvider: options?.qubicSignInProvider,
         redirectUrl: encodeURIComponent(removedResultUrl),
         dataString: encodeURIComponent(dataString),
       },

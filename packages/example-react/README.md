@@ -1,3 +1,7 @@
+# OUT OF DATE, CHECK example-pure-js INSTEAD!!
+
+---
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
