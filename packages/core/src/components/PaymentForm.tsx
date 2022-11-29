@@ -1,7 +1,7 @@
 import { CSSProperties, memo } from 'preact/compat';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
-import { OnPaymentDone } from '../types/QubicCreator';
+import { OnPaymentDone } from '../types/QubicConnect';
 import { Order } from '../types/Purchase';
 import { useApi } from './ApiProvider';
 

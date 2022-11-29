@@ -1,9 +1,9 @@
-import { Order } from '@qubic-creator/core';
+import { Order } from '@qubic-connect/core';
 
-import { PaymentFormProps as PreactPaymentFormProps } from '@qubic-creator/core/dist/components/PaymentForm';
+import { PaymentFormProps as PreactPaymentFormProps } from '@qubic-connect/core/dist/components/PaymentForm';
 
 import React, { useEffect, useRef } from 'react';
-import { useQubicCreator } from './QubicCreatorContext';
+import { useQubicConnect } from './QubicConnectContext';
 
 interface Props extends Omit<PreactPaymentFormProps, 'getOrder'> {
   order: Order;
@@ -11,16 +11,16 @@ interface Props extends Omit<PreactPaymentFormProps, 'getOrder'> {
 
 const PaymentForm = React.memo<Props>(props => {
   const { order, ...restProps } = props;
-  const { qubicCreatorSdkRef } = useQubicCreator();
+  const { qubicConnectRef } = useQubicConnect();
   const paymentFormRef = useRef(null);
   const setOrderRef = useRef<(value: Order) => void>();
 
   useEffect(() => {
-    const { setOrder } = qubicCreatorSdkRef.current.createPaymentForm(paymentFormRef.current, {
+    const { setOrder } = qubicConnectRef.current.createPaymentForm(paymentFormRef.current, {
       ...restProps,
     });
     setOrderRef.current = setOrder;
-  }, [qubicCreatorSdkRef, restProps]);
+  }, [qubicConnectRef, restProps]);
 
   useEffect(() => {
     setOrderRef.current?.(order);

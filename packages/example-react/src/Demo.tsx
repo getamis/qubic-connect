@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Currency, OnLogin, OnPaymentDone } from '@qubic-creator/core';
+import { Currency, OnLogin, OnPaymentDone } from '@qubic-connect/core';
 import { gql } from 'graphql-request';
 import querystring from 'query-string';
 import './App.css';
 
-import { LoginButton, LoginModal, PaymentForm, useQubicCreator } from '@qubic-creator/react';
+import { LoginButton, LoginModal, PaymentForm, useQubicConnect } from '@qubic-connect/react';
 
 const mockOrder = {
   tokenId: undefined,
@@ -40,17 +40,17 @@ function Demo() {
     }
     setAccessToken(result?.accessToken || '');
   }, []);
-  const { qubicCreatorSdkRef } = useQubicCreator();
+  const { qubicConnectRef } = useQubicConnect();
 
   useEffect(() => {
-    qubicCreatorSdkRef.current.onAuthStateChanged(user => {
+    qubicConnectRef.current.onAuthStateChanged(user => {
       console.log('onAuthStateChanged');
       console.log(user);
     });
-  }, [qubicCreatorSdkRef]);
+  }, [qubicConnectRef]);
 
   useEffect(() => {
-    qubicCreatorSdkRef.current
+    qubicConnectRef.current
       .getRedirectResult()
       .then(result => {
         console.log('getRedirectResult');
@@ -77,7 +77,7 @@ function Demo() {
           window.alert(`login failed: ${error.message}`);
         }
       });
-  }, [qubicCreatorSdkRef]);
+  }, [qubicConnectRef]);
   const handleGetPrice = useCallback(async () => {
     const PRICE = gql`
       query PRICE_PUBLIC($fromCurrency: Currency!, $toCurrency: Currency!) {
@@ -92,7 +92,7 @@ function Demo() {
       }
     `;
 
-    const ETHToTWDCurrencyData = await qubicCreatorSdkRef.current.requestGraphql({
+    const ETHToTWDCurrencyData = await qubicConnectRef.current.requestGraphql({
       query: PRICE,
       variables: {
         fromCurrency: Currency.ETH,
@@ -100,7 +100,7 @@ function Demo() {
       },
     });
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
-  }, [qubicCreatorSdkRef]);
+  }, [qubicConnectRef]);
 
   return (
     <div className="container">
@@ -116,10 +116,10 @@ function Demo() {
       </div>
 
       <div className="group">
-        <p>qubicCreatorSdk.loginWithRedirect</p>
+        <p>qubicConnect.loginWithRedirect</p>
         <button
           onClick={() => {
-            qubicCreatorSdkRef.current.loginWithRedirect();
+            qubicConnectRef.current.loginWithRedirect();
           }}
         >
           loginWithRedirect
@@ -128,9 +128,9 @@ function Demo() {
           <button
             onClick={async () => {
               const exampleMessage = 'Example `personal_sign` message';
-              const from = qubicCreatorSdkRef.current.address;
+              const from = qubicConnectRef.current.address;
               const msg = `0x${Buffer.from(exampleMessage, 'utf8').toString('hex')}`;
-              const signature = await qubicCreatorSdkRef.current.provider?.request?.({
+              const signature = await qubicConnectRef.current.provider?.request?.({
                 method: 'personal_sign',
                 params: [msg, from, 'Example password'],
               });
@@ -143,7 +143,7 @@ function Demo() {
         {accessToken && (
           <button
             onClick={() => {
-              qubicCreatorSdkRef.current.logout();
+              qubicConnectRef.current.logout();
             }}
           >
             logout

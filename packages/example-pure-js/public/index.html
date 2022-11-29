@@ -21,33 +21,26 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>Qubic Creator PURE JS SDK Example</title>
+    <title>Qubic Connect JS SDK Example</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div class="container">
       <div class="group">
-        <p>createLoginButton</p>
-        <div id="login-qubic"></div>
-        <div id="login-metamask"></div>
-        <div id="login-walletconnect"></div>
-      </div>
-      <div class="group">
-        <p>createLoginModal</p>
-        <div id="login-modal"></div>
-      </div>
-
-      <div class="group">
-        <p>Login</p>
-        <button id="redirect-login">Redirect Login</button>
+        <p>Redirect Login</p>
+        <button id="redirect-login">Login Qubic</button>
         <button id="logout">Logout</button>
-        <button id="personal-sign">Personal sign</button>
+
+        <p>Redirect Login - Qubic</p>
+        <button id="redirect-login-qubic-google">Google</button>
+        <button id="redirect-login-qubic-facebook">Facebook</button>
+        <button id="redirect-login-qubic-apple">Apple</button>
+
+        <p>Redirect Login - Other</p>
+        <button id="redirect-login-metamask">Metamask</button>
+        <button id="redirect-login-walletconnect">WalletConnect</button>
       </div>
 
-      <div class="group">
-        <p>createPaymentForm</p>
-        <div id="pay-form"></div>
-      </div>
       <div class="group">
         <p>requestGraphql</p>
         <button id="price">Get Price</button>

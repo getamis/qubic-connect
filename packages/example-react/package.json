@@ -1,10 +1,10 @@
 {
-  "name": "@qubic-creator/example-react",
+  "name": "@qubic-connect/example-react",
   "version": "0.3.1",
   "private": true,
   "dependencies": {
-    "@qubic-creator/core": "^0.3.1",
-    "@qubic-creator/react": "^0.3.1",
+    "@qubic-connect/core": "^0.3.1",
+    "@qubic-connect/react": "^0.3.1",
     "@qubic-js/browser": "1.4.1",
     "@qubic-js/core": "1.4.1",
     "@testing-library/jest-dom": "^5.16.4",

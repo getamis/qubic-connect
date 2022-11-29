@@ -2,7 +2,7 @@ import { ComponentChild, render, VNode } from 'preact';
 import { createPortal } from 'preact/compat';
 import qs from 'query-string';
 import { EventEmitter } from 'events';
-import { QubicCreatorConfig, OnPaymentDone, OnLogin, OnLogout, WalletUser } from './types/QubicCreator';
+import { QubicConnectConfig, OnPaymentDone, OnLogin, OnLogout, WalletUser } from './types/QubicConnect';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
 import { ExtendedExternalProvider, ProviderOptions } from './types/ExtendedExternalProvider';
 import PaymentForm from './components/PaymentForm';
@@ -10,7 +10,7 @@ import { Order } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
-import { CREATOR_API_URL, CREATOR_AUTH_URL } from './constants/backend';
+import { API_URL, AUTH_REDIRECT_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
 import { login, logout, LoginRequest, LoginResponse, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
@@ -20,16 +20,19 @@ enum Events {
   AuthStateChanged = 'AuthStateChanged',
 }
 
-const USER_STORAGE_KEY = '@qubic-creator/user';
+const USER_STORAGE_KEY = '@qubic-connect/user';
 const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 10000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
 
-export class QubicCreatorSdk {
-  private readonly config: QubicCreatorConfig;
+export type LoginRedirectWalletType = 'metamask' | 'qubic' | 'walletconnect';
+export type LoginRedirectSignInProvider = 'facebook' | 'google' | 'apple';
+
+export class QubicConnect {
+  private readonly config: QubicConnectConfig;
   private rootDiv: HTMLDivElement;
   private children: Array<ComponentChild> = [];
   private vNodeMap = new Map<HTMLElement, ComponentChild>();
-  private creatorAuthUrl: string;
+  private authRedirectUrl: string;
   public provider: ExtendedExternalProvider | null = null;
   public address: string | null = null;
   public accessToken: string | null = null;
@@ -67,31 +70,26 @@ export class QubicCreatorSdk {
   public fetch: SdkFetch;
   public requestGraphql: SdkRequestGraphql;
 
-  constructor(config: QubicCreatorConfig) {
+  constructor(config: QubicConnectConfig) {
     this.config = config;
-    QubicCreatorSdk.checkProviderOptions(config?.providerOptions);
-    const {
-      key: apiKey,
-      secret: apiSecret,
-      creatorUrl = CREATOR_API_URL,
-      creatorAuthUrl = CREATOR_AUTH_URL,
-    } = this.config;
+    QubicConnect.checkProviderOptions(config?.providerOptions);
+    const { key: apiKey, secret: apiSecret, apiUrl = API_URL, authRedirectUrl = AUTH_REDIRECT_URL } = this.config;
     this.fetch = createFetch({
       apiKey,
       apiSecret,
-      creatorUrl,
+      apiUrl,
     });
     this.requestGraphql = createRequestGraphql({
       apiKey,
       apiSecret,
-      creatorUrl,
+      apiUrl,
     });
 
-    this.creatorAuthUrl = creatorAuthUrl;
+    this.authRedirectUrl = authRedirectUrl;
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
-    this.onAuthStateChanged(QubicCreatorSdk.persistUser);
+    this.onAuthStateChanged(QubicConnect.persistUser);
     this.handleRedirectResult();
     this.hydrateUser();
   }
@@ -302,8 +300,11 @@ export class QubicCreatorSdk {
    * 4. handleRedirectResult() uses results to get creator access token
    * 5. now user can use fetch() or requestGraphql() to call api
    */
-  public loginWithRedirect(): void {
-    const removedResultUrl = QubicCreatorSdk.removeResultQueryFromUrl(window.location.href);
+  public loginWithRedirect(options?: {
+    walletType: LoginRedirectWalletType;
+    qubicSignInProvider?: LoginRedirectSignInProvider;
+  }): void {
+    const removedResultUrl = QubicConnect.removeResultQueryFromUrl(window.location.href);
     const dataString = JSON.stringify({
       name: this.config.name,
       service: this.config.service,
@@ -312,8 +313,10 @@ export class QubicCreatorSdk {
       nonce: Date.now(),
     });
     window.location.href = qs.stringifyUrl({
-      url: `${this.creatorAuthUrl}/creator-login`,
+      url: `${this.authRedirectUrl}/auth`,
       query: {
+        walletType: options?.walletType,
+        qubicSignInProvider: options?.qubicSignInProvider,
         redirectUrl: encodeURIComponent(removedResultUrl),
         dataString: encodeURIComponent(dataString),
       },
@@ -342,7 +345,7 @@ export class QubicCreatorSdk {
       isQubicUser: query.isQubicUser === 'true',
     } as LoginRequest | { errorMessage: string };
 
-    const removedResultUrl = QubicCreatorSdk.removeResultQueryFromUrl(window.location.href);
+    const removedResultUrl = QubicConnect.removeResultQueryFromUrl(window.location.href);
     window.history.replaceState({}, '', removedResultUrl);
 
     if ('errorMessage' in parsedQuery) {
@@ -357,7 +360,7 @@ export class QubicCreatorSdk {
 
   private async handleRedirectResult(): Promise<LoginResponse | null> {
     try {
-      const loginRequest = QubicCreatorSdk.getLoginRequestFromUrlAndClearUrl();
+      const loginRequest = QubicConnect.getLoginRequestFromUrlAndClearUrl();
       if (loginRequest === null) {
         // not detecting valid query, just skip
         return null;

@@ -26,3 +26,11 @@ code {
 .group {
   margin-bottom: 24px;
 }
+
+.group button {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 4px 8px;
+  font-size: 20px;
+}

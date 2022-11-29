@@ -1,17 +1,17 @@
 import { ExtendedExternalProvider, ExtendedExternalProviderMethod, ProviderOptions } from './ExtendedExternalProvider';
 import { PaymentResult } from './Purchase';
 
-export interface QubicCreatorConfig {
+export interface QubicConnectConfig {
   name: string;
   service: string;
   key: string;
   secret: string;
   providerOptions?: ProviderOptions;
-  creatorUrl?: string;
+  apiUrl?: string;
 
   // # fast login
-  // creatorAuthUrl where have different type of wallet
-  creatorAuthUrl?: string;
+  // authRedirectUrl where have different type of wallet
+  authRedirectUrl?: string;
 }
 
 export interface WalletUser {

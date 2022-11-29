@@ -1,16 +1,16 @@
-import { LoginButtonProps as PreactLoginButtonProps } from '@qubic-creator/core/dist/components/LoginButton';
+import { LoginButtonProps as PreactLoginButtonProps } from '@qubic-connect/core/dist/components/LoginButton';
 import React, { useEffect, useRef } from 'react';
-import { useQubicCreator } from './QubicCreatorContext';
+import { useQubicConnect } from './QubicConnectContext';
 
 export type LoginButtonProps = Omit<PreactLoginButtonProps, 'children'>;
 
 const LoginButton = React.memo<LoginButtonProps>(props => {
-  const { qubicCreatorSdkRef } = useQubicCreator();
+  const { qubicConnectRef } = useQubicConnect();
   const buttonRef = useRef(null);
 
   useEffect(() => {
-    qubicCreatorSdkRef.current.createLoginButton(buttonRef.current, props);
-  }, [props, qubicCreatorSdkRef]);
+    qubicConnectRef.current.createLoginButton(buttonRef.current, props);
+  }, [props, qubicConnectRef]);
 
   return <div ref={buttonRef} />;
 });

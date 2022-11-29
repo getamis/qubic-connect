@@ -3,7 +3,7 @@ import { CSSProperties, memo } from 'preact/compat';
 import jss from 'jss';
 import clsx from 'clsx';
 import { commonClasses } from './styles';
-import { OnLogin, OnLogout } from '../types/QubicCreator';
+import { OnLogin, OnLogout } from '../types/QubicConnect';
 import { ExtendedExternalProviderMethod } from '../types/ExtendedExternalProvider';
 import { useApi } from './ApiProvider';
 import { EXTERNAL_PROVIDER_MAP } from '../constants/externalProvider';

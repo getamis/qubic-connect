@@ -7,7 +7,7 @@ import {
   WalletUser,
   OnLogin,
   OnLogout,
-  QubicCreatorConfig,
+  QubicConnectConfig,
 } from '../types';
 import { createSignMessageAndLogin } from '../utils/signMessageAndLogin';
 import { BatchBuyAssetInput, BatchBuyAssetResult, createFetchBatchBuyAssetResult } from '../api/purchase';
@@ -33,7 +33,7 @@ const ApiContext = createContext<ApiContextValue>({} as any);
 
 interface ApiContextProviderProps {
   children: ComponentChildren;
-  config: QubicCreatorConfig;
+  config: QubicConnectConfig;
   onLogin: OnLogin;
   onLogout: OnLogout;
   sdkFetch: SdkFetch;
@@ -46,12 +46,12 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
   const { config, onLogin, onLogout, sdkFetch, sdkRequestGraphql } = props;
   const { name: authAppName, service: authServiceName, providerOptions } = config;
 
-  // TODO: these three state should be set by CreatorSdk
+  // TODO: these three state should be set by QubicConnect
   const [address, setAddress] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [provider, setProvider] = useState<ExtendedExternalProvider | null>(null);
 
-  // TODO: login function should defined in CreatorSdk and pass from CreatorSdk
+  // TODO: login function should defined in QubicConnect and pass from QubicConnect
   const login = useCallback(
     async (method: ExtendedExternalProviderMethod) => {
       const option = providerOptions?.[method];

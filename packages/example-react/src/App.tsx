@@ -1,18 +1,18 @@
 import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
-import { QubicCreatorConfig } from '@qubic-creator/core';
-import { QubicCreatorContextProvider } from '@qubic-creator/react';
+import { QubicConnectConfig } from '@qubic-connect/core';
+import { QubicConnectContextProvider } from '@qubic-connect/react';
 import Demo from './Demo';
 import './App.css';
-import { INFURA_ID, API_KEY, API_SECRET, CREATOR_API_URL } from './environment';
+import { INFURA_ID, API_KEY, API_SECRET, API_URL } from './environment';
 
-const SDK_CONFIG: QubicCreatorConfig = {
+const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator',
   service: 'qubee-creator',
   key: API_KEY,
   secret: API_SECRET,
-  creatorUrl: CREATOR_API_URL,
-  creatorAuthUrl: 'http://localhost:3001',
+  apiUrl: API_URL,
+  authRedirectUrl: 'http://localhost:3001',
   providerOptions: {
     qubic: {
       provider: new QubicProvider(),
@@ -37,9 +37,9 @@ const SDK_CONFIG: QubicCreatorConfig = {
 
 function App() {
   return (
-    <QubicCreatorContextProvider config={SDK_CONFIG}>
+    <QubicConnectContextProvider config={SDK_CONFIG}>
       <Demo />
-    </QubicCreatorContextProvider>
+    </QubicConnectContextProvider>
   );
 }
 
