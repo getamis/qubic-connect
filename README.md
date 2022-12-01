@@ -9,7 +9,7 @@ $ npm install @qubic-connect/core
 ```
 
 ```
-$yarn add @qubic-connect/core
+$ yarn add @qubic-connect/core
 ```
 
 ### Install from CDN
