@@ -62,13 +62,13 @@ qubicConnect.onAuthStateChanged(user => {
 
 
 
-### Direct sign in, without wallet provider
+### Direct sign in without wallet provider
 
 ```
 qubicConnect.loginWithRedirect();
 ```
 
-### Sign in, with different wallet provider
+### Sign in with different wallet providers
 
 ```
 qubicConnect.loginWithRedirect({
