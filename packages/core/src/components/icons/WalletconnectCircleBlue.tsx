@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { memo } from 'preact/compat';
 
-const SvgWalletconnectCircleBlue = props => (
+const SvgWalletconnectCircleBlue = (props: any) => (
   <svg width={24} height={24} viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" {...props}>
     <defs>
       <radialGradient cx="0%" cy="50%" fx="0%" fy="50%" r="100%" id="walletconnect-circle-blue_svg__a">

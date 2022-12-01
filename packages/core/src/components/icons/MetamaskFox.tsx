@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { memo } from 'preact/compat';
 
-const SvgMetamaskFox = props => (
+const SvgMetamaskFox = (props: any) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={24}

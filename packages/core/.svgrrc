@@ -1,5 +1,6 @@
 {
   "icon": 24,
   "jsxRuntime": "classic-preact",
-  "memo": true
+  "memo": true,
+  "typescript": true
 }

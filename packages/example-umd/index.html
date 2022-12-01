@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="text/javascript"></script>
+    <script type="text/javascript" src="./bundle.js"></script>
+    <script type="text/javascript" src="./enviroment.js"></script>
+    <script type="text/javascript">
+      // assign sdk config and verify url here
+      const SDK_CONFIG = {
+        name: 'Qubic Creator', // a display name for future usage
+        service: 'qubic-creator',
+        key: '<YOUR_KEY>',
+        secret: '<YOUR_SECRET>',
+        // apiUrl: 'https://admin.stag.qubic.market/market', // optional
+        // authRedirectUrl: 'https://pass.stag.qubic.app', // optional
+      };
+      const VERIFY_URL = 'https://auth.qubic.app/verify';
+
+      function main() {
+        const qubicConnect = QubicConnect.initialize(SDK_CONFIG);
+
+        // only work after redirection from previous page
+        qubicConnect
+          .getRedirectResult()
+          .then(user => {
+            console.log('getRedirectResult');
+            console.log({ user });
+            if (user === null) {
+              // no redirect query parameters detected
+              return;
+            }
+            window.alert('login success');
+            const verifyUrl = QubicConnect.utils.querystring.stringifyUrl({
+              url: VERIFY_URL, //
+              query: {
+                access_token: user.accessToken,
+                service: 'qubic-creator',
+              },
+            });
+            const answer = window.confirm('Open verify Url');
+            if (answer) {
+              window.open(verifyUrl, '_newWindow');
+            }
+          })
+          .catch(error => {
+            if (error instanceof Error) {
+              window.alert(`login failed: ${error.message}`);
+            }
+          });
+
+        // work every time when auth state change and fist time loading
+        qubicConnect.onAuthStateChanged(user => {
+          console.log('example onAuthStateChanged ');
+          console.log(user);
+        });
+
+        document.getElementById('redirect-login')?.addEventListener('click', () => {
+          qubicConnect.loginWithRedirect();
+        });
+
+        const metamaskElm = document.getElementById('redirect-login-metamask');
+
+        if (window.ethereum) {
+          metamaskElm?.addEventListener('click', () => {
+            qubicConnect.loginWithRedirect({
+              walletType: 'metamask',
+            });
+          });
+        } else {
+          metamaskElm?.remove();
+        }
+
+        document.getElementById('redirect-login-walletconnect')?.addEventListener('click', () => {
+          qubicConnect.loginWithRedirect({
+            walletType: 'walletconnect',
+          });
+        });
+
+        document.getElementById('redirect-login-qubic-google')?.addEventListener('click', () => {
+          qubicConnect.loginWithRedirect({
+            walletType: 'qubic',
+            qubicSignInProvider: 'google',
+          });
+        });
+
+        document.getElementById('redirect-login-qubic-apple')?.addEventListener('click', () => {
+          qubicConnect.loginWithRedirect({
+            walletType: 'qubic',
+            qubicSignInProvider: 'apple',
+          });
+        });
+
+        document.getElementById('redirect-login-qubic-facebook')?.addEventListener('click', () => {
+          qubicConnect.loginWithRedirect({
+            walletType: 'qubic',
+            qubicSignInProvider: 'facebook',
+          });
+        });
+
+        document.getElementById('logout')?.addEventListener('click', () => {
+          qubicConnect.logout();
+        });
+      }
+
+      setTimeout(() => {
+        // wait for dom ready
+        main();
+      }, 0);
+    </script>
+    <title>Document</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div class="container">
+      <div class="group">
+        <p>Redirect Login</p>
+        <button id="redirect-login">Login Qubic</button>
+        <button id="logout">Logout</button>
+
+        <p>Redirect Login - Qubic</p>
+        <button id="redirect-login-qubic-google">Google</button>
+        <button id="redirect-login-qubic-facebook">Facebook</button>
+        <button id="redirect-login-qubic-apple">Apple</button>
+
+        <p>Redirect Login - Other</p>
+        <button id="redirect-login-metamask">Metamask</button>
+        <button id="redirect-login-walletconnect">WalletConnect</button>
+      </div>
+
+      <div class="group">
+        <p>requestGraphql</p>
+        <button id="price">Get Price</button>
+      </div>
+    </div>
+  </body>
+</html>
