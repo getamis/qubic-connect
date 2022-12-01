@@ -1,5 +1,23 @@
 # Qubic Connect SDK
 
+## Installation
+
+### Install from NPM
+
+```
+$ npm install @qubic-connect/core
+```
+
+```
+$yarn add @qubic-connect/core
+```
+
+### Install from CDN
+
+```
+<script type="text/javascript" src="https://unpkg.com/@qubic-connect/core@0.4.1/dist/bundle.js"></script>
+```
+
 ## Usage
 
 ### JS (direct sign in, without wallet provider)
