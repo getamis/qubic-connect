@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useContext, useRef } from 'react';
-import QubicConnect, { QubicConnectConfig } from '@qubic-connect/core';
+import { QubicConnectConfig, QubicConnect } from '@qubic-connect/core';
 
 interface QubicConnectContextValue {
   qubicConnectRef: React.MutableRefObject<QubicConnect>;
