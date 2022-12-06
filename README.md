@@ -27,7 +27,7 @@ import QubicConnect, { Currency, QubicConnectConfig } from '@qubic-connect/core'
 
 const qubicConnect = new QubicConnect({
   name: 'Display Name', // display name for user
-  service: 'service-name',
+  service: 'qubic-creator', // 固定字串
   key: 'API_KEY',
   secret: 'API_SECRET',
 });
@@ -75,4 +75,23 @@ qubicConnect.loginWithRedirect({
   walletType: 'qubic', // 'metamask' | 'qubic' | 'walletconnect'
   qubicSignInProvider: 'google', // 'facebook' | 'google' | 'apple'
 );
+```
+
+### Verify access token on the server side
+
+#### GET /verify
+
+```
+https://auth.qubic.app/verify?access_token=${accessToken}&service=qubic-creator
+```
+
+*response example*
+
+```
+{
+  "scope": "qubic-creator",
+  "client_id": "9999",
+  "address": "0x6CE72a0Db7534C286fF7b1C6D83028389aa17e56",
+  "expires_in": 3596
+}
 ```
