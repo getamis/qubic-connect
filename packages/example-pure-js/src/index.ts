@@ -1,4 +1,4 @@
-import QubicConnect, { Currency, QubicConnectConfig } from '@qubic-connect/core';
+import { QubicConnect, Currency, QubicConnectConfig } from '@qubic-connect/core';
 import { gql } from 'graphql-request';
 import querystring from 'query-string';
 
