@@ -3,7 +3,7 @@ import { PaymentResult } from './Purchase';
 
 export interface QubicConnectConfig {
   name: string;
-  service: string;
+  service?: string;
   key: string;
   secret: string;
   providerOptions?: ProviderOptions;
@@ -12,6 +12,10 @@ export interface QubicConnectConfig {
   // # fast login
   // authRedirectUrl where have different type of wallet
   authRedirectUrl?: string;
+}
+
+export interface InternalQubicConnectConfig extends Omit<Required<QubicConnectConfig>, 'providerOptions'> {
+  providerOptions?: ProviderOptions;
 }
 
 export interface WalletUser {

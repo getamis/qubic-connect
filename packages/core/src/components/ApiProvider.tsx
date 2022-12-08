@@ -7,7 +7,7 @@ import {
   WalletUser,
   OnLogin,
   OnLogout,
-  QubicConnectConfig,
+  InternalQubicConnectConfig,
 } from '../types';
 import { createSignMessageAndLogin } from '../utils/signMessageAndLogin';
 import { BatchBuyAssetInput, BatchBuyAssetResult, createFetchBatchBuyAssetResult } from '../api/purchase';
@@ -33,14 +33,14 @@ const ApiContext = createContext<ApiContextValue>({} as any);
 
 interface ApiContextProviderProps {
   children: ComponentChildren;
-  config: QubicConnectConfig;
+  config: InternalQubicConnectConfig;
   onLogin: OnLogin;
   onLogout: OnLogout;
   sdkFetch: SdkFetch;
   sdkRequestGraphql: SdkRequestGraphql;
 }
 
-const APP_AUTH_URL = window.location.origin;
+const AUTH_APP_URL = window.location.origin;
 
 export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
   const { config, onLogin, onLogout, sdkFetch, sdkRequestGraphql } = props;
@@ -65,7 +65,7 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
       }
       const signMessageAndLogin = createSignMessageAndLogin(sdkFetch, {
         authAppName,
-        authAppUrl: APP_AUTH_URL,
+        authAppUrl: AUTH_APP_URL,
         authServiceName,
       });
       try {
