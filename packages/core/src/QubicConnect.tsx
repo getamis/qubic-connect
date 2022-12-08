@@ -2,11 +2,18 @@ import { ComponentChild, render, VNode } from 'preact';
 import { createPortal } from 'preact/compat';
 import qs from 'query-string';
 import { EventEmitter } from 'events';
-import { QubicConnectConfig, OnPaymentDone, OnLogin, OnLogout, WalletUser } from './types/QubicConnect';
+import {
+  QubicConnectConfig,
+  InternalQubicConnectConfig,
+  OnPaymentDone,
+  OnLogin,
+  OnLogout,
+  WalletUser,
+} from './types/QubicConnect';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
 import { ExtendedExternalProvider, ProviderOptions } from './types/ExtendedExternalProvider';
 import PaymentForm from './components/PaymentForm';
-import { Order } from './types';
+import { Order, SdkFetchError } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
@@ -15,6 +22,8 @@ import { createFetch, SdkFetch } from './utils/sdkFetch';
 import { login, logout, LoginRequest, LoginResponse, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
+
+const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
 enum Events {
   AuthStateChanged = 'AuthStateChanged',
@@ -28,7 +37,7 @@ export type LoginRedirectWalletType = 'metamask' | 'qubic' | 'walletconnect';
 export type LoginRedirectSignInProvider = 'facebook' | 'google' | 'apple';
 
 export class QubicConnect {
-  private readonly config: QubicConnectConfig;
+  private readonly config: InternalQubicConnectConfig;
   private rootDiv: HTMLDivElement;
   private children: Array<ComponentChild> = [];
   private vNodeMap = new Map<HTMLElement, ComponentChild>();
@@ -71,9 +80,30 @@ export class QubicConnect {
   public requestGraphql: SdkRequestGraphql;
 
   constructor(config: QubicConnectConfig) {
-    this.config = config;
+    const {
+      name,
+      service = DEFAULT_SERVICE_NAME,
+      key: apiKey,
+      secret: apiSecret,
+      apiUrl = API_URL,
+      authRedirectUrl = AUTH_REDIRECT_URL,
+    } = config;
+    if (!apiKey) {
+      throw Error('new QubicConnect should have key');
+    }
+    if (!apiSecret) {
+      throw Error('new QubicConnect should have secret');
+    }
+    this.config = {
+      name,
+      service,
+      key: apiKey,
+      secret: apiSecret,
+      apiUrl,
+      authRedirectUrl,
+    };
     QubicConnect.checkProviderOptions(config?.providerOptions);
-    const { key: apiKey, secret: apiSecret, apiUrl = API_URL, authRedirectUrl = AUTH_REDIRECT_URL } = this.config;
+
     this.fetch = createFetch({
       apiKey,
       apiSecret,
@@ -137,6 +167,9 @@ export class QubicConnect {
       this.user = data;
       this.eventEmitter.emit(Events.AuthStateChanged, data);
       this.startIntervalToCheckTokenExpired();
+    }
+    if (error) {
+      this.eventEmitter.emit(Events.AuthStateChanged, null, error);
     }
   };
 
@@ -323,7 +356,7 @@ export class QubicConnect {
     });
   }
 
-  public onAuthStateChanged(callback: (result: WalletUser | null) => void): () => void {
+  public onAuthStateChanged(callback: (result: WalletUser | null, error?: SdkFetchError) => void): () => void {
     if (this.user) {
       callback(this.user);
     }

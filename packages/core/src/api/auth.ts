@@ -57,10 +57,6 @@ export const login = async (
     body: payload,
   });
 
-  if (result.status === 401) {
-    throw Error('401 Unauthorized');
-  }
-
   const data = await result.json();
 
   globalAccessToken = data?.accessToken || null;
@@ -85,9 +81,6 @@ export const renewToken = async (sdkFetch: SdkFetch): Promise<LoginResponse> => 
       'Content-Type': 'application/x-www-form-urlencoded',
     },
   });
-  if (result.status === 401) {
-    throw Error('401 Unauthorized');
-  }
 
   const data = await result.json();
 

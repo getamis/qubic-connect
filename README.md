@@ -26,8 +26,7 @@ $ yarn add @qubic-connect/core
 import QubicConnect, { Currency, QubicConnectConfig } from '@qubic-connect/core';
 
 const qubicConnect = new QubicConnect({
-  name: 'Display Name', // display name for user
-  service: 'qubic-creator', // 固定字串
+  name: 'Display Name', // 顯示你 dApp 的名稱，會出現在簽名的提示中
   key: 'API_KEY',
   secret: 'API_SECRET',
 });
@@ -46,9 +45,19 @@ qubicConnect
   })
   .catch((error) {
     console.log(`login failed: ${error.message}`);
+    console.log(error.message)
+    console.log(error.status)
+    console.log(error.statusText) // might be `''`
+    console.log(error.body) // json object, ex: `{code: 404, message: 'resource not found'}`
   });
 
-qubicConnect.onAuthStateChanged(user => {
+qubicConnect.onAuthStateChanged((user, error) => {
+    if (error) {
+      console.log(error.message)
+      console.log(error.status)
+      console.log(error.statusText) // might be `''`
+      console.log(error.body)
+    }
     if (!user) {
       console.log('user not logged in');
       return
@@ -59,8 +68,6 @@ qubicConnect.onAuthStateChanged(user => {
     console.log(user.expiredAt);
 });
 ```
-
-
 
 ### Direct sign in without wallet provider
 
@@ -85,7 +92,7 @@ qubicConnect.loginWithRedirect({
 https://auth.qubic.app/verify?access_token=${accessToken}&service=qubic-creator
 ```
 
-*response example*
+_response example_
 
 ```
 {

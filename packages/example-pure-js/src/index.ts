@@ -1,4 +1,4 @@
-import { QubicConnect, Currency, QubicConnectConfig } from '@qubic-connect/core';
+import { QubicConnect, Currency, QubicConnectConfig, SdkFetchError } from '@qubic-connect/core';
 import { gql } from 'graphql-request';
 import querystring from 'query-string';
 
@@ -7,10 +7,10 @@ import { API_SERVICE_NAME, API_KEY, API_SECRET, API_URL, AUTH_REDIRECT_URL, VERI
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
-  service: API_SERVICE_NAME,
   key: API_KEY,
   secret: API_SECRET,
-  apiUrl: API_URL,
+  service: API_SERVICE_NAME, //optional
+  apiUrl: API_URL, // optional
   authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
 };
 
@@ -41,14 +41,22 @@ function main() {
       }
     })
     .catch(error => {
-      if (error instanceof Error) {
+      if (error instanceof SdkFetchError) {
+        console.log(error.message);
+        console.log(error.status);
+        console.log(error.statusText);
+        console.log(error.body);
         window.alert(`login failed: ${error.message}`);
       }
     });
 
   // work every time when auth state change and fist time loading
-  qubicConnect.onAuthStateChanged(user => {
+  qubicConnect.onAuthStateChanged((user, error) => {
     console.log('example onAuthStateChanged ');
+    console.log(error?.message);
+    console.log(error?.status);
+    console.log(error?.statusText);
+    console.log(error?.body);
     console.log(user);
   });
 

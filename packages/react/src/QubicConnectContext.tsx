@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useContext, useRef } from 'react';
-import { QubicConnectConfig, QubicConnect } from '@qubic-connect/core';
+import { InternalQubicConnectConfig, QubicConnect } from '@qubic-connect/core';
 
 interface QubicConnectContextValue {
   qubicConnectRef: React.MutableRefObject<QubicConnect>;
@@ -10,7 +10,7 @@ const QubicConnectContext = React.createContext<QubicConnectContextValue>({} as 
 
 interface Props {
   children: React.ReactNode;
-  config: QubicConnectConfig;
+  config: InternalQubicConnectConfig;
 }
 
 const QubicConnectContextProvider = React.memo<Props>(props => {
