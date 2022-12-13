@@ -1,10 +1,11 @@
 {
   "name": "example-umd",
   "version": "0.4.4-alpha.0",
+  "private": true,
   "description": "",
   "main": "bundle.js",
   "scripts": {
-    "copy-files": "cp ../core/dist/bundle.js* .",
+    "copy-files": "cp ../../packages/core/dist/bundle.js* .",
     "start": "yarn copy-files && http-server --port 3000",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
