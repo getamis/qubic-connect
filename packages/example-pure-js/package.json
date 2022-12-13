@@ -1,9 +1,9 @@
 {
   "name": "@qubic-connect/example-pure-js",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": true,
   "dependencies": {
-    "@qubic-connect/core": "^0.4.2",
+    "@qubic-connect/core": "^0.4.3",
     "@qubic-js/browser": "1.4.1",
     "@qubic-js/core": "1.4.1",
     "@testing-library/jest-dom": "^5.16.4",
