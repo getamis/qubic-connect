@@ -1,5 +1,5 @@
 import { DocumentNode, OperationDefinitionNode, parse, print } from 'graphql';
-import request, { RequestDocument } from 'graphql-request';
+import { request, RequestDocument } from 'graphql-request';
 
 import { getAccessToken } from '../api/auth';
 import serviceHeaderBuilder from './serviceHeaderBuilder';

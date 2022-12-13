@@ -4,18 +4,26 @@
 
 ### Install from NPM
 
-```
-$ npm install @qubic-connect/core
+```cli
+npm install @qubic-connect/core
 ```
 
-```
-$ yarn add @qubic-connect/core
+```cli
+yarn add @qubic-connect/core
 ```
 
 ### Install from CDN
 
-```
-<script type="text/javascript" src="https://unpkg.com/@qubic-connect/core@0.4.1/dist/bundle.js"></script>
+```ts
+<script type="text/javascript" src="https://unpkg.com/@qubic-connect/core@0.4.2/dist/bundle.js"></script>
+
+<script type="text/javascript" >
+const qubicConnect = QubicConnect.initialize({
+  name: 'Display Name', // will show up in display
+  key: 'API_KEY',
+  secret: 'API_SECRET',
+});
+</script>
 ```
 
 ## Usage
@@ -26,58 +34,58 @@ $ yarn add @qubic-connect/core
 import QubicConnect, { Currency, QubicConnectConfig } from '@qubic-connect/core';
 
 const qubicConnect = new QubicConnect({
-  name: 'Display Name', // 顯示你 dApp 的名稱，會出現在簽名的提示中
+  name: 'Display Name', // will show up in display
   key: 'API_KEY',
   secret: 'API_SECRET',
 });
 
 qubicConnect
   .getRedirectResult()
-  .then((user) {
+  .then(user => {
     if (!user) {
       console.log('user not logged in');
-      return
+      return;
     }
     console.log('user logged in');
     console.log(user.address);
     console.log(user.accessToken);
     console.log(user.expiredAt);
   })
-  .catch((error) {
+  .catch(error => {
     console.log(`login failed: ${error.message}`);
-    console.log(error.message)
-    console.log(error.status)
-    console.log(error.statusText) // might be `''`
-    console.log(error.body) // json object, ex: `{code: 404, message: 'resource not found'}`
+    console.log(error.message);
+    console.log(error.status);
+    console.log(error.statusText); // might be `''`
+    console.log(error.body); // json object, ex: `{code: 404, message: 'resource not found'}`
   });
 
 qubicConnect.onAuthStateChanged((user, error) => {
-    if (error) {
-      console.log(error.message)
-      console.log(error.status)
-      console.log(error.statusText) // might be `''`
-      console.log(error.body)
-    }
-    if (!user) {
-      console.log('user not logged in');
-      return
-    }
-    console.log('user logged in');
-    console.log(user.address);
-    console.log(user.accessToken);
-    console.log(user.expiredAt);
+  if (error) {
+    console.log(error.message);
+    console.log(error.status);
+    console.log(error.statusText); // might be `''`
+    console.log(error.body);
+  }
+  if (!user) {
+    console.log('user not logged in');
+    return;
+  }
+  console.log('user logged in');
+  console.log(user.address);
+  console.log(user.accessToken);
+  console.log(user.expiredAt);
 });
 ```
 
 ### Direct sign in without wallet provider
 
-```
+```ts
 qubicConnect.loginWithRedirect();
 ```
 
 ### Sign in with different wallet providers
 
-```
+```ts
 qubicConnect.loginWithRedirect({
   walletType: 'qubic', // 'metamask' | 'qubic' | 'walletconnect'
   qubicSignInProvider: 'google', // 'facebook' | 'google' | 'apple'
@@ -88,13 +96,13 @@ qubicConnect.loginWithRedirect({
 
 #### GET /verify
 
-```
+```ts
 https://auth.qubic.app/verify?access_token=${accessToken}&service=qubic-creator
 ```
 
 _response example_
 
-```
+```ts
 {
   "scope": "qubic-creator",
   "client_id": "9999",
