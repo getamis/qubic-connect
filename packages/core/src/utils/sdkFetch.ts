@@ -54,6 +54,7 @@ export const createFetch =
         ...serviceHeaders,
         ...initHeaders,
       },
+      credentials: 'include',
       ...restInit,
     });
     await handleFetchError(response);
