@@ -4,7 +4,8 @@
   "description": "Qubic Creator SDK monorepo",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "dependencies": {
     "husky": "^8.0.1"
@@ -27,7 +28,7 @@
     "deploy:payment:dev": " yarn workspace @qubic-connect/payment-form-web deploy:dev",
     "build": "lerna run build --scope={'@qubic-connect/core,@qubic-connect/react'}",
     "watch": "lerna run watch --scope={'@qubic-connect/core,@qubic-connect/react'}",
-    "release": "lerna publish --force-publish",
+    "release": "npm run build && lerna publish --force-publish",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

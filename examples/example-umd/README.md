@@ -9,6 +9,6 @@ qubic-connect git:(main) ✗ yarn run build
 than
 
 ```cmd
-cd packages/example-umd/
+cd examples/example-umd/
 yarn start
 ```
