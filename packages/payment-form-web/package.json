@@ -1,6 +1,6 @@
 {
   "name": "@qubic-connect/payment-form-web",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.4.3",
