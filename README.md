@@ -107,6 +107,10 @@ _response example_
   "scope": "qubic-creator",
   "client_id": "9999",
   "address": "0x6CE72a0Db7534C286fF7b1C6D83028389aa17e56",
-  "expires_in": 3596
+  "expires_in": 3596,
+  "qubicUser": { // optional
+    "provider": "GOOGLE", //GOOGLE | FACEBOOK | TWITTER| APPLE | UNKNOWN
+    "email": "helloworld@maicoin.com",
+  }
 }
 ```
