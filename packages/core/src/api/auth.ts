@@ -1,7 +1,6 @@
 import querystring from 'query-string';
 import convertStringToHex from '../utils/convertStringToHex';
 import { SdkFetch } from '../utils/sdkFetch';
-import { QubicUser } from '../types/QubicUser';
 
 export interface LoginRequest {
   accountAddress: string;
@@ -14,7 +13,6 @@ export interface LoginResponse {
   accessToken: string;
   expiredAt: number;
   isQubicUser: boolean;
-  qubicUser?: QubicUser;
 }
 
 let globalAccessToken: string | null = null;

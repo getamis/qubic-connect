@@ -80,6 +80,7 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
           expiredAt,
           address,
           provider: optionProvider,
+          qubicUser: null,
         };
 
         setAccessToken(accessToken);

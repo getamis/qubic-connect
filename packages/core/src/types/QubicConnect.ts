@@ -25,7 +25,7 @@ export interface WalletUser {
   accessToken: string;
   expiredAt: number;
   provider: ExtendedExternalProvider | null;
-  qubicUser?: QubicUser;
+  qubicUser: QubicUser | null;
 }
 
 export type OnLogin = (error: Error | null, result?: WalletUser) => void;
