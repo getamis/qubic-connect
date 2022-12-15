@@ -39,6 +39,19 @@ const qubicConnect = new QubicConnect({
   secret: 'API_SECRET',
 });
 
+// user schema
+// {
+//   method: ExtendedExternalProviderMethod;
+//   address: string;
+//   accessToken: string;
+//   expiredAt: number;
+//   provider: ExtendedExternalProvider | null;
+//   qubicUser?: {
+//    provider: 'GOOGLE' | 'FACEBOOK' | 'TWITTER' | 'APPLE' | 'UNKNOWN';
+//    email: string;
+//  };
+// }
+
 qubicConnect
   .getRedirectResult()
   .then(user => {
@@ -107,10 +120,6 @@ _response example_
   "scope": "qubic-creator",
   "client_id": "9999",
   "address": "0x6CE72a0Db7534C286fF7b1C6D83028389aa17e56",
-  "expires_in": 3596,
-  "qubicUser": { // optional
-    "provider": "GOOGLE", //GOOGLE | FACEBOOK | TWITTER| APPLE | UNKNOWN
-    "email": "helloworld@maicoin.com",
-  }
+  "expires_in": 3596
 }
 ```
