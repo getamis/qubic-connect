@@ -221,6 +221,8 @@ export class QubicConnect {
       accessToken: result.accessToken,
       expiredAt: result.expiredAt,
       provider: null,
+      // use previous qubicUser
+      qubicUser: this.user?.qubicUser || null,
     };
     this.handleLogin(null, user);
   }
@@ -405,15 +407,17 @@ export class QubicConnect {
       }
 
       const authResponse = await login(this.fetch, loginRequest);
-      const meResponse = await getMe(this.requestGraphql);
+      const {
+        me: { qubicUser },
+      } = await getMe(this.requestGraphql);
 
       const user: WalletUser = {
         method: 'redirect',
         address: loginRequest.accountAddress,
         accessToken: authResponse.accessToken,
         expiredAt: authResponse.expiredAt,
-        qubicUser: meResponse.me.qubicUser,
         provider: null,
+        qubicUser,
       };
       this.handleLogin(null, user);
       this.cachedRedirectResult = user;

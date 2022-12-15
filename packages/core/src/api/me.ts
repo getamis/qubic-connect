@@ -5,7 +5,7 @@ import { SdkRequestGraphql } from '../utils/graphql';
 export interface MeResponse {
   me: {
     address: string;
-    qubicUser?: QubicUser;
+    qubicUser: QubicUser | null;
   };
 }
 
