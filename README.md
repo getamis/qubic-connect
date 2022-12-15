@@ -15,7 +15,7 @@ yarn add @qubic-connect/core
 ### Install from CDN
 
 ```ts
-<script type="text/javascript" src="https://unpkg.com/@qubic-connect/core@0.4.2/dist/bundle.js"></script>
+<script type="text/javascript" src="https://unpkg.com/@qubic-connect/core"></script>
 
 <script type="text/javascript" >
 const qubicConnect = QubicConnect.initialize({
