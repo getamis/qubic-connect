@@ -30,7 +30,7 @@ enum Events {
 }
 
 const USER_STORAGE_KEY = '@qubic-connect/user';
-const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 10000;
+const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 1000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
 
 export type LoginRedirectWalletType = 'metamask' | 'qubic' | 'walletconnect';
@@ -194,7 +194,11 @@ export class QubicConnect {
       }
       const expiresIn = this.expiredAt * 1000 - new Date().getTime();
       if (expiresIn <= RENEW_TOKEN_BEFORE_EXPIRED_MS) {
-        this.renewToken();
+        this.renewToken().catch(error => {
+          console.error(error);
+          this.stopIntervalToCheckTokenExpired();
+          this.handleLogout(null);
+        });
       }
     }, CHECK_TOKEN_EXPIRED_INTERVAL_MS);
   }
