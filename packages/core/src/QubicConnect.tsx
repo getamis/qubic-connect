@@ -19,9 +19,10 @@ import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
 import { API_URL, AUTH_REDIRECT_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
-import { login, logout, LoginRequest, LoginResponse, renewToken, setAccessToken } from './api/auth';
+import { login, logout, LoginRequest, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
+import { getMe } from './api/me';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -391,20 +392,23 @@ export class QubicConnect {
     return parsedQuery;
   }
 
-  private async handleRedirectResult(): Promise<LoginResponse | null> {
+  private async handleRedirectResult(): Promise<void> {
     try {
       const loginRequest = QubicConnect.getLoginRequestFromUrlAndClearUrl();
       if (loginRequest === null) {
         // not detecting valid query, just skip
-        return null;
+        return;
       }
 
-      const result = await login(this.fetch, loginRequest);
+      const authResponse = await login(this.fetch, loginRequest);
+      const meResponse = await getMe(this.requestGraphql);
+
       const user: WalletUser = {
         method: 'redirect',
         address: loginRequest.accountAddress,
-        accessToken: result.accessToken,
-        expiredAt: result.expiredAt,
+        accessToken: authResponse.accessToken,
+        expiredAt: authResponse.expiredAt,
+        qubicUser: meResponse.me.qubicUser,
         provider: null,
       };
       this.handleLogin(null, user);
@@ -412,7 +416,7 @@ export class QubicConnect {
       this.pendingGetRedirectResultDeferred.forEach(deferred => {
         deferred.resolve(user);
       });
-      return result;
+      return;
     } catch (error) {
       if (error instanceof Error) {
         this.handleLogin(error);

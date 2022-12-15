@@ -1,5 +1,6 @@
 import { ExtendedExternalProvider, ExtendedExternalProviderMethod, ProviderOptions } from './ExtendedExternalProvider';
 import { PaymentResult } from './Purchase';
+import { QubicUser } from './QubicUser';
 
 export interface QubicConnectConfig {
   name: string;
@@ -24,6 +25,7 @@ export interface WalletUser {
   accessToken: string;
   expiredAt: number;
   provider: ExtendedExternalProvider | null;
+  qubicUser?: QubicUser;
 }
 
 export type OnLogin = (error: Error | null, result?: WalletUser) => void;

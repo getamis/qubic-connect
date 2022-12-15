@@ -15,7 +15,7 @@ yarn add @qubic-connect/core
 ### Install from CDN
 
 ```ts
-<script type="text/javascript" src="https://unpkg.com/@qubic-connect/core@0.4.2/dist/bundle.js"></script>
+<script type="text/javascript" src="https://unpkg.com/@qubic-connect/core"></script>
 
 <script type="text/javascript" >
 const qubicConnect = QubicConnect.initialize({
@@ -107,6 +107,10 @@ _response example_
   "scope": "qubic-creator",
   "client_id": "9999",
   "address": "0x6CE72a0Db7534C286fF7b1C6D83028389aa17e56",
-  "expires_in": 3596
+  "expires_in": 3596,
+  "qubicUser": { // optional
+    "provider": "GOOGLE", //GOOGLE | FACEBOOK | TWITTER| APPLE | UNKNOWN
+    "email": "helloworld@maicoin.com",
+  }
 }
 ```

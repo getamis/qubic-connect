@@ -4,6 +4,7 @@
   "source": "./src/index.ts",
   "main": "./dist/index.js",
   "browser": "./dist/bundle.js",
+  "unpkg": "./dist/bundle.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"

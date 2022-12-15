@@ -53,11 +53,13 @@ function main() {
   // work every time when auth state change and fist time loading
   qubicConnect.onAuthStateChanged((user, error) => {
     console.log('example onAuthStateChanged ');
-    console.log(error?.message);
-    console.log(error?.status);
-    console.log(error?.statusText);
-    console.log(error?.body);
-    console.log(user);
+    if (error) {
+      console.log(error?.message);
+      console.log(error?.status);
+      console.log(error?.statusText);
+      console.log(error?.body);
+    }
+    console.log({ user });
   });
 
   const PRICE = gql`
