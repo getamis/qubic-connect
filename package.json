@@ -1,5 +1,5 @@
 {
-  "name": "qubic-creator-sdk",
+  "name": "qubic-connect",
   "version": "0.1.0",
   "description": "Qubic Creator SDK monorepo",
   "private": true,
@@ -11,8 +11,12 @@
     "husky": "^8.0.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.20.5",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-typescript": "^7.18.6",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
+    "babel-jest": "^29.3.1",
     "eslint": "^7.7.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-preact": "^1.3.0",
@@ -21,13 +25,12 @@
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "lerna": "^5.1.8",
-    "nx": "^14.4.3",
-    "typescript": "^4.7.3"
+    "nx": "^14.4.3"
   },
   "scripts": {
     "deploy:payment:dev": " yarn workspace @qubic-connect/payment-form-web deploy:dev",
-    "build": "lerna run build --scope={'@qubic-connect/core,@qubic-connect/react'}",
-    "watch": "lerna run watch --scope={'@qubic-connect/core,@qubic-connect/react'}",
+    "build": "lerna run build --scope={'@qubic-connect/redirect,@qubic-connect/core,@qubic-connect/react'}",
+    "watch": "lerna run watch --scope={'@qubic-connect/redirect,@qubic-connect/core,@qubic-connect/react'}",
     "release": "npm run build && lerna publish --force-publish",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1"

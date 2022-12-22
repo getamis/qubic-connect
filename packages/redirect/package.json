@@ -1,0 +1,28 @@
+{
+  "name": "@qubic-connect/redirect",
+  "version": "0.5.1",
+  "homepage": "https://github.com/getamis/qubic-creator-sdk/tree/main/packages/redirect#readme",
+  "license": "ISC",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getamis/qubic-connect.git"
+  },
+  "scripts": {
+    "test": "jest --coverage",
+    "build": "npm run clean && npm run compile",
+    "clean": "rm -rf ./dist",
+    "compile": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch"
+  },
+  "bugs": {
+    "url": "https://github.com/getamis/qubic-connect/issues"
+  },
+  "dependencies": {
+    "query-string": "^8.1.0"
+  }
+}
