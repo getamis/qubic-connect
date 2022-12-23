@@ -2,6 +2,7 @@ import { ComponentChild, render, VNode } from 'preact';
 import { createPortal } from 'preact/compat';
 import qs from 'query-string';
 import { EventEmitter } from 'events';
+import { RedirectAuthManager, LoginRedirectWalletType, LoginRedirectSignInProvider } from '@qubic-connect/redirect';
 import {
   QubicConnectConfig,
   InternalQubicConnectConfig,
@@ -33,9 +34,6 @@ enum Events {
 const USER_STORAGE_KEY = '@qubic-connect/user';
 const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 1000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
-
-export type LoginRedirectWalletType = 'metamask' | 'qubic' | 'walletconnect';
-export type LoginRedirectSignInProvider = 'facebook' | 'google' | 'apple';
 
 export class QubicConnect {
   private readonly config: InternalQubicConnectConfig;
@@ -344,7 +342,6 @@ export class QubicConnect {
     walletType: LoginRedirectWalletType;
     qubicSignInProvider?: LoginRedirectSignInProvider;
   }): void {
-    const removedResultUrl = QubicConnect.removeResultQueryFromUrl(window.location.href);
     const dataString = JSON.stringify({
       name: this.config.name,
       service: this.config.service,
@@ -352,14 +349,13 @@ export class QubicConnect {
       permissions: ['wallet.permission.access_email_address'],
       nonce: Date.now(),
     });
-    window.location.href = qs.stringifyUrl({
-      url: `${this.authRedirectUrl}/auth`,
-      query: {
-        walletType: options?.walletType,
-        qubicSignInProvider: options?.qubicSignInProvider,
-        redirectUrl: encodeURIComponent(removedResultUrl),
-        dataString: encodeURIComponent(dataString),
-      },
+    const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
+    const redirectUrl = cleanResponsePassToConnect(window.location.href);
+    window.location.href = createUrlRequestConnectToPass(`${this.authRedirectUrl}/auth`, {
+      walletType: options?.walletType,
+      qubicSignInProvider: options?.qubicSignInProvider,
+      redirectUrl,
+      dataString,
     });
   }
 
@@ -385,8 +381,8 @@ export class QubicConnect {
       isQubicUser: query.isQubicUser === 'true',
     } as LoginRequest | { errorMessage: string };
 
-    const removedResultUrl = QubicConnect.removeResultQueryFromUrl(window.location.href);
-    window.history.replaceState({}, '', removedResultUrl);
+    const cleanedUrl = RedirectAuthManager.connect.cleanResponsePassToConnect(window.location.href);
+    window.history.replaceState({}, '', cleanedUrl);
 
     if ('errorMessage' in parsedQuery) {
       throw Error(parsedQuery.errorMessage);
