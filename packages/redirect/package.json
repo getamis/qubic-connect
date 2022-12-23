@@ -1,6 +1,6 @@
 {
   "name": "@qubic-connect/redirect",
-  "version": "0.5.1",
+  "version": "0.5.2-alpha.0",
   "homepage": "https://github.com/getamis/qubic-creator-sdk/tree/main/packages/redirect#readme",
   "license": "ISC",
   "main": "./dist/index.js",
