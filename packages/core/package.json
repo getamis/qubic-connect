@@ -1,6 +1,6 @@
 {
   "name": "@qubic-connect/core",
-  "version": "0.5.2",
+  "version": "0.5.3-alpha.0",
   "source": "./src/index.ts",
   "main": "./dist/index.js",
   "browser": "./dist/bundle.js",
@@ -43,7 +43,8 @@
   },
   "dependencies": {
     "@ethersproject/providers": "^5.6.8",
-    "@qubic-connect/redirect": "^0.5.2",
+    "@qubic-connect/redirect": "^0.5.3-alpha.0",
+    "@qubic-js/detect-inapp": "^1.4.1",
     "bignumber.js": "^9.0.2",
     "clsx": "^1.1.1",
     "cross-fetch": "^3.1.5",
@@ -55,8 +56,7 @@
     "preact": "^10.8.2",
     "query-string": "^7.1.1",
     "uuid": "^8.3.2",
-    "web-vitals": "^2.1.4",
-    "@qubic-js/detect-inapp": "^1.4.1"
+    "web-vitals": "^2.1.4"
   },
   "publishConfig": {
     "access": "public"
