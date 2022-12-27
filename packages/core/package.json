@@ -55,7 +55,8 @@
     "preact": "^10.8.2",
     "query-string": "^7.1.1",
     "uuid": "^8.3.2",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "@qubic-js/detect-inapp": "^1.4.1"
   },
   "publishConfig": {
     "access": "public"
