@@ -7,6 +7,7 @@ import HorizontalMoreOptions from '../icons/HorizontalMoreOptions';
 import VerticalMoreOptions from '../icons/VerticalMoreOptions';
 import ExportMoreOptions from '../icons/ExportMoreOptions';
 import ArrowForward from '../icons/ArrowForward';
+import { LEAVE_IAB_MODAL_ID } from '../../constants/domId';
 
 const { classes } = jss
   .createStyleSheet({
@@ -274,7 +275,7 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
   })();
 
   return (
-    <div className={clsx(classes.modal)}>
+    <div id={LEAVE_IAB_MODAL_ID} className={clsx(classes.modal)}>
       <div className={classes.backdrop} />
       <div className={hintWrapperClass}>
         {arrowPosition === 'top' && (
