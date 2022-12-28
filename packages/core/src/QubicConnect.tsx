@@ -27,6 +27,7 @@ import { login, logout, LoginRequest, renewToken, setAccessToken } from './api/a
 import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
+import { LEAVE_IAB_MODAL_ID } from './constants/domId';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -123,7 +124,7 @@ export class QubicConnect {
 
     const inapp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
 
-    if (inapp.isInApp) {
+    if (inapp.isInApp && !document.getElementById(LEAVE_IAB_MODAL_ID)) {
       this.createLeaveInAppBrowserModal(inapp);
     }
 
