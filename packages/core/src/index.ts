@@ -4,8 +4,11 @@ import { QubicConnect } from './QubicConnect';
 
 export * from './types';
 
+let globalQubicConnect: QubicConnect | null = null;
+
 function initialize(config: QubicConnectConfig): QubicConnect {
-  return new QubicConnect(config);
+  globalQubicConnect = globalQubicConnect || new QubicConnect(config);
+  return globalQubicConnect;
 }
 
 const utils = {
