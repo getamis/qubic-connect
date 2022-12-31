@@ -1,13 +1,9 @@
 const convertStringToHex = (str: string): string => {
-  try {
-    const bytesArr = new Uint8Array(Buffer.from(str));
-    return `0x${Array.from(bytesArr, byte => {
-      // eslint-disable-next-line no-bitwise
-      return `0${(byte & 0xff).toString(16)}`.slice(-2);
-    }).join('')}`;
-  } catch (error) {
-    return '';
+  let result = '0x';
+  for (let i = 0; i < str.length; i += 1) {
+    result += str.charCodeAt(i).toString(16);
   }
+  return result;
 };
 
 export default convertStringToHex;
