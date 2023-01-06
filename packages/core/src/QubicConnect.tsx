@@ -125,6 +125,12 @@ export class QubicConnect {
     const inapp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
 
     if (inapp.isInApp && !document.getElementById(LEAVE_IAB_MODAL_ID)) {
+      if (inapp.browser === 'line') {
+        const url = new URL(window.location.href);
+        const params = `${url.search ? '&' : '?'}openExternalBrowser=1`;
+        window.history.pushState(null, '', `${url.href}${params}`);
+      }
+
       this.createLeaveInAppBrowserModal(inapp);
     }
 
