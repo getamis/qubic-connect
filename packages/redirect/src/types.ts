@@ -1,2 +1,2 @@
 export type LoginRedirectWalletType = 'metamask' | 'qubic' | 'walletconnect';
-export type LoginRedirectSignInProvider = 'facebook' | 'google' | 'apple';
+export type LoginRedirectSignInProvider = 'facebook' | 'google' | 'apple' | 'yahoo';

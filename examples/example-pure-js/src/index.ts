@@ -130,6 +130,13 @@ function main() {
     });
   });
 
+  document.getElementById('redirect-login-qubic-yahoo')?.addEventListener('click', () => {
+    qubicConnect.loginWithRedirect({
+      walletType: 'qubic',
+      qubicSignInProvider: 'yahoo',
+    });
+  });
+
   document.getElementById('logout')?.addEventListener('click', () => {
     qubicConnect.logout();
   });
