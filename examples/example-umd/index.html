@@ -110,6 +110,10 @@
         document.getElementById('logout')?.addEventListener('click', () => {
           qubicConnect.logout();
         });
+
+        document.getElementById('magic-login')?.addEventListener('click', () => {
+          qubicConnect.magicLogin();
+        });
       }
 
       setTimeout(() => {
@@ -136,6 +140,11 @@
         <p>Redirect Login - Other</p>
         <button id="redirect-login-metamask">Metamask</button>
         <button id="redirect-login-walletconnect">WalletConnect</button>
+      </div>
+
+      <div class="group">
+        <p>Deeplink Login</p>
+        <button id="magic-login">login with app</button>
       </div>
 
       <div class="group">

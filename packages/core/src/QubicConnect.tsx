@@ -5,6 +5,8 @@ import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, LoginRedirectSignInProvider } from '@qubic-connect/redirect';
 import InApp from '@qubic-js/detect-inapp';
 
+import { Client, createClient } from 'graphql-ws';
+import { GraphQLError } from 'graphql';
 import {
   QubicConnectConfig,
   InternalQubicConnectConfig,
@@ -21,13 +23,15 @@ import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal'
 import LeaveInAppBrowserModal from './components/LoginModal/LeaveInAppBrowserModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
-import { API_URL, AUTH_REDIRECT_URL } from './constants/backend';
+import { API_URL, AUTH_REDIRECT_URL, MAGIC_LOGIN_LINK_URL, MAGIC_LOGIN_WEBSOCKET_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
 import { login, logout, LoginRequest, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
 import { LEAVE_IAB_MODAL_ID } from './constants/domId';
+import { subscribeIdentityTicket } from './api/subscribeIdentityTicket';
+import MagicLoginCodeModal from './components/LoginModal/MagicLoginCodeModal';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -81,6 +85,7 @@ export class QubicConnect {
 
   public fetch: SdkFetch;
   public requestGraphql: SdkRequestGraphql;
+  public subscribeGraphql: Client;
 
   constructor(config: QubicConnectConfig) {
     const {
@@ -90,6 +95,8 @@ export class QubicConnect {
       secret: apiSecret,
       apiUrl = API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
+      magicLoginWebsocketUrl = MAGIC_LOGIN_WEBSOCKET_URL,
+      magicLoginLinkUrl = MAGIC_LOGIN_LINK_URL,
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -104,6 +111,8 @@ export class QubicConnect {
       secret: apiSecret,
       apiUrl,
       authRedirectUrl,
+      magicLoginWebsocketUrl,
+      magicLoginLinkUrl,
     };
     QubicConnect.checkProviderOptions(config?.providerOptions);
 
@@ -117,15 +126,18 @@ export class QubicConnect {
       apiSecret,
       apiUrl,
     });
+    this.subscribeGraphql = createClient({
+      url: magicLoginWebsocketUrl,
+    });
 
     this.authRedirectUrl = authRedirectUrl;
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
-    const inapp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
+    const inApp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
 
-    if (inapp.isInApp && !document.getElementById(LEAVE_IAB_MODAL_ID)) {
-      this.createLeaveInAppBrowserModal(inapp);
+    if (inApp.isInApp && !document.getElementById(LEAVE_IAB_MODAL_ID)) {
+      this.createLeaveInAppBrowserModal(inApp);
     }
 
     this.onAuthStateChanged(QubicConnect.persistUser);
@@ -314,6 +326,22 @@ export class QubicConnect {
     };
   }
 
+  private createMagicLoginCodeModal(options: { passCode?: string; onLogin?: () => void; visible: boolean }): void {
+    if (!this.rootDiv) throw Error(`this.rootDiv not found`);
+    const { passCode = '', onLogin = () => null, visible } = options;
+    this.renderToChildren(
+      <MagicLoginCodeModal
+        passCode={passCode}
+        onLogin={onLogin}
+        visible={visible}
+        onClose={() => {
+          this.createMagicLoginCodeModal({ visible: false });
+        }}
+      />,
+      this.rootDiv,
+    );
+  }
+
   private static removeResultQueryFromUrl(currentUrl: string): string {
     const {
       url,
@@ -410,14 +438,8 @@ export class QubicConnect {
     return parsedQuery;
   }
 
-  private async handleRedirectResult(): Promise<void> {
+  private async handleLoginRequest(loginRequest: LoginRequest): Promise<void> {
     try {
-      const loginRequest = QubicConnect.getLoginRequestFromUrlAndClearUrl();
-      if (loginRequest === null) {
-        // not detecting valid query, just skip
-        return;
-      }
-
       const authResponse = await login(this.fetch, loginRequest);
       const {
         me: { qubicUser },
@@ -449,6 +471,15 @@ export class QubicConnect {
     }
   }
 
+  private handleRedirectResult(): void {
+    const loginRequest = QubicConnect.getLoginRequestFromUrlAndClearUrl();
+    if (loginRequest === null) {
+      // not detecting valid query, just skip
+      return;
+    }
+    this.handleLoginRequest(loginRequest);
+  }
+
   private pendingGetRedirectResultDeferred: Array<Deferred<WalletUser | null>> = [];
   public async getRedirectResult(): Promise<WalletUser | null> {
     if (this.cachedRedirectResult) {
@@ -460,5 +491,65 @@ export class QubicConnect {
     const deferred = new Deferred<WalletUser | null>();
     this.pendingGetRedirectResultDeferred.push(deferred);
     return deferred.promise;
+  }
+
+  private magicLoginPopupWindow: Window | null = null;
+  public magicLogin(): void {
+    subscribeIdentityTicket(this.subscribeGraphql, {
+      onIdentityTicket: async identityTicket => {
+        const loginRequest: LoginRequest = {
+          isQubicUser: true,
+          signature: identityTicket.ticket,
+          accountAddress: identityTicket.userAddress,
+          dataString: '',
+        };
+        try {
+          await this.handleLoginRequest(loginRequest);
+        } catch (error) {
+          console.error(error);
+        }
+        this.magicLoginPopupWindow?.close();
+        this.createMagicLoginCodeModal({ visible: false });
+      },
+      onIdentityTicketVerification: identityTicketVerification => {
+        const target = qs.stringifyUrl({
+          url: this.config.magicLoginLinkUrl,
+          query: {
+            requestId: identityTicketVerification.requestId,
+            expiredAt: identityTicketVerification.expiredAt,
+          },
+        });
+        this.createMagicLoginCodeModal({
+          passCode: identityTicketVerification.passCode,
+          onLogin: () => {
+            this.magicLoginPopupWindow = window.open(target, '_blank');
+          },
+          visible: true,
+        });
+      },
+      onComplete: () => {
+        this.createMagicLoginCodeModal({ visible: false });
+      },
+      onError: error => {
+        this.createMagicLoginCodeModal({ visible: false });
+        if (error instanceof Error) {
+          window.alert(error.message);
+          return;
+        }
+
+        if (error instanceof GraphQLError) {
+          window.alert(error.message);
+          return;
+        }
+
+        if (error instanceof CloseEvent) {
+          window.alert('websocket close');
+          return;
+        }
+        console.error(error);
+        // TODO: timeout error?
+        window.alert('something wrong');
+      },
+    });
   }
 }

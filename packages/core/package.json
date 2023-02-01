@@ -51,6 +51,7 @@
     "crypto-js": "^4.1.1",
     "graphql": "^16.5.0",
     "graphql-request": "^4.3.0",
+    "graphql-ws": "^5.11.2",
     "jss": "^10.9.0",
     "jss-preset-default": "^10.9.0",
     "preact": "^10.8.2",

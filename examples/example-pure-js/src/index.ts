@@ -3,7 +3,16 @@ import { gql } from 'graphql-request';
 import querystring from 'query-string';
 
 import './index.css';
-import { API_SERVICE_NAME, API_KEY, API_SECRET, API_URL, AUTH_REDIRECT_URL, VERIFY_URL } from './environment';
+import {
+  API_SERVICE_NAME,
+  API_KEY,
+  API_SECRET,
+  API_URL,
+  AUTH_REDIRECT_URL,
+  VERIFY_URL,
+  MAGIC_LOGIN_WEBSOCKET_URL,
+  MAGIC_LOGIN_LINK_URL,
+} from './environment';
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
@@ -12,6 +21,8 @@ const SDK_CONFIG: QubicConnectConfig = {
   service: API_SERVICE_NAME, //optional
   apiUrl: API_URL, // optional
   authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
+  magicLoginWebsocketUrl: MAGIC_LOGIN_WEBSOCKET_URL, //optional for debug
+  magicLoginLinkUrl: MAGIC_LOGIN_LINK_URL, //optional for debug
 };
 
 function main() {
@@ -139,6 +150,10 @@ function main() {
 
   document.getElementById('logout')?.addEventListener('click', () => {
     qubicConnect.logout();
+  });
+
+  document.getElementById('magic-login')?.addEventListener('click', () => {
+    qubicConnect.magicLogin();
   });
 }
 

@@ -3,12 +3,22 @@ import { PaymentResult } from './Purchase';
 import { QubicUser } from './QubicUser';
 
 export interface QubicConnectConfig {
+  /** name: for login purpose */
   name: string;
+  /** service: for login purpose, default: qubic-creator */
   service?: string;
-  key: string;
-  secret: string;
-  providerOptions?: ProviderOptions;
+  /** apiUrl: creator admin api url, default: https://admin.qubic.market/market */
   apiUrl?: string;
+  /** key: for apiUrl */
+  key: string;
+  /** secret: for apiUrl */
+  secret: string;
+  /** providerOptions: wallet provider option */
+  providerOptions?: ProviderOptions;
+  /** magicLoginWebsocketUrl: qubic wallet api graphql  */
+  magicLoginWebsocketUrl?: string;
+  /** magicLoginLinkUrl: link will be opened when button clicked */
+  magicLoginLinkUrl?: string;
 
   // # fast login
   // authRedirectUrl where have different type of wallet
