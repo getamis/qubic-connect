@@ -3,11 +3,11 @@ import { memo } from 'preact/compat';
 import clsx from 'clsx';
 import InApp, { InAppBrowser } from '@qubic-js/detect-inapp';
 
-import HorizontalMoreOptions from '../icons/HorizontalMoreOptions';
-import VerticalMoreOptions from '../icons/VerticalMoreOptions';
-import ExportMoreOptions from '../icons/ExportMoreOptions';
-import ArrowForward from '../icons/ArrowForward';
-import { LEAVE_IAB_MODAL_ID } from '../../constants/domId';
+import HorizontalMoreOptions from './icons/HorizontalMoreOptions';
+import VerticalMoreOptions from './icons/VerticalMoreOptions';
+import ExportMoreOptions from './icons/ExportMoreOptions';
+import ArrowForward from './icons/ArrowForward';
+import { LEAVE_IAB_MODAL_ID } from './constant';
 
 const { classes } = jss
   .createStyleSheet({
