@@ -1,13 +1,15 @@
 {
   "name": "@qubic-connect/detect-iab",
-  "version": "0.6.3",
+  "version": "0.6.4-alpha.0",
   "description": "when detecting environment in iab, show blocking",
   "author": "Kevin.Wu <kevin.wu@maicoin.com>",
   "homepage": "https://github.com/getamis/qubic-creator-sdk/tree/main/packages/detect-iab#readme",
   "license": "ISC",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/getamis/qubic-connect.git"
