@@ -29,8 +29,8 @@
   },
   "scripts": {
     "deploy:payment:dev": " yarn workspace @qubic-connect/payment-form-web deploy:dev",
-    "build": "lerna run build --scope={'@qubic-connect/redirect,@qubic-connect/core,@qubic-connect/react'}",
-    "watch": "lerna run watch --scope={'@qubic-connect/redirect,@qubic-connect/core,@qubic-connect/react'}",
+    "build": "lerna run build --scope={'@qubic-connect/redirect,@qubic-connect/detect-iab,@qubic-connect/core,@qubic-connect/react'}",
+    "watch": "lerna run watch --scope={'@qubic-connect/redirect,@qubic-connect/detect-iab,@qubic-connect/core,@qubic-connect/react'}",
     "release": "npm run build && lerna publish --force-publish",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1"

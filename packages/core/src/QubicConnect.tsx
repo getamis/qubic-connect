@@ -3,7 +3,7 @@ import { createPortal } from 'preact/compat';
 import qs from 'query-string';
 import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, LoginRedirectSignInProvider } from '@qubic-connect/redirect';
-import InApp from '@qubic-js/detect-inapp';
+import { showBlockerWhenIab } from '@qubic-connect/detect-iab';
 
 import {
   QubicConnectConfig,
@@ -18,7 +18,6 @@ import { ExtendedExternalProvider, ProviderOptions } from './types/ExtendedExter
 import PaymentForm from './components/PaymentForm';
 import { Order, SdkFetchError } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
-import LeaveInAppBrowserModal from './components/LoginModal/LeaveInAppBrowserModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
 import { API_URL, AUTH_REDIRECT_URL } from './constants/backend';
@@ -27,7 +26,6 @@ import { login, logout, LoginRequest, renewToken, setAccessToken } from './api/a
 import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
-import { LEAVE_IAB_MODAL_ID } from './constants/domId';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -122,17 +120,7 @@ export class QubicConnect {
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
-    const inapp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
-
-    if (inapp.isInApp && !document.getElementById(LEAVE_IAB_MODAL_ID)) {
-      if (inapp.browser === 'line') {
-        const url = new URL(window.location.href);
-        const params = `${url.search ? '&' : '?'}openExternalBrowser=1`;
-        window.history.pushState(null, '', `${url.href}${params}`);
-      }
-
-      this.createLeaveInAppBrowserModal(inapp);
-    }
+    showBlockerWhenIab();
 
     this.onAuthStateChanged(QubicConnect.persistUser);
     this.handleRedirectResult();
@@ -274,12 +262,6 @@ export class QubicConnect {
       this.children = [...this.children, newVNode];
     }
     this.forceUpdate();
-  }
-
-  private createLeaveInAppBrowserModal(inApp: InApp): void {
-    if (!this.rootDiv) throw Error(`this.rootDiv not found`);
-
-    this.renderToChildren(<LeaveInAppBrowserModal inApp={inApp} />, this.rootDiv);
   }
 
   public createLoginButton(element: HTMLElement | null, props: LoginButtonProps): void {
