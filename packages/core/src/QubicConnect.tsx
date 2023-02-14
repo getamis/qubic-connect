@@ -2,7 +2,7 @@ import { ComponentChild, render, VNode } from 'preact';
 import { createPortal } from 'preact/compat';
 import qs from 'query-string';
 import { EventEmitter } from 'events';
-import { RedirectAuthManager, LoginRedirectWalletType, LoginRedirectSignInProvider } from '@qubic-connect/redirect';
+import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
 import { showBlockerWhenIab } from '@qubic-connect/detect-iab';
 
 import {
@@ -14,7 +14,11 @@ import {
   WalletUser,
 } from './types/QubicConnect';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
-import { ExtendedExternalProvider, ProviderOptions } from './types/ExtendedExternalProvider';
+import {
+  ExtendedExternalProvider,
+  ExtendedExternalProviderMethod,
+  ProviderOptions,
+} from './types/ExtendedExternalProvider';
 import PaymentForm from './components/PaymentForm';
 import { Order, SdkFetchError } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
@@ -26,6 +30,7 @@ import { login, logout, LoginRequest, renewToken, setAccessToken } from './api/a
 import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
+import { createSignMessageAndLogin } from './utils/signMessageAndLogin';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -36,6 +41,7 @@ enum Events {
 const USER_STORAGE_KEY = '@qubic-connect/user';
 const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 1000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
+const AUTH_APP_URL = window.location.origin;
 
 export class QubicConnect {
   private readonly config: InternalQubicConnectConfig;
@@ -102,6 +108,7 @@ export class QubicConnect {
       secret: apiSecret,
       apiUrl,
       authRedirectUrl,
+      providerOptions: config.providerOptions,
     };
     QubicConnect.checkProviderOptions(config?.providerOptions);
 
@@ -302,24 +309,60 @@ export class QubicConnect {
     };
   }
 
-  private static removeResultQueryFromUrl(currentUrl: string): string {
-    const {
-      url,
-      // remove previous result, key of LoginRequest and errorMessage but keep other query params
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      query: { accountAddress, signature, dataString, isQubicUser, errorMessage, ...restQuery },
-    } = qs.parseUrl(currentUrl);
-
-    const removedResultUrl = qs.stringifyUrl({
-      url,
-      query: restQuery,
-    });
-    return removedResultUrl;
+  private handleAccountsChanged(accounts: string[]) {
+    if (accounts.length === 0) {
+      this.handleLogout(null);
+    }
   }
 
-  // public async login() : Promise<LoginResponse> {
-  // TODO: ApiProvider
-  // }
+  public async loginWithWallet(
+    method: Exclude<ExtendedExternalProviderMethod, 'redirect'>,
+    qubicSignInProvider?: QubicSignInProvider,
+  ): Promise<WalletUser> {
+    const option = this.config.providerOptions?.[method];
+    if (!option) {
+      throw Error(`providerOption.${method} not found`);
+    }
+
+    const { provider: optionProvider } = option;
+    if (!optionProvider) {
+      throw Error(`optionProvider not found`);
+    }
+
+    if (optionProvider.isQubic && qubicSignInProvider) {
+      optionProvider.setSignInProvider?.(qubicSignInProvider);
+      optionProvider.off?.('accountsChanged', this.handleAccountsChanged.bind(this));
+      optionProvider.on?.('accountsChanged', this.handleAccountsChanged.bind(this));
+    }
+    const signMessageAndLogin = createSignMessageAndLogin(this.fetch, {
+      authAppName: this.config.name,
+      authAppUrl: AUTH_APP_URL,
+      authServiceName: this.config.service,
+    });
+    try {
+      if (isWalletconnectProvider(method, optionProvider)) {
+        // https://github.com/WalletConnect/walletconnect-monorepo/issues/747
+        await optionProvider.enable();
+      }
+      const { accessToken, expiredAt, address } = await signMessageAndLogin(method, optionProvider);
+      const result: WalletUser = {
+        method,
+        accessToken,
+        expiredAt,
+        address,
+        provider: optionProvider,
+        qubicUser: null,
+      };
+
+      this.handleLogin(null, result);
+      return result;
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleLogin(error);
+      }
+      throw error;
+    }
+  }
 
   public async logout(): Promise<void> {
     try {
@@ -344,7 +387,7 @@ export class QubicConnect {
    */
   public loginWithRedirect(options?: {
     walletType: LoginRedirectWalletType;
-    qubicSignInProvider?: LoginRedirectSignInProvider;
+    qubicSignInProvider?: QubicSignInProvider;
   }): void {
     const dataString = JSON.stringify({
       name: this.config.name,
