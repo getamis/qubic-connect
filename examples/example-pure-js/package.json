@@ -26,6 +26,9 @@
   },
   "scripts": {
     "start": "GENERATE_SOURCEMAP=false react-app-rewired start",
+    "start:dev": "env-cmd -f ../.env.dev yarn start",
+    "start:stag": "env-cmd -f ../.env.stag yarn start",
+    "start:prod": "env-cmd -f ../.env.prod yarn start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"

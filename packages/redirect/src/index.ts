@@ -12,7 +12,7 @@ import {
   cleanResponseWalletToPass,
 } from './utils';
 
-export type { LoginRedirectWalletType, LoginRedirectSignInProvider } from './types';
+export type { LoginRedirectWalletType, QubicSignInProvider } from './types';
 
 export const RedirectAuthManager = {
   connect: {

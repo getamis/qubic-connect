@@ -1,9 +1,20 @@
 import { QubicConnect, Currency, QubicConnectConfig, SdkFetchError } from '@qubic-connect/core';
+import QubicProvider from '@qubic-js/browser';
+import WalletConnectProvider from '@walletconnect/web3-provider';
 import { gql } from 'graphql-request';
 import querystring from 'query-string';
 
 import './index.css';
-import { API_SERVICE_NAME, API_KEY, API_SECRET, API_URL, AUTH_REDIRECT_URL, VERIFY_URL } from './environment';
+import {
+  API_SERVICE_NAME,
+  API_KEY,
+  API_SECRET,
+  API_URL,
+  AUTH_REDIRECT_URL,
+  VERIFY_URL,
+  INFURA_ID,
+  QUBIC_WALLET_URL,
+} from './environment';
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
@@ -12,6 +23,22 @@ const SDK_CONFIG: QubicConnectConfig = {
   service: API_SERVICE_NAME, //optional
   apiUrl: API_URL, // optional
   authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
+  providerOptions: {
+    qubic: {
+      provider: new QubicProvider({
+        walletUrl: QUBIC_WALLET_URL,
+        enableIframe: true,
+      }),
+    },
+    metamask: {
+      provider: window.ethereum,
+    },
+    walletconnect: {
+      provider: new WalletConnectProvider({
+        infuraId: INFURA_ID,
+      }),
+    },
+  },
 };
 
 function main() {
@@ -137,8 +164,40 @@ function main() {
     });
   });
 
-  document.getElementById('logout')?.addEventListener('click', () => {
-    qubicConnect.logout();
+  Array.from(document.getElementsByClassName('logout')).forEach(button => {
+    button.addEventListener('click', () => {
+      qubicConnect.logout();
+    });
+  });
+
+  document.getElementById('login-metamask')?.addEventListener('click', () => {
+    qubicConnect.loginWithWallet('metamask');
+  });
+
+  document.getElementById('login-walletconnect')?.addEventListener('click', () => {
+    qubicConnect.loginWithWallet('walletconnect');
+  });
+
+  document.getElementById('login-qubic')?.addEventListener('click', () => {
+    qubicConnect.provider?.request?.({
+      method: 'eth_requestAccounts',
+    });
+  });
+
+  document.getElementById('login-qubic-google')?.addEventListener('click', () => {
+    qubicConnect.loginWithWallet('qubic', 'google');
+  });
+
+  document.getElementById('login-qubic-facebook')?.addEventListener('click', () => {
+    qubicConnect.loginWithWallet('qubic', 'facebook');
+  });
+
+  document.getElementById('login-qubic-apple')?.addEventListener('click', () => {
+    qubicConnect.loginWithWallet('qubic', 'apple');
+  });
+
+  document.getElementById('login-qubic-yahoo')?.addEventListener('click', () => {
+    qubicConnect.loginWithWallet('qubic', 'yahoo');
   });
 }
 

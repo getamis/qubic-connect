@@ -1,5 +1,5 @@
 import qs from 'query-string';
-import { LoginRedirectWalletType, LoginRedirectSignInProvider } from './types';
+import { LoginRedirectWalletType, QubicSignInProvider } from './types';
 
 export interface ResponseFail {
   errorMessage: string;
@@ -9,7 +9,7 @@ export interface ResponseFail {
 
 export interface RequestConnectToPass {
   walletType?: LoginRedirectWalletType;
-  qubicSignInProvider?: LoginRedirectSignInProvider;
+  qubicSignInProvider?: QubicSignInProvider;
   redirectUrl: string;
   dataString: string;
 }
@@ -25,7 +25,7 @@ type ResponsePassToConnect = ResponseFail | ResponsePassToConnectSuccess;
 
 export interface RequestPassToWallet {
   ticketRedirectUrl: string;
-  provider: LoginRedirectSignInProvider;
+  provider: QubicSignInProvider;
 }
 
 export interface ResponseWalletToPassSuccess extends Partial<RequestConnectToPass> {
@@ -90,7 +90,7 @@ export function getRequestConnectToPass(url: string): RequestConnectToPass | und
   }
   return {
     walletType: query.walletType as LoginRedirectWalletType,
-    qubicSignInProvider: query.qubicSignInProvider as LoginRedirectSignInProvider,
+    qubicSignInProvider: query.qubicSignInProvider as QubicSignInProvider,
     redirectUrl: decodeURIComponent(query.redirectUrl as string),
     dataString: decodeURIComponent(query.dataString as string),
   };
@@ -171,7 +171,7 @@ export function getRequestPassToWallet(url: string): RequestPassToWallet | undef
   }
   return {
     ticketRedirectUrl: decodeURIComponent(query.ticketRedirectUrl as string),
-    provider: query.provider as LoginRedirectSignInProvider,
+    provider: query.provider as QubicSignInProvider,
   };
 }
 
