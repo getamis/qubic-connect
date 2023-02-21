@@ -5,22 +5,14 @@ import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
 import { showBlockerWhenIab } from '@qubic-connect/detect-iab';
 
-import {
-  QubicConnectConfig,
-  InternalQubicConnectConfig,
-  OnPaymentDone,
-  OnLogin,
-  OnLogout,
-  WalletUser,
-} from './types/QubicConnect';
+import { QubicConnectConfig, InternalQubicConnectConfig, OnLogin, OnLogout, WalletUser } from './types/QubicConnect';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
 import {
   ExtendedExternalProvider,
   ExtendedExternalProviderMethod,
   ProviderOptions,
 } from './types/ExtendedExternalProvider';
-import PaymentForm from './components/PaymentForm';
-import { Order, SdkFetchError } from './types';
+import { SdkFetchError } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
@@ -281,32 +273,6 @@ export class QubicConnect {
     if (!element) throw Error(`${element} not found`);
 
     this.renderToChildren(<LoginModal {...props} />, element);
-  }
-
-  public createPaymentForm(
-    element: HTMLElement | null,
-    props: {
-      onPaymentDone: OnPaymentDone;
-    },
-  ): {
-    setOrder: (value: Order) => void;
-  } {
-    if (!element) throw Error(`${element} not found`);
-
-    let order: Order | undefined;
-
-    function setOrder(value: Order) {
-      order = value;
-    }
-
-    function getOrder(): Order | undefined {
-      return order;
-    }
-
-    this.renderToChildren(<PaymentForm getOrder={getOrder} onPaymentDone={props.onPaymentDone} />, element);
-    return {
-      setOrder,
-    };
   }
 
   private handleAccountsChanged(accounts: string[]) {
