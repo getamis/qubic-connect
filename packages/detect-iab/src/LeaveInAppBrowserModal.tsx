@@ -271,7 +271,7 @@ function getArrowPosition(platform: Platform, browser: InAppBrowser) {
     }
   }
 
-  return null;
+  return 'bottom';
 }
 
 function isBlurSupported(): boolean {
