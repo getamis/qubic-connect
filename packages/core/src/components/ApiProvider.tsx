@@ -1,5 +1,5 @@
 import { ComponentChildren, createContext } from 'preact';
-import { memo, useCallback, useContext, useMemo, useState } from 'preact/compat';
+import { memo, useCallback, useContext, useState } from 'preact/compat';
 import { isWalletconnectProvider } from '../utils/isWalletconnectProvider';
 import {
   ExtendedExternalProvider,
@@ -10,7 +10,6 @@ import {
   InternalQubicConnectConfig,
 } from '../types';
 import { createSignMessageAndLogin } from '../utils/signMessageAndLogin';
-import { BatchBuyAssetInput, BatchBuyAssetResult, createFetchBatchBuyAssetResult } from '../api/purchase';
 import { ProviderOptions } from '../types/ExtendedExternalProvider';
 import { logout as apiLogout } from '../api/auth';
 import { SdkFetch } from '../utils/sdkFetch';
@@ -22,7 +21,6 @@ interface ApiContextValue {
   provider: ExtendedExternalProvider | null;
   accessToken: string | null;
   address: string | null;
-  fetchBatchBuyAssetResult: (input: BatchBuyAssetInput) => Promise<BatchBuyAssetResult>;
   sdkFetch: SdkFetch;
   sdkRequestGraphql: SdkRequestGraphql;
   providerOptions?: ProviderOptions;
@@ -114,10 +112,6 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
     }
   }, [onLogout, sdkFetch]);
 
-  const fetchBatchBuyAssetResult = useMemo(() => {
-    return createFetchBatchBuyAssetResult(sdkRequestGraphql);
-  }, [sdkRequestGraphql]);
-
   return (
     <ApiContext.Provider
       value={{
@@ -128,7 +122,6 @@ export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
         sdkRequestGraphql,
         login,
         logout,
-        fetchBatchBuyAssetResult,
         providerOptions,
       }}
     >
