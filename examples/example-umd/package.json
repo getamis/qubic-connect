@@ -7,11 +7,15 @@
   "scripts": {
     "copy-files": "cp ../../packages/core/dist/bundle.js* .",
     "start": "yarn copy-files && http-server --port 3000",
+    "start:dev": "node ./scripts/parseEnv.js ../.env.dev && yarn start",
+    "start:stag": "node ./scripts/parseEnv.js ../.env.stag && yarn start",
+    "start:prod": "node ./scripts/parseEnv.js ../.env.prod && yarn start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "dotenv": "^16.0.3",
     "http-server": "^14.1.1"
   }
 }

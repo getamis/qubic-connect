@@ -4,20 +4,20 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script type="text/javascript"></script>
+    <script type="text/javascript" src="./env.js"></script>
+
     <!-- <script type="text/javascript" src="https://unpkg.com/@qubic-connect/core"></script> -->
     <script type="text/javascript" src="./bundle.js"></script>
-
     <script type="text/javascript">
       // assign sdk config and verify url here
       const SDK_CONFIG = {
         name: 'Qubic Creator', // a display name for future usage
-        key: '<YOUR_KEY>',
-        secret: '<YOUR_SECRET>',
-        // apiUrl: 'https://admin.stag.qubic.market/market', // optional
-        // authRedirectUrl: 'https://pass.stag.qubic.app', // optional
+        key: window.REACT_APP_API_KEY,
+        secret: window.REACT_APP_API_SECRET,
+        apiUrl: window.REACT_APP_API_URL,
+        authRedirectUrl: window.REACT_APP_AUTH_REDIRECT_URL,
       };
-      const VERIFY_URL = 'https://auth.qubic.app/verify';
+      const VERIFY_URL = window.REACT_APP_VERIFY_URL;
 
       function main() {
         const qubicConnect = QubicConnect.initialize(SDK_CONFIG);
