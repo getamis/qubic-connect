@@ -199,6 +199,17 @@ function main() {
   document.getElementById('login-qubic-yahoo')?.addEventListener('click', () => {
     qubicConnect.loginWithWallet('qubic', 'yahoo');
   });
+
+  document.getElementById('buy')?.addEventListener('click', () => {
+    qubicConnect.createCheckout('some input');
+  });
+
+  document.getElementById('get-order')?.addEventListener('click', () => {
+    const orderId = prompt('input order id');
+    if (orderId) {
+      qubicConnect.getOrder(orderId);
+    }
+  });
 }
 
 main();

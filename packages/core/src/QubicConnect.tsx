@@ -16,7 +16,7 @@ import { SdkFetchError } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
-import { API_URL, AUTH_REDIRECT_URL } from './constants/backend';
+import { API_URL, AUTH_REDIRECT_URL, PAYMENT_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
 import { login, logout, LoginRequest, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
@@ -86,6 +86,7 @@ export class QubicConnect {
       secret: apiSecret,
       apiUrl = API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
+      paymentUrl = PAYMENT_URL,
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -101,6 +102,7 @@ export class QubicConnect {
       apiUrl,
       authRedirectUrl,
       providerOptions: config.providerOptions,
+      paymentUrl,
     };
     QubicConnect.checkProviderOptions(config?.providerOptions);
 
@@ -457,5 +459,27 @@ export class QubicConnect {
     const deferred = new Deferred<WalletUser | null>();
     this.pendingGetRedirectResultDeferred.push(deferred);
     return deferred.promise;
+  }
+
+  public createCheckout(checkoutInput: unknown): void {
+    // eslint-disable-next-line no-console
+    console.log(`send ${JSON.stringify(checkoutInput)}`);
+
+    const checkoutId = 'checkoutId';
+
+    window.location.href = qs.stringifyUrl({
+      url: this.config.paymentUrl,
+      query: {
+        checkoutId,
+      },
+    });
+  }
+
+  public getOrder(orderId: string): any {
+    // eslint-disable-next-line no-console
+    console.log(this.config);
+    // eslint-disable-next-line no-console
+    console.log(`get order by orderId: ${orderId}`);
+    return null;
   }
 }
