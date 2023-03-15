@@ -41,14 +41,15 @@ const qubicConnect = new QubicConnect({
 
 // user schema
 // {
-//   method: ExtendedExternalProviderMethod;
+//   method: 'metamask' | 'qubic' | 'walletconnect' | 'custom' | 'redirect';
 //   address: string;
 //   accessToken: string;
 //   expiredAt: number;
-//   provider: ExtendedExternalProvider | null;
+//   provider: ExtendedExternalProvider | null; // web3 provider
 //   qubicUser?: {
 //    provider: 'GOOGLE' | 'FACEBOOK' | 'TWITTER' | 'APPLE' | 'UNKNOWN';
 //    email: string;
+//    isKyc: boolean;
 //  };
 // }
 
