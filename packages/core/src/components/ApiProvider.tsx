@@ -38,7 +38,8 @@ interface ApiContextProviderProps {
   sdkRequestGraphql: SdkRequestGraphql;
 }
 
-const AUTH_APP_URL = window.location.origin;
+// for window === 'undefined' next.js server side rendering
+const AUTH_APP_URL = typeof window === 'undefined' ? '' : window.location.origin;
 
 export const ApiContextProvider = memo<ApiContextProviderProps>(props => {
   const { config, onLogin, onLogout, sdkFetch, sdkRequestGraphql } = props;

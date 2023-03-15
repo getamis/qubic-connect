@@ -33,7 +33,7 @@ enum Events {
 const USER_STORAGE_KEY = '@qubic-connect/user';
 const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 1000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
-const AUTH_APP_URL = window.location.origin;
+const AUTH_APP_URL = typeof window === 'undefined' ? '' : window.location.origin;
 
 export class QubicConnect {
   private readonly config: InternalQubicConnectConfig;
