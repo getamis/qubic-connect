@@ -86,6 +86,7 @@ export class QubicConnect {
       secret: apiSecret,
       apiUrl = API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
+      disableIabWarning = false,
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -101,6 +102,7 @@ export class QubicConnect {
       apiUrl,
       authRedirectUrl,
       providerOptions: config.providerOptions,
+      disableIabWarning,
     };
     QubicConnect.checkProviderOptions(config?.providerOptions);
 
@@ -119,7 +121,9 @@ export class QubicConnect {
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
-    showBlockerWhenIab();
+    if (!disableIabWarning) {
+      showBlockerWhenIab();
+    }
 
     this.onAuthStateChanged(QubicConnect.persistUser);
     this.handleRedirectResult();

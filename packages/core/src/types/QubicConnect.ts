@@ -8,6 +8,7 @@ export interface QubicConnectConfig {
   secret: string;
   providerOptions?: ProviderOptions;
   apiUrl?: string;
+  disableIabWarning?: boolean;
 
   // # fast login
   // authRedirectUrl where have different type of wallet
