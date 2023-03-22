@@ -125,7 +125,8 @@ export class QubicConnect {
 
     if (!disableOpenExternalBrowserWhenLineIab) {
       openExternalBrowserWhenLineIab();
-    } else if (!disableIabWarning) {
+    }
+    if (!disableIabWarning) {
       showBlockerWhenIab();
     }
 
