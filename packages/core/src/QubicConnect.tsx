@@ -3,7 +3,7 @@ import { createPortal } from 'preact/compat';
 import qs from 'query-string';
 import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
-import { showBlockerWhenIab } from '@qubic-connect/detect-iab';
+import { showBlockerWhenIab, openExternalBrowserWhenLineIab } from '@qubic-connect/detect-iab';
 
 import { QubicConnectConfig, InternalQubicConnectConfig, OnLogin, OnLogout, WalletUser } from './types/QubicConnect';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
@@ -87,6 +87,7 @@ export class QubicConnect {
       apiUrl = API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
       disableIabWarning = false,
+      disableOpenExternalBrowserWhenLineIab = false,
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -103,6 +104,7 @@ export class QubicConnect {
       authRedirectUrl,
       providerOptions: config.providerOptions,
       disableIabWarning,
+      disableOpenExternalBrowserWhenLineIab,
     };
     QubicConnect.checkProviderOptions(config?.providerOptions);
 
@@ -121,7 +123,9 @@ export class QubicConnect {
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
-    if (!disableIabWarning) {
+    if (!disableOpenExternalBrowserWhenLineIab) {
+      openExternalBrowserWhenLineIab();
+    } else if (!disableIabWarning) {
       showBlockerWhenIab();
     }
 
