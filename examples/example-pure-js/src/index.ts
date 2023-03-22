@@ -28,6 +28,7 @@ const SDK_CONFIG: QubicConnectConfig = {
       provider: new QubicProvider({
         walletUrl: QUBIC_WALLET_URL,
         enableIframe: true,
+        disableIabWarning: true,
       }),
     },
     metamask: {
