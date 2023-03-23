@@ -72,11 +72,13 @@ export function cleanResponsePassToConnect(currentUrl: string): string {
     // remove previous result, key of LoginRequest and errorMessage but keep other query params
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     query: { accountAddress, signature, dataString, isQubicUser, errorMessage, ...restQuery },
-  } = qs.parseUrl(currentUrl);
+    fragmentIdentifier,
+  } = qs.parseUrl(currentUrl, { parseFragmentIdentifier: true });
 
   const removedResultUrl = qs.stringifyUrl({
     url,
     query: restQuery,
+    fragmentIdentifier,
   });
   return removedResultUrl;
 }
@@ -132,11 +134,13 @@ export function cleanResponseWalletToPass(currentUrl: string): string {
     url,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     query: { ticket, expiredAt, address, errorMessage, ...restQuery },
-  } = qs.parseUrl(currentUrl);
+    fragmentIdentifier,
+  } = qs.parseUrl(currentUrl, { parseFragmentIdentifier: true });
 
   const removedResultUrl = qs.stringifyUrl({
     url,
     query: restQuery,
+    fragmentIdentifier,
   });
   return removedResultUrl;
 }
