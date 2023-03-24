@@ -9,6 +9,8 @@ const en = {
   openInDefaultBrowser: 'Open in your default browser',
   openInSafari: 'Open in safari',
   openInChrome: 'Open in chrome',
+  copy: 'Copy',
+  copied: 'Copied',
 };
 
 const zhTW = {
@@ -22,6 +24,8 @@ const zhTW = {
   openInDefaultBrowser: '使用預設瀏覽器開啟',
   openInSafari: '在 Safari 開啟',
   openInChrome: '在 Chrome 開啟',
+  copy: '複製',
+  copied: '已複製',
 };
 
 export function getLocaleStrings(): Record<string, string> {
