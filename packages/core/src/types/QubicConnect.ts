@@ -8,6 +8,8 @@ export interface QubicConnectConfig {
   secret: string;
   providerOptions?: ProviderOptions;
   apiUrl?: string;
+  iabRedirectUrl?: string;
+  shouldAlwaysShowCopyUI?: boolean;
   disableIabWarning?: boolean;
   disableOpenExternalBrowserWhenLineIab?: boolean;
 

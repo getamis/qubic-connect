@@ -1,16 +1,16 @@
 import InApp from '@qubic-js/detect-inapp';
 import { render } from 'preact';
 import { LEAVE_IAB_MODAL_ID } from './constant';
-import LeaveInAppBrowserModal from './LeaveInAppBrowserModal';
+import LeaveInAppBrowserModal, { ShowBlockerOptions } from './LeaveInAppBrowserModal';
 
-export function showBlockerWhenIab(): void {
+export function showBlockerWhenIab(options?: ShowBlockerOptions): void {
   const inapp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
 
   if (inapp.isInApp && !document.getElementById(LEAVE_IAB_MODAL_ID)) {
     const createdRootDiv = document.createElement('div');
     document.body.appendChild(createdRootDiv);
 
-    render(<LeaveInAppBrowserModal inApp={inapp} />, createdRootDiv);
+    render(<LeaveInAppBrowserModal options={options} inApp={inapp} />, createdRootDiv);
   }
 }
 
