@@ -162,8 +162,20 @@ const { classes } = jss
   })
   .attach();
 
+
+export interface ShowBlockerOptions {
+  redirectUrl?: string;
+  shouldAlwaysShowCopyUI?: boolean;
+}
+
+enum DisplayMode {
+  HINT = 'hint',
+  COPY = 'copy',
+}
+
 interface ModalProps {
   inApp: InApp;
+  options?: ShowBlockerOptions;
 }
 
 function getHintImage(platform: Platform, browser: InAppBrowser) {
@@ -318,7 +330,10 @@ function isBlurSupported(): boolean {
 }
 
 const LeaveInAppBrowserModal = memo<ModalProps>(props => {
-  const { inApp } = props;
+  const { inApp, options } = props;
+
+  const { redirectUrl: optionsRedirectUrl, shouldAlwaysShowCopyUI = false } = options || {};
+  const redirectUrl = optionsRedirectUrl || window.location.href;
 
   const platform = getPlatform(inApp.ua);
   const currentBrowser =
@@ -358,7 +373,7 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
   const [copyFailed, setCopyFailed] = useState(false);
 
   const copyFn = useCallback((manual: boolean) => async () => {
-    const text = window.location.href;
+    const text = redirectUrl;
 
     if (typeof navigator !== undefined && typeof navigator.clipboard !== undefined) {
       const resolve = () => { 
@@ -390,7 +405,9 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
         setCopyFailed(true);
       }
     }
-  }, []);
+  }, [redirectUrl]);
+
+  const displayMode = shouldAlwaysShowCopyUI || !arrowPosition ? DisplayMode.COPY : DisplayMode.HINT;
 
   return (
     <div id={LEAVE_IAB_MODAL_ID} className={classes.modal}>
@@ -403,11 +420,11 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
           <span className={classes.alertSentence2}>
             {localeStrings.alertSentence2}
           </span>
-          {!arrowPosition && (
+          {displayMode === DisplayMode.COPY && (
             <div className={classes.currentUrlWrapper}>
               <input
                 readOnly
-                value={window.location.href}
+                value={redirectUrl}
                 className={classes.currentUrlInput}
               />
               {!copyFailed && (
@@ -419,7 +436,7 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
           )}
         </div>
       </div>
-      {arrowPosition && (
+      {displayMode === DisplayMode.HINT && (
         <div className={hintWrapperClass}>
           <div className={classes.dialogWrapper}>
             <p className={classes.dialogText}>

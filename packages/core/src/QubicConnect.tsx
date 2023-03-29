@@ -87,6 +87,8 @@ export class QubicConnect {
       apiUrl = API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
       disableIabWarning = false,
+      iabRedirectUrl = window.location.href,
+      shouldAlwaysShowCopyUI = false,
       disableOpenExternalBrowserWhenLineIab = false,
     } = config;
     if (!apiKey) {
@@ -104,8 +106,11 @@ export class QubicConnect {
       authRedirectUrl,
       providerOptions: config.providerOptions,
       disableIabWarning,
+      iabRedirectUrl,
+      shouldAlwaysShowCopyUI,
       disableOpenExternalBrowserWhenLineIab,
     };
+
     QubicConnect.checkProviderOptions(config?.providerOptions);
 
     this.fetch = createFetch({
@@ -126,8 +131,12 @@ export class QubicConnect {
     if (!disableOpenExternalBrowserWhenLineIab) {
       openExternalBrowserWhenLineIab();
     }
+
     if (!disableIabWarning) {
-      showBlockerWhenIab();
+      showBlockerWhenIab({
+        redirectUrl: iabRedirectUrl,
+        shouldAlwaysShowCopyUI,
+      });
     }
 
     this.onAuthStateChanged(QubicConnect.persistUser);
