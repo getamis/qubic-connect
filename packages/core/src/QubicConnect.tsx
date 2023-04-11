@@ -382,7 +382,7 @@ export class QubicConnect {
     });
     const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
     const redirectUrl = cleanResponsePassToConnect(window.location.href);
-    window.location.href = createUrlRequestConnectToPass(`${this.authRedirectUrl}/auth`, {
+    window.location.href = createUrlRequestConnectToPass(this.authRedirectUrl, {
       walletType: options?.walletType,
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,
