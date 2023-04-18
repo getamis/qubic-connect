@@ -31,7 +31,7 @@ const qubicConnect = QubicConnect.initialize({
 ### Initialize Qubic Connect
 
 ```ts
-import QubicConnect, { Currency, QubicConnectConfig } from '@qubic-connect/core';
+import QubicConnect from '@qubic-connect/core';
 
 const qubicConnect = new QubicConnect({
   name: 'Display Name', // will show up in display
