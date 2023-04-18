@@ -10,6 +10,7 @@ import {
   API_KEY,
   API_SECRET,
   API_URL,
+  CHECKOUT_API_URL,
   AUTH_REDIRECT_URL,
   VERIFY_URL,
   INFURA_ID,
@@ -22,6 +23,7 @@ const SDK_CONFIG: QubicConnectConfig = {
   secret: API_SECRET,
   service: API_SERVICE_NAME, //optional
   apiUrl: API_URL, // optional
+  checkoutApiUrl: CHECKOUT_API_URL,
   authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
   iabRedirectUrl: '', // optional
   shouldAlwaysShowCopyUI: false, // optional
@@ -116,6 +118,20 @@ function main() {
     });
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
   });
+
+  const assetBuyDom = document.querySelector('#asset-buy');
+  assetBuyDom?.addEventListener('click', async () => {
+    try {
+      const assetBuyInputJson = prompt('Please enter assetBuyInputJson', '');
+      const assetBuyInput = JSON.parse(assetBuyInputJson || '');
+
+      const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
+
+      window.alert(JSON.stringify(assetBuyResult));
+    } catch (e) {
+      console.error(e);
+    }
+  })
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicConnect.loginWithRedirect();

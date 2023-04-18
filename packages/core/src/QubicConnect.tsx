@@ -16,13 +16,15 @@ import { SdkFetchError } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
-import { API_URL, AUTH_REDIRECT_URL } from './constants/backend';
+import { API_URL, AUTH_REDIRECT_URL, CHECKOUT_API_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
 import { login, logout, LoginRequest, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
 import { createSignMessageAndLogin } from './utils/signMessageAndLogin';
+import { AssetBuyInput } from './types/Asset';
+import { buyAsset, BuyAssetResponse } from './api/assets';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -77,6 +79,7 @@ export class QubicConnect {
 
   public fetch: SdkFetch;
   public requestGraphql: SdkRequestGraphql;
+  public checkoutRequestGraphql: SdkRequestGraphql;
 
   constructor(config: QubicConnectConfig) {
     const {
@@ -85,6 +88,7 @@ export class QubicConnect {
       key: apiKey,
       secret: apiSecret,
       apiUrl = API_URL,
+      checkoutApiUrl = CHECKOUT_API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
       disableIabWarning = false,
       iabRedirectUrl = window.location.href,
@@ -103,6 +107,7 @@ export class QubicConnect {
       key: apiKey,
       secret: apiSecret,
       apiUrl,
+      checkoutApiUrl,
       authRedirectUrl,
       providerOptions: config.providerOptions,
       disableIabWarning,
@@ -118,10 +123,18 @@ export class QubicConnect {
       apiSecret,
       apiUrl,
     });
+
     this.requestGraphql = createRequestGraphql({
       apiKey,
       apiSecret,
       apiUrl,
+    });
+
+    this.checkoutRequestGraphql = createRequestGraphql({
+      apiKey,
+      apiSecret,
+      apiUrl: checkoutApiUrl,
+      isForcingApiUrl: true,
     });
 
     this.authRedirectUrl = authRedirectUrl;
@@ -475,5 +488,20 @@ export class QubicConnect {
     const deferred = new Deferred<WalletUser | null>();
     this.pendingGetRedirectResultDeferred.push(deferred);
     return deferred.promise;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public async buyAssetAndCreateCheckout(assetBuyInput: AssetBuyInput): Promise<BuyAssetResponse | null> {
+    try {
+      const response = await buyAsset(this.checkoutRequestGraphql, assetBuyInput);
+
+      return response;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+    }
+
+    return null;
   }
 }
