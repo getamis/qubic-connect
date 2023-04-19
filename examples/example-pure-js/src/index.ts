@@ -3,6 +3,7 @@ import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import { gql } from 'graphql-request';
 import querystring from 'query-string';
+import { v4 as uuidv4 } from 'uuid';
 
 import './index.css';
 import {
@@ -16,6 +17,8 @@ import {
   INFURA_ID,
   QUBIC_WALLET_URL,
 } from './environment';
+import { GET_ASSET_DETAIL, LIST_ASSETS_V2 } from './gqlSchema/assets';
+import { CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
@@ -122,12 +125,54 @@ function main() {
   const assetBuyDom = document.querySelector('#asset-buy');
   assetBuyDom?.addEventListener('click', async () => {
     try {
-      const assetBuyInputJson = prompt('Please enter assetBuyInputJson', '');
-      const assetBuyInput = JSON.parse(assetBuyInputJson || '');
+      const listAssets = await qubicConnect.requestGraphql({
+        query: LIST_ASSETS_V2,
+        variables: {
+          disableSurge: false,
+          first: 30,
+          offset: 0,
+          onlyAvailable: false,
+          paymentMode: "FIAT",
+          searchText: "",
+          sort: "SORT_BY_PUBLISH_TIME_DESC",
+          tags: [],
+        }
+      });
 
-      const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
+      const firstBuyableListAsset = listAssets?.listAssetsV2?.assets.find((asset: { saleState: string; }) => asset.saleState === 'BUY');
 
-      window.alert(JSON.stringify(assetBuyResult));
+      if (firstBuyableListAsset) {
+        const assetDetail = await qubicConnect.requestGraphql({
+          query: GET_ASSET_DETAIL,
+          variables: {
+            assetId: firstBuyableListAsset.assetId,
+            disableSurge: false,
+            paymentMode: "FIAT",
+          }
+        });
+
+        if (assetDetail) {
+          const assetBuyInput = {
+            asset: {
+              assetId: firstBuyableListAsset.assetId,
+              currency: CurrencyForAsset.TWD,
+              price: assetDetail.getAssetDetail.batchAsset.price,
+              quantity: 1,
+              variantId: assetDetail.getAssetDetail.batchAssets[0].batchId,
+            },
+            payCallback: {
+              failureRedirectUrl: "https://www.google.com",
+              pendingRedirectUrl: "https://www.google.com",
+              successRedirectUrl: "https://www.google.com",
+            },
+            requestId: uuidv4(),
+          };
+
+          const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
+
+          console.log('assetBuyResult', assetBuyResult)
+        } 
+      }
     } catch (e) {
       console.error(e);
     }
