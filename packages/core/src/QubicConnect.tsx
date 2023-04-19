@@ -150,10 +150,14 @@ export class QubicConnect {
       if (provider && isWalletconnectProvider(user.method, provider)) {
         provider.enable();
       }
-      this.handleLogin(null, {
-        ...user,
-        provider,
-      });
+      if (QubicConnect.ifTokenExpired(user.expiredAt)) {
+        this.handleLogout(null);
+      } else {
+        this.handleLogin(null, {
+          ...user,
+          provider,
+        });
+      }
     } catch (error) {
       // ignore error
       console.warn('can not recover user from localStorage');
@@ -186,6 +190,12 @@ export class QubicConnect {
     }
   };
 
+  private static ifTokenExpired(expiredAt: number): boolean {
+    const expiresIn = expiredAt * 1000 - new Date().getTime();
+    const result = expiresIn <= RENEW_TOKEN_BEFORE_EXPIRED_MS;
+    return result;
+  }
+
   private checkTokenExpiredIntervalId = 0;
   private startIntervalToCheckTokenExpired() {
     window.clearInterval(this.checkTokenExpiredIntervalId);
@@ -194,8 +204,7 @@ export class QubicConnect {
         this.stopIntervalToCheckTokenExpired();
         return;
       }
-      const expiresIn = this.expiredAt * 1000 - new Date().getTime();
-      if (expiresIn <= RENEW_TOKEN_BEFORE_EXPIRED_MS) {
+      if (QubicConnect.ifTokenExpired(this.expiredAt)) {
         this.renewToken().catch(error => {
           console.error(error);
           this.stopIntervalToCheckTokenExpired();
@@ -364,7 +373,7 @@ export class QubicConnect {
     });
     const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
     const redirectUrl = cleanResponsePassToConnect(window.location.href);
-    window.location.href = createUrlRequestConnectToPass(`${this.authRedirectUrl}/auth`, {
+    window.location.href = createUrlRequestConnectToPass(this.authRedirectUrl, {
       walletType: options?.walletType,
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,

@@ -124,3 +124,7 @@ _response example_
   "expires_in": 3596
 }
 ```
+
+## Related Repo
+
+[https://github.com/getamis/qubic-auth](https://github.com/getamis/qubic-auth)
