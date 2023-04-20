@@ -23,11 +23,14 @@ const SDK_CONFIG: QubicConnectConfig = {
   service: API_SERVICE_NAME, //optional
   apiUrl: API_URL, // optional
   authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
+  iabRedirectUrl: '', // optional
+  shouldAlwaysShowCopyUI: false, // optional
   providerOptions: {
     qubic: {
       provider: new QubicProvider({
         walletUrl: QUBIC_WALLET_URL,
         enableIframe: true,
+        disableIabWarning: true,
       }),
     },
     metamask: {

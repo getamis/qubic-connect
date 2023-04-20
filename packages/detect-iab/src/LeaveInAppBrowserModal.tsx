@@ -1,6 +1,6 @@
 import jss from 'jss';
 import preset from 'jss-preset-default';
-import { useEffect, memo, useMemo } from 'preact/compat';
+import { useEffect, memo, useMemo, useCallback, useState } from 'preact/compat';
 import clsx from 'clsx';
 import InApp, { InAppBrowser } from '@qubic-js/detect-inapp';
 
@@ -8,7 +8,7 @@ import HorizontalMoreOptions from './icons/HorizontalMoreOptions';
 import VerticalMoreOptions from './icons/VerticalMoreOptions';
 import ExportMoreOptions from './icons/ExportMoreOptions';
 import TooltipArrow from './icons/TooltipArrow';
-import { LEAVE_IAB_MODAL_ID } from './constant';
+import { LEAVE_IAB_MODAL_ID, doubleBrowserIcons } from './constant';
 import { getLocaleStrings } from './locale';
 
 // One time setup with default plugins and settings.
@@ -126,11 +126,56 @@ const { classes } = jss
       right: 12,
       transform: 'rotate(180deg) scaleX(-1)',
     },
+    currentUrlWrapper: {
+      display: 'flex',
+      flexDirection: 'row',
+      borderRadius: 8,
+      width: 'calc(100% - 48px)',
+      backgroundColor: 'white',
+      padding: 4,
+      marginTop: 24,
+    },
+    currentUrlInput: {
+      height: 40,
+      flex: 1,
+      border: 'none',
+      userSelect: 'all',
+      borderRadius: 8,
+      fontSize: 16,
+      lineHeight: '24px',
+      '&:focus': {
+        outline: 'none',
+      },
+    },
+    currentUrlBtn: {
+      flexShrink: 0,
+      border: 0,
+      color: '#2962FF',
+      fontSize: 16,
+      lineHeight: '24px',
+      backgroundColor: 'transparent',
+      padding: '8px 16px',
+    },
+    currentUrlBtnCopied: {
+      color: '#5FC417',
+    }
   })
   .attach();
 
+
+export interface ShowBlockerOptions {
+  redirectUrl?: string;
+  shouldAlwaysShowCopyUI?: boolean;
+}
+
+enum DisplayMode {
+  HINT = 'hint',
+  COPY = 'copy',
+}
+
 interface ModalProps {
   inApp: InApp;
+  options?: ShowBlockerOptions;
 }
 
 function getHintImage(platform: Platform, browser: InAppBrowser) {
@@ -271,7 +316,7 @@ function getArrowPosition(platform: Platform, browser: InAppBrowser) {
     }
   }
 
-  return 'bottom';
+  return null;
 }
 
 function isBlurSupported(): boolean {
@@ -285,7 +330,10 @@ function isBlurSupported(): boolean {
 }
 
 const LeaveInAppBrowserModal = memo<ModalProps>(props => {
-  const { inApp } = props;
+  const { inApp, options } = props;
+
+  const { redirectUrl: optionsRedirectUrl, shouldAlwaysShowCopyUI = false } = options || {};
+  const redirectUrl = optionsRedirectUrl || window.location.href;
 
   const platform = getPlatform(inApp.ua);
   const currentBrowser =
@@ -298,9 +346,8 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
       case 'top':
         return clsx(classes.hintWrapper, classes.hintWrapperTop);
       case 'bottom':
-        return clsx(classes.hintWrapper, classes.hintWrapperBottom);
       default:
-        return clsx(classes.hintWrapper);
+        return clsx(classes.hintWrapper, classes.hintWrapperBottom);
     }
   })();
 
@@ -322,33 +369,89 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
     return {};
   }, []);
 
+  const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
+
+  const copyFn = useCallback((manual: boolean) => async () => {
+    const text = redirectUrl;
+
+    if (typeof navigator !== undefined && typeof navigator.clipboard !== undefined) {
+      const resolve = () => { 
+        if (manual) {
+          setCopied(true);
+        }
+      }
+      const reject = (err: any) => { 
+        console.error('透過 Clipboard 複製至剪貼簿失敗:' + err.toString() ); 
+        setCopyFailed(true);
+      }
+
+      navigator.clipboard.writeText(text).then(resolve, reject)
+    }
+    else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.display = 'none';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        if (manual) {
+          setCopied(true);
+        }
+      } catch (e) {
+        setCopyFailed(true);
+      }
+    }
+  }, [redirectUrl]);
+
+  const displayMode = shouldAlwaysShowCopyUI || !arrowPosition ? DisplayMode.COPY : DisplayMode.HINT;
+
   return (
-    <div id={LEAVE_IAB_MODAL_ID} className={clsx(classes.modal)}>
+    <div id={LEAVE_IAB_MODAL_ID} className={classes.modal}>
       <div className={classes.backdrop} style={blurStyle}>
         <div className={classes.contentWrapper}>
-          <span className={classes.emoji}>😲</span>
+          <img src={`data:image/png;base64, ${doubleBrowserIcons}`} alt="browser" style={{ width: 120, height: 120 }} />
           <span className={classes.alertSentence1}>
             {localeStrings.alertSentence1}
           </span>
           <span className={classes.alertSentence2}>
             {localeStrings.alertSentence2}
           </span>
+          {displayMode === DisplayMode.COPY && (
+            <div className={classes.currentUrlWrapper}>
+              <input
+                readOnly
+                value={redirectUrl}
+                className={classes.currentUrlInput}
+              />
+              {!copyFailed && (
+                <button type="button" className={clsx([classes.currentUrlBtn, copied ? classes.currentUrlBtnCopied : undefined])} onClick={copyFn(true)}>
+                  {copied ? localeStrings.copied : localeStrings.copy}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
-      <div className={hintWrapperClass}>
-        <div className={classes.dialogWrapper}>
-          <p className={classes.dialogText}>
-            {localeStrings.hintPart1}
-            {getHintImage(platform, currentBrowser)}
-            {localeStrings.hintPart2}
-            {getHintBrowserString(platform, currentBrowser)}
-            {localeStrings.hintPart3}
-          </p>
-          <div className={arrowPosition === 'top' ? classes.arrowTopWrapper : classes.arrowBottomWrapper}>
-            <TooltipArrow />
+      {displayMode === DisplayMode.HINT && (
+        <div className={hintWrapperClass}>
+          <div className={classes.dialogWrapper}>
+            <p className={classes.dialogText}>
+              {localeStrings.hintPart1}
+              {getHintImage(platform, currentBrowser)}
+              {localeStrings.hintPart2}
+              {getHintBrowserString(platform, currentBrowser)}
+              {localeStrings.hintPart3}
+            </p>
+            <div className={arrowPosition === 'top' ? classes.arrowTopWrapper : classes.arrowBottomWrapper}>
+              <TooltipArrow />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 });

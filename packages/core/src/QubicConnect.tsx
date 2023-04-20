@@ -3,7 +3,7 @@ import { createPortal } from 'preact/compat';
 import qs from 'query-string';
 import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
-import { showBlockerWhenIab } from '@qubic-connect/detect-iab';
+import { showBlockerWhenIab, openExternalBrowserWhenLineIab } from '@qubic-connect/detect-iab';
 
 import { QubicConnectConfig, InternalQubicConnectConfig, OnLogin, OnLogout, WalletUser } from './types/QubicConnect';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
@@ -86,6 +86,10 @@ export class QubicConnect {
       secret: apiSecret,
       apiUrl = API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
+      disableIabWarning = false,
+      iabRedirectUrl = window.location.href,
+      shouldAlwaysShowCopyUI = false,
+      disableOpenExternalBrowserWhenLineIab = false,
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -101,7 +105,12 @@ export class QubicConnect {
       apiUrl,
       authRedirectUrl,
       providerOptions: config.providerOptions,
+      disableIabWarning,
+      iabRedirectUrl,
+      shouldAlwaysShowCopyUI,
+      disableOpenExternalBrowserWhenLineIab,
     };
+
     QubicConnect.checkProviderOptions(config?.providerOptions);
 
     this.fetch = createFetch({
@@ -119,7 +128,16 @@ export class QubicConnect {
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
-    showBlockerWhenIab();
+    if (!disableOpenExternalBrowserWhenLineIab) {
+      openExternalBrowserWhenLineIab();
+    }
+
+    if (!disableIabWarning) {
+      showBlockerWhenIab({
+        redirectUrl: iabRedirectUrl,
+        shouldAlwaysShowCopyUI,
+      });
+    }
 
     this.onAuthStateChanged(QubicConnect.persistUser);
     this.handleRedirectResult();
