@@ -3,6 +3,7 @@ import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import { gql } from 'graphql-request';
 import querystring from 'query-string';
+import { v4 as uuidv4 } from 'uuid';
 
 import './index.css';
 import {
@@ -10,11 +11,14 @@ import {
   API_KEY,
   API_SECRET,
   API_URL,
+  CHECKOUT_API_URL,
   AUTH_REDIRECT_URL,
   VERIFY_URL,
   INFURA_ID,
   QUBIC_WALLET_URL,
 } from './environment';
+import { GET_ASSET_DETAIL, LIST_ASSETS_V2 } from './gqlSchema/assets';
+import { CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
@@ -22,6 +26,7 @@ const SDK_CONFIG: QubicConnectConfig = {
   secret: API_SECRET,
   service: API_SERVICE_NAME, //optional
   apiUrl: API_URL, // optional
+  checkoutApiUrl: CHECKOUT_API_URL,
   authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
   iabRedirectUrl: '', // optional
   shouldAlwaysShowCopyUI: false, // optional
@@ -116,6 +121,62 @@ function main() {
     });
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
   });
+
+  const assetBuyDom = document.querySelector('#asset-buy');
+  assetBuyDom?.addEventListener('click', async () => {
+    try {
+      const listAssets = await qubicConnect.requestGraphql({
+        query: LIST_ASSETS_V2,
+        variables: {
+          disableSurge: false,
+          first: 30,
+          offset: 0,
+          onlyAvailable: false,
+          paymentMode: "FIAT",
+          searchText: "",
+          sort: "SORT_BY_PUBLISH_TIME_DESC",
+          tags: [],
+        }
+      });
+
+      const firstBuyableListAsset = listAssets?.listAssetsV2?.assets.find((asset: { saleState: string; }) => asset.saleState === 'BUY');
+
+      if (firstBuyableListAsset) {
+        const assetDetail = await qubicConnect.requestGraphql({
+          query: GET_ASSET_DETAIL,
+          variables: {
+            assetId: firstBuyableListAsset.assetId,
+            disableSurge: false,
+            paymentMode: "FIAT",
+          }
+        });
+
+        if (assetDetail) {
+          const assetBuyInput = {
+            asset: {
+              assetId: firstBuyableListAsset.assetId,
+              currency: CurrencyForAsset.TWD,
+              price: assetDetail.getAssetDetail.batchAsset.price,
+              quantity: 1,
+              variantId: assetDetail.getAssetDetail.batchAssets[0].batchId,
+            },
+            payCallback: {
+              failureRedirectUrl: "https://www.google.com",
+              pendingRedirectUrl: "https://www.google.com",
+              successRedirectUrl: "https://www.google.com",
+            },
+            requestId: uuidv4(),
+          };
+
+          const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
+
+          console.log('assetBuyResult', assetBuyResult)
+        } 
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  })
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicConnect.loginWithRedirect();
