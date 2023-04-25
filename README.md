@@ -53,6 +53,7 @@ const qubicConnect = new QubicConnect({
 //  };
 // }
 
+// getRedirectResult only resolve user after redirecting
 qubicConnect
   .getRedirectResult()
   .then(user => {
@@ -104,6 +105,12 @@ qubicConnect.loginWithRedirect({
   walletType: 'qubic', // 'metamask' | 'qubic' | 'walletconnect'
   qubicSignInProvider: 'google', // 'facebook' | 'google' | 'apple'
 );
+```
+
+### get current user
+
+```ts
+qubicConnect.getCurrentUser();
 ```
 
 ### Verify access token on the server side

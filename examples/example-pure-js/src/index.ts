@@ -202,6 +202,10 @@ function main() {
   document.getElementById('login-qubic-yahoo')?.addEventListener('click', () => {
     qubicConnect.loginWithWallet('qubic', 'yahoo');
   });
+
+  document.getElementById('get-current-user')?.addEventListener('click', () => {
+    console.log({ currentUser: qubicConnect.getCurrentUser() });
+  });
 }
 
 main();
