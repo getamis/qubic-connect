@@ -203,6 +203,7 @@ export class QubicConnect {
       this.accessToken = null;
       this.expiredAt = null;
       this.provider = null;
+      this.user = null;
       this.eventEmitter.emit(Events.AuthStateChanged, null);
       this.stopIntervalToCheckTokenExpired();
     }
@@ -400,7 +401,10 @@ export class QubicConnect {
   }
 
   public onAuthStateChanged(callback: (result: WalletUser | null, error?: SdkFetchError) => void): () => void {
-    if (this.user) {
+    if (typeof this.cachedRedirectResult !== 'undefined') {
+      // the purpose of callback here is let developer can
+      // get result immediately when bind this event
+      // if everything is ready
       callback(this.user);
     }
     this.eventEmitter.addListener(Events.AuthStateChanged, callback);
@@ -409,7 +413,7 @@ export class QubicConnect {
     };
   }
 
-  private cachedRedirectResult?: WalletUser;
+  private cachedRedirectResult?: WalletUser | null;
   private cachedRedirectError?: Error;
 
   private static getLoginRequestFromUrlAndClearUrl(): LoginRequest | null {
@@ -438,7 +442,10 @@ export class QubicConnect {
     try {
       const loginRequest = QubicConnect.getLoginRequestFromUrlAndClearUrl();
       if (loginRequest === null) {
-        // not detecting valid query, just skip
+        this.cachedRedirectResult = null;
+        this.pendingGetRedirectResultDeferred.forEach(deferred => {
+          deferred.resolve(null);
+        });
         return;
       }
 
@@ -462,6 +469,7 @@ export class QubicConnect {
       });
       return;
     } catch (error) {
+      this.cachedRedirectResult = null;
       if (error instanceof Error) {
         this.handleLogin(error);
         this.cachedRedirectError = error;
@@ -475,7 +483,7 @@ export class QubicConnect {
 
   private pendingGetRedirectResultDeferred: Array<Deferred<WalletUser | null>> = [];
   public async getRedirectResult(): Promise<WalletUser | null> {
-    if (this.cachedRedirectResult) {
+    if (typeof this.cachedRedirectResult !== 'undefined') {
       return this.cachedRedirectResult;
     }
     if (this.cachedRedirectError) {
@@ -484,5 +492,9 @@ export class QubicConnect {
     const deferred = new Deferred<WalletUser | null>();
     this.pendingGetRedirectResultDeferred.push(deferred);
     return deferred.promise;
+  }
+
+  public getCurrentUser(): WalletUser | null {
+    return this.user;
   }
 }
