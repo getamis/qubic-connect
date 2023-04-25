@@ -49,6 +49,7 @@ const qubicConnect = new QubicConnect({
 //   qubicUser?: {
 //    provider: 'GOOGLE' | 'FACEBOOK' | 'TWITTER' | 'APPLE' | 'UNKNOWN';
 //    email: string;
+//    isKyc: boolean;
 //  };
 // }
 
@@ -123,3 +124,7 @@ _response example_
   "expires_in": 3596
 }
 ```
+
+## Related Repo
+
+[https://github.com/getamis/qubic-auth](https://github.com/getamis/qubic-auth)

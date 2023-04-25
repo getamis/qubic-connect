@@ -3,7 +3,7 @@ import { createPortal } from 'preact/compat';
 import qs from 'query-string';
 import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
-import { showBlockerWhenIab } from '@qubic-connect/detect-iab';
+import { showBlockerWhenIab, openExternalBrowserWhenLineIab } from '@qubic-connect/detect-iab';
 
 import { QubicConnectConfig, InternalQubicConnectConfig, OnLogin, OnLogout, WalletUser } from './types/QubicConnect';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
@@ -33,7 +33,7 @@ enum Events {
 const USER_STORAGE_KEY = '@qubic-connect/user';
 const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 1000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
-const AUTH_APP_URL = window.location.origin;
+const AUTH_APP_URL = typeof window === 'undefined' ? '' : window.location.origin;
 
 export class QubicConnect {
   private readonly config: InternalQubicConnectConfig;
@@ -87,6 +87,10 @@ export class QubicConnect {
       apiUrl = API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
       paymentUrl = PAYMENT_URL,
+      disableIabWarning = false,
+      iabRedirectUrl = window.location.href,
+      shouldAlwaysShowCopyUI = false,
+      disableOpenExternalBrowserWhenLineIab = false,
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -103,7 +107,12 @@ export class QubicConnect {
       authRedirectUrl,
       providerOptions: config.providerOptions,
       paymentUrl,
+      disableIabWarning,
+      iabRedirectUrl,
+      shouldAlwaysShowCopyUI,
+      disableOpenExternalBrowserWhenLineIab,
     };
+
     QubicConnect.checkProviderOptions(config?.providerOptions);
 
     this.fetch = createFetch({
@@ -121,7 +130,16 @@ export class QubicConnect {
     this.rootDiv = document.createElement('div');
     document.body.appendChild(this.rootDiv);
 
-    showBlockerWhenIab();
+    if (!disableOpenExternalBrowserWhenLineIab) {
+      openExternalBrowserWhenLineIab();
+    }
+
+    if (!disableIabWarning) {
+      showBlockerWhenIab({
+        redirectUrl: iabRedirectUrl,
+        shouldAlwaysShowCopyUI,
+      });
+    }
 
     this.onAuthStateChanged(QubicConnect.persistUser);
     this.handleRedirectResult();
@@ -152,10 +170,14 @@ export class QubicConnect {
       if (provider && isWalletconnectProvider(user.method, provider)) {
         provider.enable();
       }
-      this.handleLogin(null, {
-        ...user,
-        provider,
-      });
+      if (QubicConnect.ifTokenExpired(user.expiredAt)) {
+        this.handleLogout(null);
+      } else {
+        this.handleLogin(null, {
+          ...user,
+          provider,
+        });
+      }
     } catch (error) {
       // ignore error
       console.warn('can not recover user from localStorage');
@@ -188,6 +210,12 @@ export class QubicConnect {
     }
   };
 
+  private static ifTokenExpired(expiredAt: number): boolean {
+    const expiresIn = expiredAt * 1000 - new Date().getTime();
+    const result = expiresIn <= RENEW_TOKEN_BEFORE_EXPIRED_MS;
+    return result;
+  }
+
   private checkTokenExpiredIntervalId = 0;
   private startIntervalToCheckTokenExpired() {
     window.clearInterval(this.checkTokenExpiredIntervalId);
@@ -196,8 +224,7 @@ export class QubicConnect {
         this.stopIntervalToCheckTokenExpired();
         return;
       }
-      const expiresIn = this.expiredAt * 1000 - new Date().getTime();
-      if (expiresIn <= RENEW_TOKEN_BEFORE_EXPIRED_MS) {
+      if (QubicConnect.ifTokenExpired(this.expiredAt)) {
         this.renewToken().catch(error => {
           console.error(error);
           this.stopIntervalToCheckTokenExpired();
@@ -366,7 +393,7 @@ export class QubicConnect {
     });
     const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
     const redirectUrl = cleanResponsePassToConnect(window.location.href);
-    window.location.href = createUrlRequestConnectToPass(`${this.authRedirectUrl}/auth`, {
+    window.location.href = createUrlRequestConnectToPass(this.authRedirectUrl, {
       walletType: options?.walletType,
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,
