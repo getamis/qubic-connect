@@ -1,4 +1,4 @@
-enum BuyStatus {
+export enum BuyStatus {
   SUCCESS = 'SUCCESS',
   WAIT_PAYMENT = 'WAIT_PAYMENT',
   FAILED = 'FAILED',
@@ -16,7 +16,7 @@ export enum CurrencyForAsset {
   MATIC = 'MATIC',
 }
 
-interface AssetSaleInput {
+export interface AssetSaleInput {
   assetId: string;
   variantId: string;
   quantity: number;
@@ -24,7 +24,7 @@ interface AssetSaleInput {
   currency: CurrencyForAsset;
 }
 
-interface PayCallbackInput {
+export interface PayCallbackInput {
   successRedirectUrl: string;
   failureRedirectUrl: string;
   pendingRedirectUrl: string;
