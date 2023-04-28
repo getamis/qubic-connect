@@ -53,6 +53,7 @@ const qubicConnect = new QubicConnect({
 //  };
 // }
 
+// getRedirectResult only resolve user after redirecting
 qubicConnect
   .getRedirectResult()
   .then(user => {
@@ -106,6 +107,12 @@ qubicConnect.loginWithRedirect({
 );
 ```
 
+### get current user
+
+```ts
+qubicConnect.getCurrentUser();
+```
+
 ### Verify access token on the server side
 
 #### GET /verify
@@ -124,3 +131,7 @@ _response example_
   "expires_in": 3596
 }
 ```
+
+## Related Repo
+
+[https://github.com/getamis/qubic-auth](https://github.com/getamis/qubic-auth)

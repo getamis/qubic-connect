@@ -181,10 +181,14 @@ export class QubicConnect {
       if (provider && isWalletconnectProvider(user.method, provider)) {
         provider.enable();
       }
-      this.handleLogin(null, {
-        ...user,
-        provider,
-      });
+      if (QubicConnect.ifTokenExpired(user.expiredAt)) {
+        this.handleLogout(null);
+      } else {
+        this.handleLogin(null, {
+          ...user,
+          provider,
+        });
+      }
     } catch (error) {
       // ignore error
       console.warn('can not recover user from localStorage');
@@ -212,10 +216,17 @@ export class QubicConnect {
       this.accessToken = null;
       this.expiredAt = null;
       this.provider = null;
+      this.user = null;
       this.eventEmitter.emit(Events.AuthStateChanged, null);
       this.stopIntervalToCheckTokenExpired();
     }
   };
+
+  private static ifTokenExpired(expiredAt: number): boolean {
+    const expiresIn = expiredAt * 1000 - new Date().getTime();
+    const result = expiresIn <= RENEW_TOKEN_BEFORE_EXPIRED_MS;
+    return result;
+  }
 
   private checkTokenExpiredIntervalId = 0;
   private startIntervalToCheckTokenExpired() {
@@ -225,8 +236,7 @@ export class QubicConnect {
         this.stopIntervalToCheckTokenExpired();
         return;
       }
-      const expiresIn = this.expiredAt * 1000 - new Date().getTime();
-      if (expiresIn <= RENEW_TOKEN_BEFORE_EXPIRED_MS) {
+      if (QubicConnect.ifTokenExpired(this.expiredAt)) {
         this.renewToken().catch(error => {
           console.error(error);
           this.stopIntervalToCheckTokenExpired();
@@ -395,7 +405,7 @@ export class QubicConnect {
     });
     const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
     const redirectUrl = cleanResponsePassToConnect(window.location.href);
-    window.location.href = createUrlRequestConnectToPass(`${this.authRedirectUrl}/auth`, {
+    window.location.href = createUrlRequestConnectToPass(this.authRedirectUrl, {
       walletType: options?.walletType,
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,
@@ -404,7 +414,10 @@ export class QubicConnect {
   }
 
   public onAuthStateChanged(callback: (result: WalletUser | null, error?: SdkFetchError) => void): () => void {
-    if (this.user) {
+    if (typeof this.cachedRedirectResult !== 'undefined') {
+      // the purpose of callback here is let developer can
+      // get result immediately when bind this event
+      // if everything is ready
       callback(this.user);
     }
     this.eventEmitter.addListener(Events.AuthStateChanged, callback);
@@ -413,7 +426,7 @@ export class QubicConnect {
     };
   }
 
-  private cachedRedirectResult?: WalletUser;
+  private cachedRedirectResult?: WalletUser | null;
   private cachedRedirectError?: Error;
 
   private static getLoginRequestFromUrlAndClearUrl(): LoginRequest | null {
@@ -442,7 +455,10 @@ export class QubicConnect {
     try {
       const loginRequest = QubicConnect.getLoginRequestFromUrlAndClearUrl();
       if (loginRequest === null) {
-        // not detecting valid query, just skip
+        this.cachedRedirectResult = null;
+        this.pendingGetRedirectResultDeferred.forEach(deferred => {
+          deferred.resolve(null);
+        });
         return;
       }
 
@@ -466,6 +482,7 @@ export class QubicConnect {
       });
       return;
     } catch (error) {
+      this.cachedRedirectResult = null;
       if (error instanceof Error) {
         this.handleLogin(error);
         this.cachedRedirectError = error;
@@ -479,7 +496,7 @@ export class QubicConnect {
 
   private pendingGetRedirectResultDeferred: Array<Deferred<WalletUser | null>> = [];
   public async getRedirectResult(): Promise<WalletUser | null> {
-    if (this.cachedRedirectResult) {
+    if (typeof this.cachedRedirectResult !== 'undefined') {
       return this.cachedRedirectResult;
     }
     if (this.cachedRedirectError) {
@@ -488,6 +505,10 @@ export class QubicConnect {
     const deferred = new Deferred<WalletUser | null>();
     this.pendingGetRedirectResultDeferred.push(deferred);
     return deferred.promise;
+  }
+
+  public getCurrentUser(): WalletUser | null {
+    return this.user;
   }
 
   // eslint-disable-next-line class-methods-use-this
