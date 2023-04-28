@@ -29,11 +29,6 @@ const serviceHeaderBuilder = ({
   const sig = HmacSHA256(msg, apiSecret).toString(Base64);
 
   return {
-    // CORS
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'cross-site',
-
     // API Key
     'X-Qubic-Api-Key': apiKey,
     'X-Qubic-Ts': now.toString(),

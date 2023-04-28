@@ -122,61 +122,81 @@ function main() {
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
   });
 
-  const assetBuyDom = document.querySelector('#asset-buy');
-  assetBuyDom?.addEventListener('click', async () => {
-    try {
-      const listAssets = await qubicConnect.requestGraphql({
-        query: LIST_ASSETS_V2,
+  async function getAssetDetail() {
+    const listAssets = await qubicConnect.requestGraphql({
+      query: LIST_ASSETS_V2,
+      variables: {
+        disableSurge: false,
+        first: 30,
+        offset: 0,
+        onlyAvailable: false,
+        paymentMode: "FIAT",
+        searchText: "",
+        sort: "SORT_BY_PUBLISH_TIME_DESC",
+        tags: [],
+      }
+    });
+
+    const firstBuyableListAsset = listAssets?.listAssetsV2?.assets.find((asset: { saleState: string; }) => asset.saleState === 'BUY');
+
+    if (firstBuyableListAsset) {
+      const assetDetail = await qubicConnect.requestGraphql({
+        query: GET_ASSET_DETAIL,
         variables: {
+          assetId: firstBuyableListAsset.assetId,
           disableSurge: false,
-          first: 30,
-          offset: 0,
-          onlyAvailable: false,
           paymentMode: "FIAT",
-          searchText: "",
-          sort: "SORT_BY_PUBLISH_TIME_DESC",
-          tags: [],
         }
       });
 
-      const firstBuyableListAsset = listAssets?.listAssetsV2?.assets.find((asset: { saleState: string; }) => asset.saleState === 'BUY');
-
-      if (firstBuyableListAsset) {
-        const assetDetail = await qubicConnect.requestGraphql({
-          query: GET_ASSET_DETAIL,
-          variables: {
+      if (assetDetail) {
+        const assetBuyInput = {
+          asset: {
             assetId: firstBuyableListAsset.assetId,
-            disableSurge: false,
-            paymentMode: "FIAT",
-          }
-        });
+            currency: CurrencyForAsset.TWD,
+            price: assetDetail.getAssetDetail.batchAsset.price,
+            quantity: 1,
+            variantId: assetDetail.getAssetDetail.batchAssets[0].batchId,
+          },
+          payCallback: {
+            failureRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+            pendingRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+            successRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+          },
+          requestId: uuidv4(),
+        };
 
-        if (assetDetail) {
-          const assetBuyInput = {
-            asset: {
-              assetId: firstBuyableListAsset.assetId,
-              currency: CurrencyForAsset.TWD,
-              price: assetDetail.getAssetDetail.batchAsset.price,
-              quantity: 1,
-              variantId: assetDetail.getAssetDetail.batchAssets[0].batchId,
-            },
-            payCallback: {
-              failureRedirectUrl: "https://www.google.com",
-              pendingRedirectUrl: "https://www.google.com",
-              successRedirectUrl: "https://www.google.com",
-            },
-            requestId: uuidv4(),
-          };
+        const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
 
-          const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
+        console.log('assetBuyResult', assetBuyResult)
 
-          console.log('assetBuyResult', assetBuyResult)
-        } 
-      }
-    } catch (e) {
-      console.error(e);
+        return assetBuyResult;
+      } 
     }
-  })
+
+    return null;
+  }
+
+  const assetBuyDom = document.querySelector('#asset-buy');
+
+  assetBuyDom?.addEventListener('click', getAssetDetail);
+
+  const assetBuyAndGoDom = document.querySelector('#asset-buy-go');
+
+  assetBuyAndGoDom?.addEventListener('click', async () => {
+    const assetDetail = await getAssetDetail();
+
+    if (!assetDetail) return;
+
+    try {
+      const assetDomain = prompt('Please enter domain', 'http://localhost:3000');
+
+      const { pathname, search } = new URL(assetDetail.assetBuy.paymentUrl);
+      window.location.href =`${assetDomain}${pathname}${search}`;
+    } catch (e) {
+      console.error(e)
+    }
+  });
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicConnect.loginWithRedirect();
