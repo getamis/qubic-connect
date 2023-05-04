@@ -18,7 +18,7 @@ import {
   QUBIC_WALLET_URL,
 } from './environment';
 import { GET_ASSET_DETAIL, LIST_ASSETS_V2 } from './gqlSchema/assets';
-import { CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
+import { AssetBuyOptionInput, CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
@@ -123,55 +123,83 @@ function main() {
   });
 
   async function getAssetDetail() {
-    const listAssets = await qubicConnect.requestGraphql({
-      query: LIST_ASSETS_V2,
-      variables: {
-        disableSurge: false,
-        first: 30,
-        offset: 0,
-        onlyAvailable: false,
-        paymentMode: "FIAT",
-        searchText: "",
-        sort: "SORT_BY_PUBLISH_TIME_DESC",
-        tags: [],
-      }
-    });
+    let assetId = prompt('Please enter assetId', '') || '';
 
-    const firstBuyableListAsset = listAssets?.listAssetsV2?.assets.find((asset: { saleState: string; }) => asset.saleState === 'BUY');
-
-    if (firstBuyableListAsset) {
-      const assetDetail = await qubicConnect.requestGraphql({
-        query: GET_ASSET_DETAIL,
+    if (!assetId) {
+      const listAssets = await qubicConnect.requestGraphql({
+        query: LIST_ASSETS_V2,
         variables: {
-          assetId: firstBuyableListAsset.assetId,
           disableSurge: false,
+          first: 30,
+          offset: 0,
+          onlyAvailable: false,
           paymentMode: "FIAT",
+          searchText: "",
+          sort: "SORT_BY_PUBLISH_TIME_DESC",
+          tags: [],
         }
       });
 
-      if (assetDetail) {
-        const assetBuyInput = {
-          asset: {
-            assetId: firstBuyableListAsset.assetId,
-            currency: CurrencyForAsset.TWD,
-            price: assetDetail.getAssetDetail.batchAsset.price,
-            quantity: 1,
-            variantId: assetDetail.getAssetDetail.batchAssets[0].batchId,
-          },
-          payCallback: {
-            failureRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-            pendingRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-            successRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-          },
-          requestId: uuidv4(),
-        };
+      const firstBuyableListAsset = listAssets?.listAssetsV2?.assets.find((asset: { saleState: string; }) => asset.saleState === 'BUY');
 
-        const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
+      if (firstBuyableListAsset) {
+        assetId = firstBuyableListAsset.assetId;
+      } else {
+        throw new Error('no buyable asset');
+      }
+    }
 
-        console.log('assetBuyResult', assetBuyResult)
+    const assetDetail = await qubicConnect.requestGraphql({
+      query: GET_ASSET_DETAIL,
+      variables: {
+        assetId,
+        disableSurge: false,
+        paymentMode: "FIAT",
+      }
+    });
 
-        return assetBuyResult;
-      } 
+    if (assetDetail) {
+      let purchaseCode = '';
+      let beGift = false;
+
+      if (assetDetail.getAssetDetail.salePhase.mode === 'PURCHASE_CODE') {
+        purchaseCode = prompt('Please enter purchaseCode', '') || '';
+      }
+
+      if (assetDetail.getAssetDetail.giftable) {
+        beGift = prompt('Is this a gift? input true / false', '') === 'true';
+      }
+
+      const assetBuyInput = {
+        asset: {
+          assetId,
+          currency: CurrencyForAsset.TWD,
+          price: assetDetail.getAssetDetail.batchAsset.price,
+          quantity: 1,
+          variantId: assetDetail.getAssetDetail.batchAssets[0].batchId,
+        },
+        payCallback: {
+          failureRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+          pendingRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+          successRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+        },
+        requestId: uuidv4(),
+        option: {} as AssetBuyOptionInput,
+      };
+
+      if (purchaseCode) {
+        assetBuyInput.option.purchaseCode = purchaseCode;
+      }
+
+      if (beGift) {
+        assetBuyInput.option.beGift = true;
+      }
+
+      const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
+
+      console.log('assetBuyResult', assetBuyResult)
+
+      return assetBuyResult;
     }
 
     return null;

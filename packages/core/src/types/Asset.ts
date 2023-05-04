@@ -30,8 +30,14 @@ export interface PayCallbackInput {
   pendingRedirectUrl: string;
 }
 
+export interface AssetBuyOptionInput {
+  beGift?: boolean;
+  purchaseCode?: string;
+}
+
 export interface AssetBuyInput {
   requestId: string;
   asset: AssetSaleInput;
   payCallback: PayCallbackInput;
+  option?: AssetBuyOptionInput;
 }
