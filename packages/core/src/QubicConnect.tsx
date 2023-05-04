@@ -23,7 +23,7 @@ import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
 import { createSignMessageAndLogin } from './utils/signMessageAndLogin';
-import { AssetBuyInput } from './types/Asset';
+import { AssetBuyInput, AssetBuyOptions } from './types/Asset';
 import { buyAsset, BuyAssetResponse } from './api/assets';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
@@ -512,11 +512,30 @@ export class QubicConnect {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  public async buyAssetAndCreateCheckout(assetBuyInput: AssetBuyInput): Promise<BuyAssetResponse | null> {
+  public async buyAssetAndCreateCheckout(
+    assetBuyInput: AssetBuyInput,
+    options?: AssetBuyOptions,
+  ): Promise<BuyAssetResponse | null> {
     try {
       const response = await buyAsset(this.checkoutRequestGraphql, assetBuyInput);
 
-      return response;
+      let { paymentUrl } = response.assetBuy;
+
+      if (options?.locale) {
+        const paymentUrlObject = new URL(response.assetBuy.paymentUrl);
+        const params = new URLSearchParams(paymentUrlObject.search);
+        params.append('locale', options.locale);
+        paymentUrlObject.search = params.toString();
+        paymentUrl = paymentUrlObject.href;
+      }
+
+      return {
+        ...response,
+        assetBuy: {
+          ...response.assetBuy,
+          paymentUrl,
+        },
+      };
     } catch (error) {
       if (error instanceof Error) {
         throw error;

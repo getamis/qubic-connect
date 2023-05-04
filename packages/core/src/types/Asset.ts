@@ -41,3 +41,9 @@ export interface AssetBuyInput {
   payCallback: PayCallbackInput;
   option?: AssetBuyOptionInput;
 }
+
+export type PaymentLocale = 'en' | 'zh' | undefined;
+
+export interface AssetBuyOptions {
+  locale: PaymentLocale;
+}
