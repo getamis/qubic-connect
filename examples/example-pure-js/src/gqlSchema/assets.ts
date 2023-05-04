@@ -37,6 +37,10 @@ export const GET_ASSET_DETAIL = gql`
       batchAssets {
         batchId
       }
+      salePhase {
+        mode
+      }
+      giftable
     }
   }
 `

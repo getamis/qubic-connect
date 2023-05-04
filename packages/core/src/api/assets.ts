@@ -7,8 +7,13 @@ export interface BuyAssetResponse {
 }
 
 export const BUY_ASSET = gql`
-  mutation BuyAsset($requestId: String!, $asset: AssetSaleInput!, $payCallback: PayCallbackInput!) {
-    assetBuy(input: { requestId: $requestId, asset: $asset, payCallback: $payCallback }) {
+  mutation BuyAsset(
+    $requestId: String!
+    $asset: AssetSaleInput!
+    $payCallback: PayCallbackInput!
+    $option: AssetBuyOptionInput
+  ) {
+    assetBuy(input: { requestId: $requestId, asset: $asset, payCallback: $payCallback, option: $option }) {
       status
       orderId
       paymentUrl
