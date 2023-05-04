@@ -1,3 +1,4 @@
+import { PaymentLocale } from './../../../packages/core/src/types/Asset';
 import { QubicConnect, Currency, QubicConnectConfig, SdkFetchError } from '@qubic-connect/core';
 import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
@@ -122,31 +123,11 @@ function main() {
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
   });
 
-  async function getAssetDetail() {
+  async function getAssetDetail(locale?: PaymentLocale) {
     let assetId = prompt('Please enter assetId', '') || '';
 
     if (!assetId) {
-      const listAssets = await qubicConnect.requestGraphql({
-        query: LIST_ASSETS_V2,
-        variables: {
-          disableSurge: false,
-          first: 30,
-          offset: 0,
-          onlyAvailable: false,
-          paymentMode: "FIAT",
-          searchText: "",
-          sort: "SORT_BY_PUBLISH_TIME_DESC",
-          tags: [],
-        }
-      });
-
-      const firstBuyableListAsset = listAssets?.listAssetsV2?.assets.find((asset: { saleState: string; }) => asset.saleState === 'BUY');
-
-      if (firstBuyableListAsset) {
-        assetId = firstBuyableListAsset.assetId;
-      } else {
-        throw new Error('no buyable asset');
-      }
+      throw new Error('no buyable asset');
     }
 
     const assetDetail = await qubicConnect.requestGraphql({
@@ -162,7 +143,7 @@ function main() {
       let purchaseCode = '';
       let beGift = false;
 
-      if (assetDetail.getAssetDetail.salePhase.mode === 'PURCHASE_CODE') {
+      if (assetDetail.getAssetDetail.salePhases?.[0]?.mode === 'PURCHASE_CODE') {
         purchaseCode = prompt('Please enter purchaseCode', '') || '';
       }
 
@@ -195,7 +176,7 @@ function main() {
         assetBuyInput.option.beGift = true;
       }
 
-      const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput);
+      const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput, { locale });
 
       console.log('assetBuyResult', assetBuyResult)
 
@@ -205,25 +186,34 @@ function main() {
     return null;
   }
 
-  const assetBuyDom = document.querySelector('#asset-buy');
-
-  assetBuyDom?.addEventListener('click', getAssetDetail);
-
-  const assetBuyAndGoDom = document.querySelector('#asset-buy-go');
-
-  assetBuyAndGoDom?.addEventListener('click', async () => {
-    const assetDetail = await getAssetDetail();
+  async function checkDomainAndGo(locale?: PaymentLocale) {
+    const assetDetail = await getAssetDetail(locale);
 
     if (!assetDetail) return;
 
     try {
       const assetDomain = prompt('Please enter domain', 'http://localhost:3000');
 
+      if (!assetDomain) {
+        return null;
+      }
+
       const { pathname, search } = new URL(assetDetail.assetBuy.paymentUrl);
       window.location.href =`${assetDomain}${pathname}${search}`;
     } catch (e) {
       console.error(e)
     }
+  }
+
+  const assetBuyDom = document.querySelector('#asset-buy');
+
+  assetBuyDom?.addEventListener('click', async () => { checkDomainAndGo() });
+
+  const assetBuyLocaleDom = document.querySelector('#asset-buy-locale');
+
+  assetBuyLocaleDom?.addEventListener('click', async () => {
+    const locale = prompt('Please enter locale', 'zh') as PaymentLocale || undefined;
+    await checkDomainAndGo(locale);
   });
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
