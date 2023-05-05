@@ -439,7 +439,7 @@ export class QubicConnect {
     } as LoginRequest | { errorMessage: string };
 
     const cleanedUrl = RedirectAuthManager.connect.cleanResponsePassToConnect(window.location.href);
-    window.history.replaceState({}, '', cleanedUrl);
+    window.history.replaceState(window.history.state, '', cleanedUrl);
 
     if ('errorMessage' in parsedQuery) {
       throw Error(parsedQuery.errorMessage);
