@@ -1,12 +1,15 @@
 import querystring from 'query-string';
 import convertStringToHex from '../utils/convertStringToHex';
 import { SdkFetch } from '../utils/sdkFetch';
+import { Credential } from '../types/QubicConnect';
 
 export interface LoginRequest {
   accountAddress: string;
   signature: string;
   dataString: string;
   isQubicUser: boolean;
+  action?: 'login' | 'bind';
+  bindTicket?: string;
 }
 
 export interface LoginResponse {
@@ -47,9 +50,35 @@ export const login = async (
 
   const serviceUri = isQubicUser ? `services/auth/qubic` : `services/auth`;
 
-  const httpMethod = 'POST';
-
   const result = await sdkFetch(serviceUri, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: payload,
+  });
+
+  const data = await result.json();
+
+  globalAccessToken = data?.accessToken || null;
+  return data as LoginResponse;
+};
+
+export const loginWithCredential = async (
+  sdkFetch: SdkFetch,
+  { identityTicket, expiredAt, address }: Credential,
+): Promise<LoginResponse> => {
+  if (!identityTicket || !expiredAt || !address) {
+    throw new Error('Missing login data');
+  }
+
+  const httpMethod = 'POST';
+  const payload = JSON.stringify({
+    identityTicket,
+    address,
+  });
+
+  const result = await sdkFetch('services/auth/prime', {
     method: httpMethod,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

@@ -8,14 +8,16 @@ import {
   getRequestConnectToPass,
   getRequestPassToWallet,
   getResponseWalletToPass,
-  ResponsePassToConnectSuccess,
   createUrlResponsePassToConnect,
   getResponsePassToConnect,
   ResponseFail,
   createUrlResponseWalletToPassOrConnect,
   cleanResponsePassToConnect,
   cleanResponseWalletToPass,
+  ResponsePassToConnectSuccess,
 } from './utils';
+
+const MOCK_EXPIRED_AT = 1683601793;
 
 describe('utils', () => {
   test('createUrlRequestConnectToPass', () => {
@@ -32,6 +34,21 @@ describe('utils', () => {
     expect(result).toEqual(RequestConnectToPass);
   });
 
+  test('createUrlRequestConnectToPass - bind', () => {
+    const requestConnectToPass: RequestConnectToPass = {
+      walletType: 'qubic',
+      qubicSignInProvider: 'google',
+      redirectUrl: 'https://www.mydapp.com',
+      dataString: JSON.stringify({ foo: 1, bar: 2 }),
+      action: 'bind',
+    };
+    const targetUrl = createUrlRequestConnectToPass('https://pass.qubic.app', requestConnectToPass);
+    expect(targetUrl).toBeDefined();
+
+    const result = getRequestConnectToPass(targetUrl);
+    expect(result).toEqual(requestConnectToPass);
+  });
+
   test('createUrlRequestPassToWallet', () => {
     const RequestPassToWallet: RequestPassToWallet = {
       ticketRedirectUrl: 'https://pass.qubic.app',
@@ -44,10 +61,36 @@ describe('utils', () => {
     expect(result).toEqual(RequestPassToWallet);
   });
 
+  test('createUrlRequestPassToWallet - incorrect url', () => {
+    const result = getRequestPassToWallet('https://pass.qubic.app');
+    expect(result).toEqual(undefined);
+  });
+
+  test('createUrlResponseWalletToPassOrConnect - utils incorrect url', () => {
+    const result = createUrlResponseWalletToPassOrConnect('https://pass.qubic.app', {
+      ticket: 'mockTicket',
+      expiredAt: MOCK_EXPIRED_AT,
+      address: 'mockAddress',
+    });
+    expect(result).toEqual('https://pass.qubic.app?address=mockAddress&expiredAt=mockExpiredAt&ticket=mockTicket');
+  });
+
+  test('createUrlResponseWalletToPassOrConnect - utils errorMessage', () => {
+    const result = createUrlResponseWalletToPassOrConnect(
+      'https://pass.qubic.app?errorMessage=hello&redirectUrl=https://myapp.com',
+      {
+        ticket: 'mockTicket',
+        expiredAt: MOCK_EXPIRED_AT,
+        address: 'mockAddress',
+      },
+    );
+    expect(result).toEqual('https://myapp.com?errorMessage=hello');
+  });
+
   test('createUrlResponseWalletToPass success', () => {
     const responseWalletToPassSuccess: ResponseWalletToPassSuccess = {
       ticket: 'ticket',
-      expiredAt: '123',
+      expiredAt: MOCK_EXPIRED_AT,
       address: '0x123',
     };
     const targetUrl = createUrlResponseWalletToPass('https://pass.qubic.app', responseWalletToPassSuccess);
@@ -96,7 +139,25 @@ describe('utils', () => {
     expect(cleanedUrl).not.toContain('isQubicUser');
   });
 
-  test('createUrlResponsePassToConnect fail', () => {
+  test('createUrlResponsePassToConnect success - bind', () => {
+    const responsePassToConnectSuccess: ResponsePassToConnectSuccess = {
+      action: 'bind',
+      bindTicket: 'bindTicket',
+      expiredAt: 1683601582875,
+    };
+    const targetUrl = createUrlResponsePassToConnect('https://pass.qubic.app', responsePassToConnectSuccess);
+    expect(targetUrl).toBeDefined();
+
+    const result = getResponsePassToConnect(targetUrl);
+    expect(result).toEqual(responsePassToConnectSuccess);
+
+    const cleanedUrl = cleanResponsePassToConnect(targetUrl);
+    expect(cleanedUrl).not.toContain('action');
+    expect(cleanedUrl).not.toContain('bindTicket');
+    expect(cleanedUrl).not.toContain('expiredAt');
+  });
+
+  test('createUrlResponsePassToConnect fail - utils', () => {
     const responseFail: ResponseFail = {
       errorMessage: 'Something Wrong',
     };
@@ -119,6 +180,7 @@ describe('real world', () => {
     // console.log('--- Qubic Connect SDK ---');
     // console.log(url);
     url = createUrlRequestConnectToPass('https://pass.qubic.app', {
+      action: 'login',
       walletType: 'qubic',
       qubicSignInProvider: 'google',
       redirectUrl: url,
@@ -150,7 +212,7 @@ describe('real world', () => {
     }
     url = createUrlResponseWalletToPass(params2.ticketRedirectUrl, {
       ticket: 'mockTicket',
-      expiredAt: 'mockExpiredAt',
+      expiredAt: MOCK_EXPIRED_AT,
       address: 'mockAddress',
     });
 
@@ -183,6 +245,7 @@ describe('real world', () => {
     // console.log(url);
     // console.log(params4);
     expect(params4).toEqual({
+      action: 'login',
       accountAddress: 'mockAddress',
       signature: 'mockTicket',
       dataString: '{"foo":1,"bar":2}',
@@ -196,6 +259,7 @@ describe('real world', () => {
     // console.log('--- Qubic Connect SDK ---');
     // console.log(url);
     url = createUrlRequestConnectToPass('https://pass.qubic.app', {
+      action: 'login',
       walletType: 'qubic',
       qubicSignInProvider: 'google',
       redirectUrl: url,
@@ -229,7 +293,7 @@ describe('real world', () => {
 
     url = createUrlResponseWalletToPassOrConnect(params2.ticketRedirectUrl, {
       ticket: 'mockTicket',
-      expiredAt: 'mockExpiredAt',
+      expiredAt: MOCK_EXPIRED_AT,
       address: 'mockAddress',
     });
 
@@ -240,10 +304,91 @@ describe('real world', () => {
     // console.log(params3);
 
     expect(params3).toEqual({
+      action: 'login',
       accountAddress: 'mockAddress',
       signature: 'mockTicket',
       dataString: '{"foo":1,"bar":2}',
       isQubicUser: true,
+    });
+  });
+
+  test('full flow - bind', () => {
+    let url = 'https://www.mydapp.com';
+
+    // code connect sdk, dApp
+    // console.log('--- Qubic Connect SDK ---');
+    // console.log(url);
+    url = createUrlRequestConnectToPass('https://pass.qubic.app', {
+      walletType: 'qubic',
+      qubicSignInProvider: 'google',
+      redirectUrl: url,
+      dataString: JSON.stringify({ foo: 1, bar: 2 }),
+      action: 'bind',
+    });
+
+    // code in pass
+    const params1 = getRequestConnectToPass(url);
+    // console.log('--- Qubic Pass ---');
+    // console.log(url);
+    // console.log(params1);
+
+    if (!params1?.qubicSignInProvider) {
+      throw Error('qubicSignInProvider not exists');
+    }
+
+    url = createUrlRequestPassToWallet('https://wallet.qubic.app', {
+      ticketRedirectUrl: url,
+      provider: params1.qubicSignInProvider,
+    });
+
+    // wallet
+    const params2 = getRequestPassToWallet(url);
+    // console.log('--- Qubic Wallet ---');
+    // console.log(url);
+    if (!params2) {
+      throw Error('invalid params');
+    }
+    url = createUrlResponseWalletToPass(params2.ticketRedirectUrl, {
+      ticket: 'mockTicket',
+      expiredAt: MOCK_EXPIRED_AT,
+      address: 'mockAddress',
+    });
+
+    // pass
+    const params3 = getResponseWalletToPass(url);
+    // console.log('--- Qubic Pass ---');
+    // console.log(url);
+    // console.log(params3);
+    if ('errorMessage' in params3) {
+      throw Error(params3.errorMessage);
+    }
+    if (!params3.redirectUrl) {
+      throw Error('redirectUrl not found');
+    }
+    if (!params3.dataString) {
+      throw Error('dataString not found');
+    }
+
+    if (params3.action !== 'bind') {
+      throw Error('should be bind action');
+    }
+
+    url = createUrlResponsePassToConnect(params3.redirectUrl, {
+      action: params3.action,
+      bindTicket: 'mockedBindTicket',
+      expiredAt: MOCK_EXPIRED_AT,
+    });
+
+    // code connect sdk, dApp
+    const params4 = getResponsePassToConnect(url);
+
+    // console.log('--- Qubic Connect SDK ---');
+    // console.log(url);
+    // console.log(params4);
+    expect(params4).toEqual({
+      bindTicket: 'mockedBindTicket',
+      expiredAt: MOCK_EXPIRED_AT,
+      action: 'bind',
     });
   });
 });

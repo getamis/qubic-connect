@@ -32,5 +32,16 @@ export interface WalletUser {
   qubicUser: QubicUser | null;
 }
 
+export interface BindTicketResult {
+  bindTicket: string;
+  expiredAt: number;
+}
+
+export interface Credential {
+  identityTicket: string;
+  expiredAt: number;
+  address: string;
+}
+
 export type OnLogin = (error: Error | null, result?: WalletUser) => void;
 export type OnLogout = (error: Error | null) => void;
