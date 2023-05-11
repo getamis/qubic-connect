@@ -132,6 +132,10 @@ _response example_
 }
 ```
 
+## Error Code
+
+[Payment](packages/core/src/constants/errorCodes.ts)
+
 ## Related Repo
 
 [https://github.com/getamis/qubic-auth](https://github.com/getamis/qubic-auth)
