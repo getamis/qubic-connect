@@ -3,6 +3,7 @@ import { QubicConnectConfig } from './types/QubicConnect';
 import { QubicConnect } from './QubicConnect';
 
 export * from './types';
+export * from './constants';
 
 let globalQubicConnect: QubicConnect | null = null;
 
