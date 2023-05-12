@@ -23,8 +23,9 @@ import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
 import { createSignMessageAndLogin } from './utils/signMessageAndLogin';
-import { AssetBuyInput, AssetBuyOptions } from './types/Asset';
-import { buyAsset, BuyAssetResponse } from './api/assets';
+import { AssetBuyInput, AssetBuyOptions, GiftRedeemInput, GiftRedeemOptions } from './types/Asset';
+import { buyAsset, BuyAssetResponse, giftRedeem, GiftRedeemResponse } from './api/assets';
+import { addLocaleToUrl } from './utils/addLocaleToUrl';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -522,17 +523,43 @@ export class QubicConnect {
       let { paymentUrl } = response.assetBuy;
 
       if (options?.locale) {
-        const paymentUrlObject = new URL(response.assetBuy.paymentUrl);
-        const params = new URLSearchParams(paymentUrlObject.search);
-        params.append('locale', options.locale);
-        paymentUrlObject.search = params.toString();
-        paymentUrl = paymentUrlObject.href;
+        paymentUrl = addLocaleToUrl(response.assetBuy.paymentUrl, options.locale);
       }
 
       return {
         ...response,
         assetBuy: {
           ...response.assetBuy,
+          paymentUrl,
+        },
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+    }
+
+    return null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public async giftRedeem(
+    giftRedeemInput: GiftRedeemInput,
+    options?: GiftRedeemOptions,
+  ): Promise<GiftRedeemResponse | null> {
+    try {
+      const response = await giftRedeem(this.checkoutRequestGraphql, giftRedeemInput);
+
+      let { paymentUrl } = response.giftRedeem;
+
+      if (options?.locale) {
+        paymentUrl = addLocaleToUrl(response.giftRedeem.paymentUrl, options.locale);
+      }
+
+      return {
+        ...response,
+        giftRedeem: {
+          ...response.giftRedeem,
           paymentUrl,
         },
       };

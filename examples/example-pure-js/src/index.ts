@@ -123,7 +123,7 @@ function main() {
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
   });
 
-  async function getAssetDetail(locale?: PaymentLocale) {
+  async function buyAsset(locale?: PaymentLocale) {
     let assetId = prompt('Please enter assetId', '') || '';
 
     if (!assetId) {
@@ -186,10 +186,41 @@ function main() {
     return null;
   }
 
-  async function checkDomainAndGo(locale?: PaymentLocale) {
-    const assetDetail = await getAssetDetail(locale);
+  async function giftRedeem(locale?: PaymentLocale) {
+    let giftTicket = prompt('Please enter giftTicket', '') || '';
 
-    if (!assetDetail) return;
+    if (!giftTicket) {
+      throw new Error('no gift ticket');
+    }
+
+    const giftRedeemInput = {
+      requestId: uuidv4(),
+      giftTicket,
+      payCallback: {
+        failureRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+        pendingRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+        successRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+      },
+    };
+
+    const giftRedeemResult = await qubicConnect.giftRedeem(giftRedeemInput, { locale });
+
+    console.log('AAA, giftRedeemResult', giftRedeemResult);
+
+    return giftRedeemResult;
+  }
+
+  async function checkDomainAndGo(locale?: PaymentLocale, isGift = false) {
+    let checkoutInfo = undefined;
+    if (isGift) {
+      const response = await giftRedeem(locale);
+      checkoutInfo = response?.giftRedeem;
+    } else {
+      const response = await buyAsset(locale);
+      checkoutInfo = response?.assetBuy;
+    }
+
+    if (!checkoutInfo) return;
 
     try {
       const assetDomain = prompt('Please enter domain', 'http://localhost:3000');
@@ -198,7 +229,7 @@ function main() {
         return null;
       }
 
-      const { pathname, search } = new URL(assetDetail.assetBuy.paymentUrl);
+      const { pathname, search } = new URL(checkoutInfo.paymentUrl);
       window.location.href =`${assetDomain}${pathname}${search}`;
     } catch (e) {
       console.error(e)
@@ -215,6 +246,10 @@ function main() {
     const locale = prompt('Please enter locale', 'zh') as PaymentLocale || undefined;
     await checkDomainAndGo(locale);
   });
+
+  const giftRedeemDom = document.querySelector('#gift-redeem');
+
+  giftRedeemDom?.addEventListener('click', async () => { checkDomainAndGo(undefined, true) });
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicConnect.loginWithRedirect();
