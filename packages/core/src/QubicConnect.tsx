@@ -1,11 +1,19 @@
 import { ComponentChild, render, VNode } from 'preact';
 import { createPortal } from 'preact/compat';
-import qs from 'query-string';
 import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
 import { showBlockerWhenIab, openExternalBrowserWhenLineIab } from '@qubic-connect/detect-iab';
 
-import { QubicConnectConfig, InternalQubicConnectConfig, OnLogin, OnLogout, WalletUser } from './types/QubicConnect';
+import { ResponsePassToConnect } from '@qubic-connect/redirect/src/utils';
+import {
+  QubicConnectConfig,
+  InternalQubicConnectConfig,
+  OnLogin,
+  OnLogout,
+  WalletUser,
+  BindTicketResult,
+  Credential,
+} from './types/QubicConnect';
 import LoginButton, { LoginButtonProps } from './components/LoginButton';
 import {
   ExtendedExternalProvider,
@@ -18,7 +26,7 @@ import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
 import { API_URL, AUTH_REDIRECT_URL, CHECKOUT_API_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
-import { login, logout, LoginRequest, renewToken, setAccessToken } from './api/auth';
+import { login, logout, loginWithCredential as apiLoginWithCredential, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
 import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
@@ -31,6 +39,7 @@ const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
 enum Events {
   AuthStateChanged = 'AuthStateChanged',
+  BindTicketResult = 'BindTicketResult',
 }
 
 const USER_STORAGE_KEY = '@qubic-connect/user';
@@ -414,6 +423,28 @@ export class QubicConnect {
     });
   }
 
+  public bindWithRedirect(options?: {
+    walletType: LoginRedirectWalletType;
+    qubicSignInProvider?: QubicSignInProvider;
+  }): void {
+    const dataString = JSON.stringify({
+      name: this.config.name,
+      service: this.config.service,
+      url: window.location.origin,
+      permissions: ['wallet.permission.access_email_address'],
+      nonce: Date.now(),
+    });
+    const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
+    const redirectUrl = cleanResponsePassToConnect(window.location.href);
+    window.location.href = createUrlRequestConnectToPass(this.authRedirectUrl, {
+      walletType: options?.walletType,
+      qubicSignInProvider: options?.qubicSignInProvider,
+      redirectUrl,
+      dataString,
+      action: 'bind',
+    });
+  }
+
   public onAuthStateChanged(callback: (result: WalletUser | null, error?: SdkFetchError) => void): () => void {
     if (typeof this.cachedRedirectResult !== 'undefined') {
       // the purpose of callback here is let developer can
@@ -430,32 +461,42 @@ export class QubicConnect {
   private cachedRedirectResult?: WalletUser | null;
   private cachedRedirectError?: Error;
 
-  private static getLoginRequestFromUrlAndClearUrl(): LoginRequest | null {
-    const { query } = qs.parseUrl(window.location.href);
+  private cachedBindTicket?: BindTicketResult;
+  public onBindTicketResult(callback: (result: BindTicketResult | null, error?: SdkFetchError) => void): () => void {
+    if (typeof this.cachedBindTicket !== 'undefined') {
+      // the purpose of callback here is let developer can
+      // get result immediately when bind this event
+      // if everything is ready
+      callback(this.cachedBindTicket);
+    }
+    this.eventEmitter.addListener(Events.BindTicketResult, callback);
+    return () => {
+      this.eventEmitter.removeListener(Events.BindTicketResult, callback);
+    };
+  }
 
-    const parsedQuery = {
-      ...query,
-      // isQubicUser need to convert from string to boolean to match type
-      isQubicUser: query.isQubicUser === 'true',
-    } as LoginRequest | { errorMessage: string };
+  private static getRedirectResultFromUrlAndClearUrl(): ResponsePassToConnect | null {
+    const currentLocation = window.location.href;
+    const parsedQuery = RedirectAuthManager.connect.getResponsePassToConnect(currentLocation);
 
-    const cleanedUrl = RedirectAuthManager.connect.cleanResponsePassToConnect(window.location.href);
+    const cleanedUrl = RedirectAuthManager.connect.cleanResponsePassToConnect(currentLocation);
     window.history.replaceState(window.history.state, '', cleanedUrl);
 
     if ('errorMessage' in parsedQuery) {
       throw Error(parsedQuery.errorMessage);
     }
-    if (!parsedQuery.signature || !parsedQuery.accountAddress) {
-      // not detecting valid query, just skip
+
+    if (!parsedQuery.action) {
       return null;
     }
+
     return parsedQuery;
   }
 
   private async handleRedirectResult(): Promise<void> {
     try {
-      const loginRequest = QubicConnect.getLoginRequestFromUrlAndClearUrl();
-      if (loginRequest === null) {
+      const responsePassToConnect = QubicConnect.getRedirectResultFromUrlAndClearUrl();
+      if (responsePassToConnect === null) {
         this.cachedRedirectResult = null;
         this.pendingGetRedirectResultDeferred.forEach(deferred => {
           deferred.resolve(null);
@@ -463,14 +504,27 @@ export class QubicConnect {
         return;
       }
 
-      const authResponse = await login(this.fetch, loginRequest);
+      if ('errorMessage' in responsePassToConnect) {
+        throw Error(responsePassToConnect.errorMessage);
+      }
+
+      if (responsePassToConnect.action === 'bind') {
+        this.cachedBindTicket = {
+          bindTicket: responsePassToConnect.bindTicket,
+          expiredAt: responsePassToConnect.expiredAt,
+        };
+        this.eventEmitter.emit(Events.BindTicketResult, this.cachedBindTicket);
+        return;
+      }
+
+      const authResponse = await login(this.fetch, responsePassToConnect);
       const {
         me: { qubicUser },
       } = await getMe(this.requestGraphql);
 
       const user: WalletUser = {
         method: 'redirect',
-        address: loginRequest.accountAddress,
+        address: responsePassToConnect.accountAddress,
         accessToken: authResponse.accessToken,
         expiredAt: authResponse.expiredAt,
         provider: null,
@@ -510,6 +564,24 @@ export class QubicConnect {
 
   public getCurrentUser(): WalletUser | null {
     return this.user;
+  }
+
+  public async loginWithCredential(credential: Credential): Promise<WalletUser> {
+    const authResponse = await apiLoginWithCredential(this.fetch, credential);
+    const {
+      me: { qubicUser },
+    } = await getMe(this.requestGraphql);
+
+    const user: WalletUser = {
+      method: 'redirect',
+      address: credential.address,
+      accessToken: authResponse.accessToken,
+      expiredAt: authResponse.expiredAt,
+      provider: null,
+      qubicUser,
+    };
+
+    return user;
   }
 
   // eslint-disable-next-line class-methods-use-this

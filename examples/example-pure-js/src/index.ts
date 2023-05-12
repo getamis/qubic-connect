@@ -98,6 +98,17 @@ function main() {
     console.log({ user });
   });
 
+  qubicConnect.onBindTicketResult((bindTicketResult, error) => {
+    console.log('example onBindTicketResult ');
+    if (error) {
+      console.log(error?.message);
+      console.log(error?.status);
+      console.log(error?.statusText);
+      console.log(error?.body);
+    }
+    console.log({ bindTicketResult });
+  });
+
   const PRICE = gql`
     query PRICE_PUBLIC($fromCurrency: Currency!, $toCurrency: Currency!) {
       price(input: { fromCurrency: $fromCurrency, toCurrency: $toCurrency }) {
@@ -135,8 +146,8 @@ function main() {
       variables: {
         assetId,
         disableSurge: false,
-        paymentMode: "FIAT",
-      }
+        paymentMode: 'FIAT',
+      },
     });
 
     if (assetDetail) {
@@ -160,9 +171,9 @@ function main() {
           variantId: assetDetail.getAssetDetail.batchAssets[0].batchId,
         },
         payCallback: {
-          failureRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-          pendingRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-          successRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+          failureRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
+          pendingRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
+          successRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
         },
         requestId: uuidv4(),
         option: {} as AssetBuyOptionInput,
@@ -178,7 +189,7 @@ function main() {
 
       const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput, { locale });
 
-      console.log('assetBuyResult', assetBuyResult)
+      console.log('assetBuyResult', assetBuyResult);
 
       return assetBuyResult;
     }
@@ -231,19 +242,22 @@ function main() {
 
       const { pathname, search } = new URL(checkoutInfo.paymentUrl);
       window.location.href =`${assetDomain}${pathname}${search}`;
+
     } catch (e) {
-      console.error(e)
+      console.error(e);
     }
   }
 
   const assetBuyDom = document.querySelector('#asset-buy');
 
-  assetBuyDom?.addEventListener('click', async () => { checkDomainAndGo() });
+  assetBuyDom?.addEventListener('click', async () => {
+    checkDomainAndGo();
+  });
 
   const assetBuyLocaleDom = document.querySelector('#asset-buy-locale');
 
   assetBuyLocaleDom?.addEventListener('click', async () => {
-    const locale = prompt('Please enter locale', 'zh') as PaymentLocale || undefined;
+    const locale = (prompt('Please enter locale', 'zh') as PaymentLocale) || undefined;
     await checkDomainAndGo(locale);
   });
 
@@ -253,6 +267,18 @@ function main() {
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicConnect.loginWithRedirect();
+  });
+
+  document.getElementById('redirect-bind')?.addEventListener('click', () => {
+    qubicConnect.bindWithRedirect();
+  });
+
+  document.getElementById('login-with-credential')?.addEventListener('click', () => {
+    const credential = prompt('credential in json format');
+    if (!credential) {
+      throw Error('null credential');
+    }
+    qubicConnect.loginWithCredential(JSON.parse(credential));
   });
 
   const metamaskElm = document.getElementById('redirect-login-metamask');
