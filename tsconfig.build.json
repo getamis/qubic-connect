@@ -13,5 +13,5 @@
     "target": "ES5",
     "module": "commonjs"
   },
-  "exclude": ["coverage", "dist/**", "node_modules", "**/__tests__", "**/__mocks__"]
+  "exclude": ["coverage", "dist/**", "node_modules", "**/__tests__", "**/__mocks__", "**/*.test.ts"]
 }

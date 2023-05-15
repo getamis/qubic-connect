@@ -481,12 +481,12 @@ export class QubicConnect {
     const cleanedUrl = RedirectAuthManager.connect.cleanResponsePassToConnect(currentLocation);
     window.history.replaceState(window.history.state, '', cleanedUrl);
 
-    if ('errorMessage' in parsedQuery) {
-      throw Error(parsedQuery.errorMessage);
+    if (!parsedQuery) {
+      return null;
     }
 
-    if (!parsedQuery.action) {
-      return null;
+    if ('errorMessage' in parsedQuery) {
+      throw Error(parsedQuery.errorMessage);
     }
 
     return parsedQuery;
