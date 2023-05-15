@@ -66,7 +66,7 @@ export function createUrlRequestConnectToPass(url: string, options: RequestConne
   });
 }
 
-export function getResponsePassToConnect(url: string): ResponsePassToConnect {
+export function getResponsePassToConnect(url: string): ResponsePassToConnect | null {
   const query = qs.parseUrl(url).query as QueryRecord<ResponsePassToConnect>;
   if (query.errorMessage) {
     return {
@@ -80,6 +80,10 @@ export function getResponsePassToConnect(url: string): ResponsePassToConnect {
       bindTicket: query.bindTicket,
       expiredAt: Number(query.expiredAt),
     };
+  }
+
+  if (!query.accountAddress || !query.signature || !query.dataString) {
+    return null;
   }
 
   return {

@@ -72,7 +72,7 @@ describe('utils', () => {
       expiredAt: MOCK_EXPIRED_AT,
       address: 'mockAddress',
     });
-    expect(result).toEqual('https://pass.qubic.app?address=mockAddress&expiredAt=mockExpiredAt&ticket=mockTicket');
+    expect(result).toEqual(`https://pass.qubic.app?address=mockAddress&expiredAt=${MOCK_EXPIRED_AT}&ticket=mockTicket`);
   });
 
   test('createUrlResponseWalletToPassOrConnect - utils errorMessage', () => {
@@ -121,6 +121,7 @@ describe('utils', () => {
 
   test('createUrlResponsePassToConnect success', () => {
     const responsePassToConnectSuccess: ResponsePassToConnectSuccess = {
+      action: 'login',
       accountAddress: '0x123',
       signature: '0x123',
       dataString: '123',
@@ -155,6 +156,12 @@ describe('utils', () => {
     expect(cleanedUrl).not.toContain('action');
     expect(cleanedUrl).not.toContain('bindTicket');
     expect(cleanedUrl).not.toContain('expiredAt');
+  });
+
+  test('getResponsePassToConnect - when not detect any valid params', () => {
+    const result = getResponsePassToConnect('https://www.mydapp.com');
+
+    expect(result).toBeNull();
   });
 
   test('createUrlResponsePassToConnect fail - utils', () => {
