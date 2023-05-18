@@ -204,6 +204,15 @@ export class QubicConnect {
     }
   }
 
+  private handleUserPurge() {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    this.address = null;
+    this.accessToken = null;
+    this.expiredAt = null;
+    this.provider = null;
+    this.user = null;
+  }
+
   private handleLogin: OnLogin = (error, data) => {
     if (!error && data) {
       this.address = data.address;
@@ -220,15 +229,9 @@ export class QubicConnect {
   };
 
   private handleLogout: OnLogout = error => {
-    if (!error) {
-      this.address = null;
-      this.accessToken = null;
-      this.expiredAt = null;
-      this.provider = null;
-      this.user = null;
-      this.eventEmitter.emit(Events.AuthStateChanged, null);
-      this.stopIntervalToCheckTokenExpired();
-    }
+    this.handleUserPurge();
+    this.eventEmitter.emit(Events.AuthStateChanged, null, error);
+    this.stopIntervalToCheckTokenExpired();
   };
 
   private static ifTokenExpired(expiredAt: number): boolean {
