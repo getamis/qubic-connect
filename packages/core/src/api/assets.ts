@@ -1,5 +1,5 @@
 import { gql } from 'graphql-request';
-import { AssetBuyInfo, AssetBuyInput } from '../types/Asset';
+import { AssetBuyInfo, AssetBuyInput, GiftRedeemInfo, GiftRedeemInput } from '../types/Asset';
 import { SdkRequestGraphql } from '../utils/graphql';
 
 export interface BuyAssetResponse {
@@ -28,6 +28,32 @@ export async function buyAsset(
   const response = await sdkRequestGraphql({
     query: BUY_ASSET,
     variables: assetBuyInput,
+  });
+
+  return response;
+}
+
+export interface GiftRedeemResponse {
+  giftRedeem: GiftRedeemInfo;
+}
+
+export const GIFT_REDEEM = gql`
+  mutation GiftRedeem($requestId: String!, $giftTicket: String!, $payCallback: PayCallbackInput!) {
+    giftRedeem(input: { requestId: $requestId, giftTicket: $giftTicket, payCallback: $payCallback }) {
+      status
+      orderId
+      paymentUrl
+    }
+  }
+`;
+
+export async function giftRedeem(
+  sdkRequestGraphql: SdkRequestGraphql<GiftRedeemInput, GiftRedeemResponse>,
+  giftRedeemInput: GiftRedeemInput,
+): Promise<GiftRedeemResponse> {
+  const response = await sdkRequestGraphql({
+    query: GIFT_REDEEM,
+    variables: giftRedeemInput,
   });
 
   return response;

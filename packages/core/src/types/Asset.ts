@@ -42,8 +42,18 @@ export interface AssetBuyInput {
   option?: AssetBuyOptionInput;
 }
 
-export type PaymentLocale = 'en' | 'zh' | undefined;
+export type PaymentLocale = 'en' | 'zh';
 
 export interface AssetBuyOptions {
-  locale: PaymentLocale;
+  locale?: PaymentLocale;
 }
+
+export interface GiftRedeemInput {
+  requestId: string;
+  // valid giftTicket should be `^[A-HJ-NP-Z]{8}$`
+  giftTicket: string;
+  payCallback: PayCallbackInput;
+}
+
+export type GiftRedeemInfo = AssetBuyInfo;
+export type GiftRedeemOptions = AssetBuyOptions;
