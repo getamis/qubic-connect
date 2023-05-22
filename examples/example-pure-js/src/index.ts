@@ -12,13 +12,13 @@ import {
   API_KEY,
   API_SECRET,
   API_URL,
-  CHECKOUT_API_URL,
+  MARKET_API_URL,
   AUTH_REDIRECT_URL,
   VERIFY_URL,
   INFURA_ID,
   QUBIC_WALLET_URL,
 } from './environment';
-import { GET_ASSET_DETAIL, LIST_ASSETS_V2 } from './gqlSchema/assets';
+import { GET_ASSET_DETAIL } from './gqlSchema/assets';
 import { AssetBuyOptionInput, CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
 
 const SDK_CONFIG: QubicConnectConfig = {
@@ -27,7 +27,7 @@ const SDK_CONFIG: QubicConnectConfig = {
   secret: API_SECRET,
   service: API_SERVICE_NAME, //optional
   apiUrl: API_URL, // optional
-  checkoutApiUrl: CHECKOUT_API_URL,
+  marketApiUrl: MARKET_API_URL,
   authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
   iabRedirectUrl: '', // optional
   shouldAlwaysShowCopyUI: false, // optional
@@ -91,9 +91,6 @@ function main() {
     console.log('example onAuthStateChanged ');
     if (error) {
       console.log(error?.message);
-      console.log(error?.status);
-      console.log(error?.statusText);
-      console.log(error?.body);
     }
     console.log({ user });
   });
@@ -102,9 +99,6 @@ function main() {
     console.log('example onBindTicketResult ');
     if (error) {
       console.log(error?.message);
-      console.log(error?.status);
-      console.log(error?.statusText);
-      console.log(error?.body);
     }
     console.log({ bindTicketResult });
   });
@@ -125,6 +119,7 @@ function main() {
   const priceDom = document.querySelector('#price');
   priceDom?.addEventListener('click', async () => {
     const ETHToTWDCurrencyData = await qubicConnect.requestGraphql({
+      path: '/services/graphql-acc',
       query: PRICE,
       variables: {
         fromCurrency: Currency.ETH,
@@ -132,6 +127,12 @@ function main() {
       },
     });
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
+  });
+
+  const bindPrimeDom = document.querySelector('#bind-prime');
+  bindPrimeDom?.addEventListener('click', async () => {
+    const response = await qubicConnect.bindWithRedirect();
+    window.alert(JSON.stringify(response));
   });
 
   async function buyAsset(locale?: PaymentLocale) {
@@ -142,6 +143,7 @@ function main() {
     }
 
     const assetDetail = await qubicConnect.requestGraphql({
+      path: '/services/graphql-acc',
       query: GET_ASSET_DETAIL,
       variables: {
         assetId,
@@ -208,9 +210,9 @@ function main() {
       requestId: uuidv4(),
       giftTicket,
       payCallback: {
-        failureRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-        pendingRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-        successRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+        failureRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
+        pendingRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
+        successRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
       },
     };
 
@@ -241,8 +243,7 @@ function main() {
       }
 
       const { pathname, search } = new URL(checkoutInfo.paymentUrl);
-      window.location.href =`${assetDomain}${pathname}${search}`;
-
+      window.location.href = `${assetDomain}${pathname}${search}`;
     } catch (e) {
       console.error(e);
     }
@@ -263,7 +264,9 @@ function main() {
 
   const giftRedeemDom = document.querySelector('#gift-redeem');
 
-  giftRedeemDom?.addEventListener('click', async () => { checkDomainAndGo(undefined, true) });
+  giftRedeemDom?.addEventListener('click', async () => {
+    checkDomainAndGo(undefined, true);
+  });
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicConnect.loginWithRedirect();

@@ -9,6 +9,7 @@ participant "Client Service" as clientService
 participant "Qubic Connect SDK" as sdk
 participant "Auth Web" as auth
 participant "Qubic Wallet" as wallet
+participant "Qubic Auth Admin Api" as adminApi
 
 entryspacing 1.0
 
@@ -29,16 +30,20 @@ wallet->wallet:sign in success and get ticket from wallet service
 end
 
 sdk->sdk:handleRedirectUrl\n
-sdk->sdk:login with signature\nif it's Qubic wallet signature would be ticket
+sdk->adminApi:以 qubic wallet 登入\n/services/auth/qubic\npayload {address,ticket} \n\n其他錢包登入\n/services/auth\npayload {provider, signature, address data}
+sdk<--adminApi:response {accessToken, expiredAt, isQubicUser}
+sdk->sdk
 client<--sdk:trigger onAuthChanged\n{\n  method\n  address\n  accessToken\n  expiredAt\n  provider\n  qubicUser\n}
 
 ## bindWithRedirect
 
-note over client, wallet: bindWithRedirect
+note over client, adminApi: bindWithRedirect
 
 
 client->sdk:bindWithRedirect\n
-	sdk->auth:navigate to auth web\n{\n  action: 'bind'\n  walletType\n  qubicSignInProvider\n  redirectUrl\n  dataString\n}
+sdk->adminApi:clientTicketIssue\n
+sdk<-adminApi:response { ticket, expiredAt }
+	sdk->auth:navigate to auth web\n{\n  action: 'bind'\n  clientTicket\n  walletType\n  qubicSignInProvider\n  redirectUrl\n  dataString\n}\n\n
 
 
 else action:bind
@@ -49,9 +54,13 @@ else action:bind
     else WalletConnect/Metamask
 		auth->auth:active wallet and sign
 	end
-auth->auth:login with signature or ticket
+auth->auth
+auth->adminApi:以 qubic wallet 登入\n/services/auth/qubic\npayload {address,ticket} \n\n其他錢包登入\n/services/auth\npayload {provider, signature, address data} \n\n帶入 clientTicket \nheaders { X-Qubic-Client-Ticket }
+auth<--adminApi:response {accessToken, expiredAt, isQubicUser, clientId, merchantName, clientIconUrl}
 	auth->auth:show confirm auhtorized to user\n
-	auth->auth:send request to get bind token
+	auth->auth
+auth->adminApi:gql PrimeBind \nheaders { X-Qubic-Client-Ticket }
+auth<--adminApi:response { bindTicket, expireTime }
 	sdk<--auth:response \n{\n  action: 'bind',\n  bindTicket: string,\n  expiredAt: number\n}
 
 
@@ -67,8 +76,8 @@ note over client, clientService: After binding success, you can login with clien
 client->clientService:login
 client<--clientService:response with credential\n{\n  identityTicket,\n  expiredAt,\n  address\n}
 client->sdk:loginWithCredential
+sdk->adminApi:/services/auth/prime\npayload {identityTicket, address}\n
+sdk<--adminApi:response {accessToken, expiredAt, isQubicUser}
 client<--sdk:trigger onAuthChanged\n{\n  method\n  address\n  accessToken\n  expiredAt\n  provider\n  qubicUser\n}
-
-
 
 ```

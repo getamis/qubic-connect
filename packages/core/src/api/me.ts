@@ -16,7 +16,6 @@ export const GET_ME = gql`
       qubicUser {
         provider
         email
-        isKyc
       }
     }
   }

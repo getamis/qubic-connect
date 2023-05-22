@@ -49,7 +49,6 @@ const qubicConnect = new QubicConnect({
 //   qubicUser?: {
 //    provider: 'GOOGLE' | 'FACEBOOK' | 'TWITTER' | 'APPLE' | 'UNKNOWN';
 //    email: string;
-//    isKyc: boolean;
 //  };
 // }
 
@@ -96,6 +95,22 @@ qubicConnect.onAuthStateChanged((user, error) => {
 
 ```ts
 qubicConnect.loginWithRedirect();
+```
+
+### Bind with redirect
+
+```ts
+// bind with redirect
+qubicConnect.bindWithRedirect();
+
+// when success redirect from url
+qubicConnect.onBindTicketResult((bindTicketResult, error) => {
+  console.log('example onBindTicketResult ');
+  if (error) {
+    console.log(error?.message);
+  }
+  console.log({ bindTicketResult });
+});
 ```
 
 ### Sign in with different wallet providers

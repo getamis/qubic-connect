@@ -11,12 +11,27 @@ export interface ResponseFail {
 
 // in Qubic Connect
 
-export interface RequestConnectToPass {
+export interface RequestConnectToPassLogin {
   walletType?: LoginRedirectWalletType;
   qubicSignInProvider?: QubicSignInProvider;
   redirectUrl: string;
   dataString: string;
-  action?: 'login' | 'bind'; // default sign in
+  action: 'login';
+}
+
+export interface RequestConnectToPassBind {
+  walletType?: LoginRedirectWalletType;
+  qubicSignInProvider?: QubicSignInProvider;
+  redirectUrl: string;
+  dataString: string;
+  clientTicket: string;
+  action: 'bind';
+}
+
+export type RequestConnectToPass = RequestConnectToPassBind | RequestConnectToPassLogin;
+
+export interface ResponsePassToConnectFail extends ResponseFail {
+  action: 'bind' | 'login';
 }
 
 export interface ResponsePassToConnectLoginSuccess {
@@ -29,20 +44,23 @@ export interface ResponsePassToConnectLoginSuccess {
 
 export interface ResponsePassToConnectBindSuccess {
   bindTicket: string;
-  expiredAt: number;
+  expireTime: string;
   action: 'bind';
 }
 
 export type ResponsePassToConnectSuccess = ResponsePassToConnectLoginSuccess | ResponsePassToConnectBindSuccess;
 
-export type ResponsePassToConnect = ResponseFail | ResponsePassToConnectLoginSuccess | ResponsePassToConnectBindSuccess;
+export type ResponsePassToConnect =
+  | ResponsePassToConnectFail
+  | ResponsePassToConnectLoginSuccess
+  | ResponsePassToConnectBindSuccess;
 
 export interface RequestPassToWallet {
   ticketRedirectUrl: string;
   provider: QubicSignInProvider;
 }
 
-export interface ResponseWalletToPassSuccess extends Partial<RequestConnectToPass> {
+export interface ResponseWalletToPassSuccess {
   ticket: string;
   expiredAt: number;
   address: string;
@@ -53,13 +71,23 @@ export type ResponseWalletToPassFail = ResponseFail & Partial<RequestConnectToPa
 export type ResponseWalletToPass = ResponseWalletToPassSuccess | ResponseFail;
 
 export function createUrlRequestConnectToPass(url: string, options: RequestConnectToPass): string {
-  const query: RequestConnectToPass = {
-    walletType: options.walletType,
-    qubicSignInProvider: options?.qubicSignInProvider,
-    redirectUrl: encodeURIComponent(options.redirectUrl),
-    dataString: encodeURIComponent(options.dataString),
-    action: options.action,
-  };
+  const query: RequestConnectToPass =
+    options.action === 'login'
+      ? {
+          walletType: options.walletType,
+          qubicSignInProvider: options?.qubicSignInProvider,
+          redirectUrl: encodeURIComponent(options.redirectUrl),
+          dataString: encodeURIComponent(options.dataString),
+          action: options.action,
+        }
+      : {
+          walletType: options.walletType,
+          qubicSignInProvider: options?.qubicSignInProvider,
+          redirectUrl: encodeURIComponent(options.redirectUrl),
+          dataString: encodeURIComponent(options.dataString),
+          clientTicket: options.clientTicket,
+          action: 'bind',
+        };
   return qs.stringifyUrl({
     url,
     query: query as any,
@@ -70,15 +98,16 @@ export function getResponsePassToConnect(url: string): ResponsePassToConnect | n
   const query = qs.parseUrl(url).query as QueryRecord<ResponsePassToConnect>;
   if (query.errorMessage) {
     return {
+      action: query.action,
       errorMessage: query.errorMessage,
-    } as ResponseFail;
+    } as ResponsePassToConnectFail;
   }
 
   if (query.action === 'bind') {
     return {
       action: 'bind',
       bindTicket: query.bindTicket,
-      expiredAt: Number(query.expiredAt),
+      expireTime: query.expireTime,
     };
   }
 
@@ -107,8 +136,8 @@ export function cleanResponsePassToConnect(currentUrl: string): string {
       isQubicUser,
       errorMessage,
       action,
-      expiredAt,
       bindTicket,
+      expiredTime,
       ...restQuery
     },
     fragmentIdentifier,
@@ -127,16 +156,25 @@ export function cleanResponsePassToConnect(currentUrl: string): string {
 export function getRequestConnectToPass(url: string): RequestConnectToPass | undefined {
   const query = qs.parseUrl(url).query as QueryRecord<RequestConnectToPass>;
 
-  if (!query.redirectUrl || !query.dataString) {
+  if (!query.redirectUrl) {
     return undefined;
   }
-  return {
-    walletType: query.walletType as LoginRedirectWalletType,
-    qubicSignInProvider: query.qubicSignInProvider as QubicSignInProvider,
-    redirectUrl: decodeURIComponent(query.redirectUrl),
-    dataString: decodeURIComponent(query.dataString),
-    action: query.action as RequestConnectToPass['action'],
-  };
+  return query.action === 'login'
+    ? {
+        walletType: query.walletType as LoginRedirectWalletType,
+        qubicSignInProvider: query.qubicSignInProvider as QubicSignInProvider,
+        redirectUrl: decodeURIComponent(query.redirectUrl),
+        dataString: decodeURIComponent(query.dataString),
+        action: 'login',
+      }
+    : {
+        walletType: query.walletType as LoginRedirectWalletType,
+        qubicSignInProvider: query.qubicSignInProvider as QubicSignInProvider,
+        redirectUrl: decodeURIComponent(query.redirectUrl),
+        dataString: decodeURIComponent(query.dataString),
+        clientTicket: query.clientTicket,
+        action: 'bind',
+      };
 }
 
 export function createUrlRequestPassToWallet(url: string, options: RequestPassToWallet): string {
@@ -156,19 +194,13 @@ export function getResponseWalletToPass(url: string): ResponseWalletToPass {
   if (query.errorMessage) {
     return {
       errorMessage: query.errorMessage,
-      redirectUrl: query.redirectUrl,
     };
   }
-
-  const ticketRedirectUrlParams = getRequestConnectToPass(url);
 
   return {
     ticket: query.ticket,
     expiredAt: Number(query.expiredAt),
     address: query.address,
-
-    // ticketRedirectUrl has it own query parameter
-    ...(ticketRedirectUrlParams?.dataString ? ticketRedirectUrlParams : {}),
   };
 }
 
@@ -229,7 +261,13 @@ export function createUrlResponseWalletToPassOrConnect(url: string, options: Res
   const nextUrl = createUrlResponseWalletToPass(url, options);
   const params = getResponseWalletToPass(nextUrl);
 
-  if (!('redirectUrl' in params) || !params.redirectUrl || params.action === 'bind') {
+  const requestConnectToPassParams = getRequestConnectToPass(nextUrl);
+
+  if (
+    !requestConnectToPassParams ||
+    !requestConnectToPassParams.redirectUrl ||
+    requestConnectToPassParams.action === 'bind'
+  ) {
     // not detecting url just go back to pass
     return nextUrl;
   }
@@ -237,18 +275,19 @@ export function createUrlResponseWalletToPassOrConnect(url: string, options: Res
   // if we detect redirectUrl we skip pass web, go to connect sdk directly
   if ('errorMessage' in params) {
     return createUrlResponsePassToConnect((params as any).redirectUrl, {
+      action: requestConnectToPassParams.action,
       errorMessage: (params as ResponseFail).errorMessage,
     });
   }
 
-  if (!params.dataString) {
+  if (!requestConnectToPassParams.dataString) {
     throw Error('params data string Not found');
   }
 
-  return createUrlResponsePassToConnect(params.redirectUrl, {
+  return createUrlResponsePassToConnect(requestConnectToPassParams.redirectUrl, {
     accountAddress: params.address,
     signature: params.ticket,
-    dataString: params.dataString,
+    dataString: requestConnectToPassParams.dataString,
     isQubicUser: true,
     action: 'login',
   });

@@ -8,7 +8,7 @@ export interface QubicConnectConfig {
   secret: string;
   providerOptions?: ProviderOptions;
   apiUrl?: string;
-  checkoutApiUrl?: string;
+  marketApiUrl?: string;
   iabRedirectUrl?: string;
   shouldAlwaysShowCopyUI?: boolean;
   disableIabWarning?: boolean;
@@ -34,7 +34,7 @@ export interface WalletUser {
 
 export interface BindTicketResult {
   bindTicket: string;
-  expiredAt: number;
+  expireTime: string;
 }
 
 export interface Credential {
