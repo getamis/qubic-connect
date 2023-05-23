@@ -1,6 +1,6 @@
 {
   "name": "@qubic-connect/core",
-  "version": "0.8.7",
+  "version": "0.9.0",
   "source": "./src/index.ts",
   "main": "./dist/index.js",
   "browser": "./dist/bundle.js",
@@ -43,8 +43,8 @@
   },
   "dependencies": {
     "@ethersproject/providers": "^5.6.8",
-    "@qubic-connect/detect-iab": "^0.8.7",
-    "@qubic-connect/redirect": "^0.8.7",
+    "@qubic-connect/detect-iab": "^0.9.0",
+    "@qubic-connect/redirect": "^0.9.0",
     "bignumber.js": "^9.0.2",
     "clsx": "^1.1.1",
     "cross-fetch": "^3.1.5",
