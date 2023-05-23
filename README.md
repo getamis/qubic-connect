@@ -156,8 +156,8 @@ _response example_
 we don't have mock client server for dev environment, need to use docker to run locally
 
 ```cli
-docker pull aimi/qubic-prime-bind-server:commit-00c25cc
-docker run -it --rm -p8080:80 aimi/qubic-prime-bind-server:commit-00c25cc build/local_web_server
+docker pull aimi/qubic-prime-bind-server:commit-63d0994
+docker run -it --rm -p8080:80 aimi/qubic-prime-bind-server:commit-63d0994 build/local_web_server
 cd examples/example-pure-js
 yarn start:dev
 ```
