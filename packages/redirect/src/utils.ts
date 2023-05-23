@@ -137,7 +137,7 @@ export function cleanResponsePassToConnect(currentUrl: string): string {
       errorMessage,
       action,
       bindTicket,
-      expiredTime,
+      expireTime,
       ...restQuery
     },
     fragmentIdentifier,

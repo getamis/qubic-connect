@@ -453,13 +453,14 @@ export class QubicConnect {
     });
   }
 
+  private cachedRedirectResult?: WalletUser | null;
+  private cachedRedirectError?: Error | SdkFetchError;
   public onAuthStateChanged(callback: (result: WalletUser | null, error?: Error) => void): () => void {
-    if (typeof this.cachedRedirectResult !== 'undefined' && typeof this.cachedRedirectError !== 'undefined') {
+    if (typeof this.cachedRedirectResult !== 'undefined' || typeof this.cachedRedirectError !== 'undefined') {
       // the purpose of callback here is let developer can
       // get result immediately when bind this event
       // if everything is ready
-      callback(this.user);
-      callback(this.user, this.cachedRedirectError);
+      callback(this.cachedRedirectResult || null, this.cachedRedirectError);
     }
 
     this.eventEmitter.addListener(Events.AuthStateChanged, callback);
@@ -468,17 +469,14 @@ export class QubicConnect {
     };
   }
 
-  private cachedRedirectResult?: WalletUser | null;
-  private cachedRedirectError?: Error | SdkFetchError;
-
   private cachedBindTicketResult?: BindTicketResult | null;
   private cachedBindTicketError?: Error;
   public onBindTicketResult(callback: (result: BindTicketResult | null, error?: Error) => void): () => void {
-    if (typeof this.cachedBindTicketResult !== 'undefined' && typeof this.cachedBindTicketError !== 'undefined') {
+    if (typeof this.cachedBindTicketResult !== 'undefined' || typeof this.cachedBindTicketError !== 'undefined') {
       // the purpose of callback here is let developer can
       // get result immediately when bind this event
       // if everything is ready
-      callback(this.cachedBindTicketResult, this.cachedBindTicketError);
+      callback(this.cachedBindTicketResult || null, this.cachedBindTicketError);
     }
 
     this.eventEmitter.addListener(Events.BindTicketResult, callback);
@@ -588,7 +586,7 @@ export class QubicConnect {
     const authResponse = await apiLoginWithCredential(this.fetch, credential);
     const {
       me: { qubicUser },
-    } = await getMe(this.requestGraphql);
+    } = await getMe(this.marketRequestGraphql);
 
     const user: WalletUser = {
       method: 'redirect',

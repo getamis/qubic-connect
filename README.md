@@ -151,6 +151,17 @@ _response example_
 
 [Payment](packages/core/src/constants/errorCodes.ts)
 
+## Bind mock client server for dev environment
+
+we don't have mock client server for dev environment, need to use docker to run locally
+
+```cli
+docker pull aimi/qubic-prime-bind-server:commit-00c25cc
+docker run -it --rm -p8080:80 aimi/qubic-prime-bind-server:commit-00c25cc build/local_web_server
+cd examples/example-pure-js
+yarn start:dev
+```
+
 ## Related Repo
 
 [https://github.com/getamis/qubic-auth](https://github.com/getamis/qubic-auth)

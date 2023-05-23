@@ -17,9 +17,11 @@ import {
   VERIFY_URL,
   INFURA_ID,
   QUBIC_WALLET_URL,
+  MOCK_BIND_SERVICE_API,
 } from './environment';
 import { GET_ASSET_DETAIL } from './gqlSchema/assets';
 import { AssetBuyOptionInput, CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
+import { Credential } from '@qubic-connect/core/dist/types/QubicConnect';
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
@@ -95,12 +97,77 @@ function main() {
     console.log({ user });
   });
 
-  qubicConnect.onBindTicketResult((bindTicketResult, error) => {
-    console.log('example onBindTicketResult ');
-    if (error) {
-      console.log(error?.message);
+  async function sendBindTicketToClientServer(input: {
+    bindTicket: string;
+    memberId: string;
+  }): Promise<{ success: boolean }> {
+    // server will use bindTicket to exchange for prime, GQL primeGet(bindTicket)
+    // prime is a value for user to exchange credential
+    // lifecycle of prime is forever, you should keep it safely
+    const bindResponse = await fetch(`${MOCK_BIND_SERVICE_API}/primeBind`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `bindTicket=${input.bindTicket}&memberId=${input.memberId}`,
+    });
+    const bindData = (await bindResponse.json()) as {
+      success: boolean;
+    };
+    return bindData;
+  }
+
+  async function loginClientServer(input: { memberId: string }): Promise<{
+    id: string;
+    name: string;
+    credential: Credential;
+  }> {
+    // login to client server
+    // in the login process you should also called GQL credentialIssue, use prime to get credential
+    // and response it with user data
+    const credentialIssueResponse = await fetch(`${MOCK_BIND_SERVICE_API}/credentialIssue`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `memberId=${input.memberId}`,
+    });
+    const credential = (await credentialIssueResponse.json()) as Credential;
+    return {
+      id: input.memberId,
+      name: 'member name:' + input.memberId,
+      credential,
+    };
+  }
+
+  qubicConnect.onBindTicketResult(async (bindTicketResult, error) => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1));
+      console.log('example onBindTicketResult ');
+      if (error) {
+        console.log(error?.message);
+        throw error;
+      }
+      console.log({ bindTicketResult });
+      const memberId = window.prompt('bindTicketResult done, what memberId number do you want?');
+      if (!bindTicketResult) throw Error('no bind ticket result');
+      if (!memberId) throw Error('no memberId');
+
+      const { success } = await sendBindTicketToClientServer({
+        bindTicket: bindTicketResult.bindTicket,
+        memberId,
+      });
+      if (!success) throw Error('success failed');
+
+      const member = await loginClientServer({ memberId });
+
+      const user = await qubicConnect.loginWithCredential(member.credential);
+      window.alert('user login in:' + JSON.stringify(user));
+    } catch (error) {
+      if (error instanceof Error) {
+        window.alert(error.message);
+      }
     }
-    console.log({ bindTicketResult });
   });
 
   const PRICE = gql`

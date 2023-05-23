@@ -72,14 +72,13 @@ export const loginWithCredential = async (
     throw new Error('Missing login data');
   }
 
-  const httpMethod = 'POST';
-  const payload = JSON.stringify({
+  const payload = querystring.stringify({
     identityTicket,
     address,
   });
 
   const result = await sdkFetch('services/auth/prime', {
-    method: httpMethod,
+    method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },

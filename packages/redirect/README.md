@@ -54,24 +54,21 @@ else action:bind
     else WalletConnect/Metamask
 		auth->auth:active wallet and sign
 	end
-auth->auth
 auth->adminApi:以 qubic wallet 登入\n/services/auth/qubic\npayload {address,ticket} \n\n其他錢包登入\n/services/auth\npayload {provider, signature, address data} \n\n帶入 clientTicket \nheaders { X-Qubic-Client-Ticket }
 auth<--adminApi:response {accessToken, expiredAt, isQubicUser, clientId, merchantName, clientIconUrl}
 	auth->auth:show confirm auhtorized to user\n
-	auth->auth
 auth->adminApi:gql PrimeBind \nheaders { X-Qubic-Client-Ticket }
 auth<--adminApi:response { bindTicket, expireTime }
 	sdk<--auth:response \n{\n  action: 'bind',\n  bindTicket: string,\n  expiredAt: number\n}
 
 
 sdk->sdk:handleRedirectUrl\n
-sdk->sdk
-clientService<-sdk
+
 client<--sdk:trigger onBindTicketResult\n{\n  bindTicket,\n  expiredAt,\n}
 client->clientService:sendBindToken to client service
 client<--clientService:bind success with credential\n{\n  identityTicket,\n  expiredAt,\n  address\n}
 
-note over client, clientService: After binding success, you can login with client service
+note over client,adminApi:After binding success, you can login with client service
 
 client->clientService:login
 client<--clientService:response with credential\n{\n  identityTicket,\n  expiredAt,\n  address\n}
