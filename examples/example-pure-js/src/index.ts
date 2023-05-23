@@ -12,14 +12,16 @@ import {
   API_KEY,
   API_SECRET,
   API_URL,
-  CHECKOUT_API_URL,
+  MARKET_API_URL,
   AUTH_REDIRECT_URL,
   VERIFY_URL,
   INFURA_ID,
   QUBIC_WALLET_URL,
+  MOCK_BIND_SERVICE_API,
 } from './environment';
-import { GET_ASSET_DETAIL, LIST_ASSETS_V2 } from './gqlSchema/assets';
+import { GET_ASSET_DETAIL } from './gqlSchema/assets';
 import { AssetBuyOptionInput, CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
+import { Credential } from '@qubic-connect/core/dist/types/QubicConnect';
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
@@ -27,7 +29,7 @@ const SDK_CONFIG: QubicConnectConfig = {
   secret: API_SECRET,
   service: API_SERVICE_NAME, //optional
   apiUrl: API_URL, // optional
-  checkoutApiUrl: CHECKOUT_API_URL,
+  marketApiUrl: MARKET_API_URL,
   authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
   iabRedirectUrl: '', // optional
   shouldAlwaysShowCopyUI: false, // optional
@@ -91,22 +93,81 @@ function main() {
     console.log('example onAuthStateChanged ');
     if (error) {
       console.log(error?.message);
-      console.log(error?.status);
-      console.log(error?.statusText);
-      console.log(error?.body);
     }
     console.log({ user });
   });
 
-  qubicConnect.onBindTicketResult((bindTicketResult, error) => {
-    console.log('example onBindTicketResult ');
-    if (error) {
-      console.log(error?.message);
-      console.log(error?.status);
-      console.log(error?.statusText);
-      console.log(error?.body);
+  async function sendBindTicketToClientServer(input: {
+    bindTicket: string;
+    memberId: string;
+  }): Promise<{ success: boolean }> {
+    // server will use bindTicket to exchange for prime, GQL primeGet(bindTicket)
+    // prime is a value for user to exchange credential
+    // lifecycle of prime is forever, you should keep it safely
+    const bindResponse = await fetch(`${MOCK_BIND_SERVICE_API}/primeBind`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `bindTicket=${input.bindTicket}&memberId=${input.memberId}`,
+    });
+    const bindData = (await bindResponse.json()) as {
+      success: boolean;
+    };
+    return bindData;
+  }
+
+  async function loginClientServer(input: { memberId: string }): Promise<{
+    id: string;
+    name: string;
+    credential: Credential;
+  }> {
+    // login to client server
+    // in the login process you should also called GQL credentialIssue, use prime to get credential
+    // and response it with user data
+    const credentialIssueResponse = await fetch(`${MOCK_BIND_SERVICE_API}/credentialIssue`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `memberId=${input.memberId}`,
+    });
+    const credential = (await credentialIssueResponse.json()) as Credential;
+    return {
+      id: input.memberId,
+      name: 'member name:' + input.memberId,
+      credential,
+    };
+  }
+
+  qubicConnect.onBindTicketResult(async (bindTicketResult, error) => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1));
+      console.log('example onBindTicketResult ');
+      if (error) {
+        console.log(error?.message);
+        throw error;
+      }
+      console.log({ bindTicketResult });
+      const memberId = window.prompt('bindTicketResult done, what memberId number do you want?');
+      if (!bindTicketResult) throw Error('no bind ticket result');
+      if (!memberId) throw Error('no memberId');
+
+      const { success } = await sendBindTicketToClientServer({
+        bindTicket: bindTicketResult.bindTicket,
+        memberId,
+      });
+      if (!success) throw Error('success failed');
+
+      const member = await loginClientServer({ memberId });
+
+      const user = await qubicConnect.loginWithCredential(member.credential);
+      window.alert('user login in:' + JSON.stringify(user));
+    } catch (error) {
+      if (error instanceof Error) {
+        window.alert(error.message);
+      }
     }
-    console.log({ bindTicketResult });
   });
 
   const PRICE = gql`
@@ -125,6 +186,7 @@ function main() {
   const priceDom = document.querySelector('#price');
   priceDom?.addEventListener('click', async () => {
     const ETHToTWDCurrencyData = await qubicConnect.requestGraphql({
+      path: '/services/graphql-acc',
       query: PRICE,
       variables: {
         fromCurrency: Currency.ETH,
@@ -132,6 +194,12 @@ function main() {
       },
     });
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
+  });
+
+  const bindPrimeDom = document.querySelector('#bind-prime');
+  bindPrimeDom?.addEventListener('click', async () => {
+    const response = await qubicConnect.bindWithRedirect();
+    window.alert(JSON.stringify(response));
   });
 
   async function buyAsset(locale?: PaymentLocale) {
@@ -142,6 +210,7 @@ function main() {
     }
 
     const assetDetail = await qubicConnect.requestGraphql({
+      path: '/services/graphql-acc',
       query: GET_ASSET_DETAIL,
       variables: {
         assetId,
@@ -208,9 +277,9 @@ function main() {
       requestId: uuidv4(),
       giftTicket,
       payCallback: {
-        failureRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-        pendingRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
-        successRedirectUrl: "https://creator-demo.dev.qubic.market/orders",
+        failureRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
+        pendingRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
+        successRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
       },
     };
 
@@ -241,8 +310,7 @@ function main() {
       }
 
       const { pathname, search } = new URL(checkoutInfo.paymentUrl);
-      window.location.href =`${assetDomain}${pathname}${search}`;
-
+      window.location.href = `${assetDomain}${pathname}${search}`;
     } catch (e) {
       console.error(e);
     }
@@ -263,7 +331,9 @@ function main() {
 
   const giftRedeemDom = document.querySelector('#gift-redeem');
 
-  giftRedeemDom?.addEventListener('click', async () => { checkDomainAndGo(undefined, true) });
+  giftRedeemDom?.addEventListener('click', async () => {
+    checkDomainAndGo(undefined, true);
+  });
 
   document.getElementById('redirect-login')?.addEventListener('click', () => {
     qubicConnect.loginWithRedirect();

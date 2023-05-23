@@ -24,7 +24,7 @@ import { SdkFetchError } from './types';
 import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
 import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
-import { API_URL, AUTH_REDIRECT_URL, CHECKOUT_API_URL } from './constants/backend';
+import { API_URL, AUTH_REDIRECT_URL, MARKET_API_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
 import { login, logout, loginWithCredential as apiLoginWithCredential, renewToken, setAccessToken } from './api/auth';
 import { Deferred } from './utils/Deferred';
@@ -34,6 +34,7 @@ import { createSignMessageAndLogin } from './utils/signMessageAndLogin';
 import { AssetBuyInput, AssetBuyOptions, GiftRedeemInput, GiftRedeemOptions } from './types/Asset';
 import { buyAsset, BuyAssetResponse, giftRedeem, GiftRedeemResponse } from './api/assets';
 import { addLocaleToUrl } from './utils/addLocaleToUrl';
+import { clientTicketIssue } from './api/clientTicket';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -89,7 +90,7 @@ export class QubicConnect {
 
   public fetch: SdkFetch;
   public requestGraphql: SdkRequestGraphql;
-  public checkoutRequestGraphql: SdkRequestGraphql;
+  public marketRequestGraphql: SdkRequestGraphql;
 
   constructor(config: QubicConnectConfig) {
     const {
@@ -98,7 +99,7 @@ export class QubicConnect {
       key: apiKey,
       secret: apiSecret,
       apiUrl = API_URL,
-      checkoutApiUrl = CHECKOUT_API_URL,
+      marketApiUrl = MARKET_API_URL,
       authRedirectUrl = AUTH_REDIRECT_URL,
       disableIabWarning = false,
       iabRedirectUrl = window.location.href,
@@ -117,7 +118,7 @@ export class QubicConnect {
       key: apiKey,
       secret: apiSecret,
       apiUrl,
-      checkoutApiUrl,
+      marketApiUrl,
       authRedirectUrl,
       providerOptions: config.providerOptions,
       disableIabWarning,
@@ -140,11 +141,10 @@ export class QubicConnect {
       apiUrl,
     });
 
-    this.checkoutRequestGraphql = createRequestGraphql({
+    this.marketRequestGraphql = createRequestGraphql({
       apiKey,
       apiSecret,
-      apiUrl: checkoutApiUrl,
-      isForcingApiUrl: true,
+      apiUrl: marketApiUrl,
     });
 
     this.authRedirectUrl = authRedirectUrl;
@@ -423,13 +423,14 @@ export class QubicConnect {
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,
       dataString,
+      action: 'login',
     });
   }
 
-  public bindWithRedirect(options?: {
+  public async bindWithRedirect(options?: {
     walletType: LoginRedirectWalletType;
     qubicSignInProvider?: QubicSignInProvider;
-  }): void {
+  }): Promise<void> {
     const dataString = JSON.stringify({
       name: this.config.name,
       service: this.config.service,
@@ -437,6 +438,9 @@ export class QubicConnect {
       permissions: ['wallet.permission.access_email_address'],
       nonce: Date.now(),
     });
+
+    const response = await clientTicketIssue(this.requestGraphql);
+
     const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
     const redirectUrl = cleanResponsePassToConnect(window.location.href);
     window.location.href = createUrlRequestConnectToPass(this.authRedirectUrl, {
@@ -444,34 +448,37 @@ export class QubicConnect {
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,
       dataString,
+      clientTicket: response.clientTicketIssue.ticket,
       action: 'bind',
     });
   }
 
-  public onAuthStateChanged(callback: (result: WalletUser | null, error?: SdkFetchError) => void): () => void {
-    if (typeof this.cachedRedirectResult !== 'undefined') {
+  private cachedRedirectResult?: WalletUser | null;
+  private cachedRedirectError?: Error | SdkFetchError;
+  public onAuthStateChanged(callback: (result: WalletUser | null, error?: Error) => void): () => void {
+    if (typeof this.cachedRedirectResult !== 'undefined' || typeof this.cachedRedirectError !== 'undefined') {
       // the purpose of callback here is let developer can
       // get result immediately when bind this event
       // if everything is ready
-      callback(this.user);
+      callback(this.cachedRedirectResult || null, this.cachedRedirectError);
     }
+
     this.eventEmitter.addListener(Events.AuthStateChanged, callback);
     return () => {
       this.eventEmitter.removeListener(Events.AuthStateChanged, callback);
     };
   }
 
-  private cachedRedirectResult?: WalletUser | null;
-  private cachedRedirectError?: Error;
-
-  private cachedBindTicket?: BindTicketResult;
-  public onBindTicketResult(callback: (result: BindTicketResult | null, error?: SdkFetchError) => void): () => void {
-    if (typeof this.cachedBindTicket !== 'undefined') {
+  private cachedBindTicketResult?: BindTicketResult | null;
+  private cachedBindTicketError?: Error;
+  public onBindTicketResult(callback: (result: BindTicketResult | null, error?: Error) => void): () => void {
+    if (typeof this.cachedBindTicketResult !== 'undefined' || typeof this.cachedBindTicketError !== 'undefined') {
       // the purpose of callback here is let developer can
       // get result immediately when bind this event
       // if everything is ready
-      callback(this.cachedBindTicket);
+      callback(this.cachedBindTicketResult || null, this.cachedBindTicketError);
     }
+
     this.eventEmitter.addListener(Events.BindTicketResult, callback);
     return () => {
       this.eventEmitter.removeListener(Events.BindTicketResult, callback);
@@ -489,10 +496,6 @@ export class QubicConnect {
       return null;
     }
 
-    if ('errorMessage' in parsedQuery) {
-      throw Error(parsedQuery.errorMessage);
-    }
-
     return parsedQuery;
   }
 
@@ -507,23 +510,33 @@ export class QubicConnect {
         return;
       }
 
-      if ('errorMessage' in responsePassToConnect) {
-        throw Error(responsePassToConnect.errorMessage);
+      if (responsePassToConnect.action === 'bind') {
+        // handle all bin error message here
+        if ('errorMessage' in responsePassToConnect) {
+          this.cachedBindTicketResult = null;
+          this.cachedBindTicketError = new Error(responsePassToConnect.errorMessage);
+          this.eventEmitter.emit(Events.BindTicketResult, null, this.cachedBindTicketError);
+          return;
+        }
+
+        this.cachedBindTicketResult = {
+          bindTicket: responsePassToConnect.bindTicket,
+          expireTime: responsePassToConnect.expireTime,
+        };
+        this.eventEmitter.emit(Events.BindTicketResult, this.cachedBindTicketResult);
+        return;
       }
 
-      if (responsePassToConnect.action === 'bind') {
-        this.cachedBindTicket = {
-          bindTicket: responsePassToConnect.bindTicket,
-          expiredAt: responsePassToConnect.expiredAt,
-        };
-        this.eventEmitter.emit(Events.BindTicketResult, this.cachedBindTicket);
-        return;
+      // responsePassToConnect.action === 'login'
+      // continue login process
+      if ('errorMessage' in responsePassToConnect) {
+        throw Error(responsePassToConnect.errorMessage);
       }
 
       const authResponse = await login(this.fetch, responsePassToConnect);
       const {
         me: { qubicUser },
-      } = await getMe(this.requestGraphql);
+      } = await getMe(this.marketRequestGraphql);
 
       const user: WalletUser = {
         method: 'redirect',
@@ -573,7 +586,7 @@ export class QubicConnect {
     const authResponse = await apiLoginWithCredential(this.fetch, credential);
     const {
       me: { qubicUser },
-    } = await getMe(this.requestGraphql);
+    } = await getMe(this.marketRequestGraphql);
 
     const user: WalletUser = {
       method: 'redirect',
@@ -593,7 +606,7 @@ export class QubicConnect {
     options?: AssetBuyOptions,
   ): Promise<BuyAssetResponse | null> {
     try {
-      const response = await buyAsset(this.checkoutRequestGraphql, assetBuyInput);
+      const response = await buyAsset(this.marketRequestGraphql, assetBuyInput);
 
       let { paymentUrl } = response.assetBuy;
 
@@ -623,7 +636,7 @@ export class QubicConnect {
     options?: GiftRedeemOptions,
   ): Promise<GiftRedeemResponse | null> {
     try {
-      const response = await giftRedeem(this.checkoutRequestGraphql, giftRedeemInput);
+      const response = await giftRedeem(this.marketRequestGraphql, giftRedeemInput);
 
       let { paymentUrl } = response.giftRedeem;
 

@@ -41,8 +41,7 @@ function resolveRequestDocument(document: RequestDocument): { query: string; ope
 export interface RequestGraphqlInput<TVariables> {
   query: string;
   variables?: TVariables;
-  isPublic?: boolean;
-  isForcingApiUrl?: boolean;
+  path?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,18 +50,8 @@ export interface SdkRequestGraphql<TVariables = any, TResult = any> {
 }
 
 export const createRequestGraphql =
-  ({
-    apiKey,
-    apiSecret,
-    apiUrl,
-    isForcingApiUrl = false,
-  }: {
-    apiKey: string;
-    apiSecret: string;
-    apiUrl: string;
-    isForcingApiUrl?: boolean;
-  }): SdkRequestGraphql =>
-  ({ query, variables, isPublic = false }) => {
+  ({ apiKey, apiSecret, apiUrl }: { apiKey: string; apiSecret: string; apiUrl: string }): SdkRequestGraphql =>
+  ({ query, variables, path = '' }) => {
     // currently, we have 3 graphql endpoints:
     // origin api url has public and acc
     // public means no access token
@@ -70,7 +59,7 @@ export const createRequestGraphql =
     // we have a separate api url for checkout api
     // so use IsForcingApiUrl to force using the api url
 
-    const endPoint = isForcingApiUrl ? apiUrl : `${apiUrl}/services/graphql-${isPublic ? 'public' : 'acc'}`;
+    const endPoint = `${apiUrl}${path}`;
 
     const { operationName, query: graphQLQuery } = resolveRequestDocument(query);
     const body =

@@ -6,7 +6,7 @@ export const API_SERVICE_NAME = process.env.REACT_APP_API_SERVICE_NAME || '';
 export const API_KEY = process.env.REACT_APP_API_KEY || '';
 export const API_SECRET = process.env.REACT_APP_API_SECRET || '';
 export const API_URL = process.env.REACT_APP_API_URL || '';
-export const CHECKOUT_API_URL = process.env.REACT_APP_CHECKOUT_API_URL || '';
+export const MARKET_API_URL = process.env.REACT_APP_MARKET_API_URL || '';
 export const AUTH_REDIRECT_URL = process.env.REACT_APP_AUTH_REDIRECT_URL || '';
 
 export const QUBIC_WALLET_URL = process.env.REACT_APP_QUBIC_WALLET_URL || '';
@@ -14,3 +14,4 @@ export const QUBIC_API_KEY = process.env.REACT_APP_QUBIC_API_KEY || '';
 export const QUBIC_API_SECRET = process.env.REACT_APP_QUBIC_API_SECRET || '';
 
 export const VERIFY_URL = process.env.REACT_APP_VERIFY_URL || '';
+export const MOCK_BIND_SERVICE_API = process.env.REACT_APP_MOCK_BIND_SERVICE_API || '';

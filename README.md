@@ -49,7 +49,6 @@ const qubicConnect = new QubicConnect({
 //   qubicUser?: {
 //    provider: 'GOOGLE' | 'FACEBOOK' | 'TWITTER' | 'APPLE' | 'UNKNOWN';
 //    email: string;
-//    isKyc: boolean;
 //  };
 // }
 
@@ -98,6 +97,22 @@ qubicConnect.onAuthStateChanged((user, error) => {
 qubicConnect.loginWithRedirect();
 ```
 
+### Bind with redirect
+
+```ts
+// bind with redirect
+qubicConnect.bindWithRedirect();
+
+// when success redirect from url
+qubicConnect.onBindTicketResult((bindTicketResult, error) => {
+  console.log('example onBindTicketResult ');
+  if (error) {
+    console.log(error?.message);
+  }
+  console.log({ bindTicketResult });
+});
+```
+
 ### Sign in with different wallet providers
 
 ```ts
@@ -135,6 +150,17 @@ _response example_
 ## Error Code
 
 [Payment](packages/core/src/constants/errorCodes.ts)
+
+## Bind mock client server for dev environment
+
+we don't have mock client server for dev environment, need to use docker to run locally
+
+```cli
+docker pull aimi/qubic-prime-bind-server:commit-63d0994
+docker run -it --rm -p8080:80 aimi/qubic-prime-bind-server:commit-63d0994 build/local_web_server
+cd examples/example-pure-js
+yarn start:dev
+```
 
 ## Related Repo
 
