@@ -162,9 +162,9 @@ export class QubicConnect {
       });
     }
 
-    this.onAuthStateChanged(QubicConnect.persistUser);
     this.handleRedirectResult();
     this.hydrateUser();
+    this.onAuthStateChanged(QubicConnect.persistUser);
   }
 
   private static persistUser(user: WalletUser | null) {
@@ -456,11 +456,15 @@ export class QubicConnect {
   private cachedRedirectResult?: WalletUser | null;
   private cachedRedirectError?: Error | SdkFetchError;
   public onAuthStateChanged(callback: (result: WalletUser | null, error?: Error) => void): () => void {
-    if (typeof this.cachedRedirectResult !== 'undefined' || typeof this.cachedRedirectError !== 'undefined') {
-      // the purpose of callback here is let developer can
-      // get result immediately when bind this event
-      // if everything is ready
-      callback(this.cachedRedirectResult || null, this.cachedRedirectError);
+    // the purpose of callback here is let developer can
+    // get result immediately when bind this event
+    // if everything is ready
+    if (
+      this.user ||
+      typeof this.cachedRedirectResult !== 'undefined' ||
+      typeof this.cachedRedirectError !== 'undefined'
+    ) {
+      callback(this.user, this.cachedRedirectError);
     }
 
     this.eventEmitter.addListener(Events.AuthStateChanged, callback);
