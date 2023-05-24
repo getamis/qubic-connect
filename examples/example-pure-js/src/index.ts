@@ -436,6 +436,24 @@ function main() {
   document.getElementById('get-current-user')?.addEventListener('click', () => {
     console.log({ currentUser: qubicConnect.getCurrentUser() });
   });
+
+  document.getElementById('get-user-wallet-collectible-url')?.addEventListener('click', () => {
+    const url = qubicConnect.getUserQubicWalletCollectibleUrl();
+    if (!url) {
+      window.alert('url not found');
+      return;
+    }
+    window.open(url);
+  });
+
+  document.getElementById('get-user-pass-url')?.addEventListener('click', () => {
+    const url = qubicConnect.getUserPassUrl();
+    if (!url) {
+      window.alert('url not found');
+      return;
+    }
+    window.open(url);
+  });
 }
 
 main();

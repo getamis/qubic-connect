@@ -3,8 +3,8 @@ import { createPortal } from 'preact/compat';
 import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
 import { showBlockerWhenIab, openExternalBrowserWhenLineIab } from '@qubic-connect/detect-iab';
-
 import { ResponsePassToConnect } from '@qubic-connect/redirect/src/utils';
+import qs from 'query-string';
 import {
   QubicConnectConfig,
   InternalQubicConnectConfig,
@@ -35,6 +35,7 @@ import { AssetBuyInput, AssetBuyOptions, GiftRedeemInput, GiftRedeemOptions } fr
 import { buyAsset, BuyAssetResponse, giftRedeem, GiftRedeemResponse } from './api/assets';
 import { addLocaleToUrl } from './utils/addLocaleToUrl';
 import { clientTicketIssue } from './api/clientTicket';
+import { PASS_URL, WALLET_URL } from './constants/config';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -662,5 +663,31 @@ export class QubicConnect {
     }
 
     return null;
+  }
+
+  public getUserQubicWalletCollectibleUrl(walletUrl = WALLET_URL): string | null {
+    // if not a qubic user
+    if (!this.user?.qubicUser) {
+      return null;
+    }
+    return qs.stringifyUrl({
+      url: `${walletUrl}/collectibles/list`,
+      query: {
+        userAddress: this.user?.address,
+      },
+    });
+  }
+
+  public getUserPassUrl(passUrl = PASS_URL): string | null {
+    // not logged in user should not return any url
+    if (!this.user) return null;
+    return qs.stringifyUrl({
+      url: `${passUrl}/login`,
+      query: {
+        address: this.user.address,
+        qubicSignInProvider: this.user.qubicUser?.provider,
+        qubicSignInEmail: this.user.qubicUser?.email,
+      },
+    });
   }
 }
