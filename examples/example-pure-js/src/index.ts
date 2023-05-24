@@ -18,6 +18,7 @@ import {
   INFURA_ID,
   QUBIC_WALLET_URL,
   MOCK_BIND_SERVICE_API,
+  QUBIC_PASS_URL,
 } from './environment';
 import { GET_ASSET_DETAIL } from './gqlSchema/assets';
 import { AssetBuyOptionInput, CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
@@ -438,7 +439,7 @@ function main() {
   });
 
   document.getElementById('get-user-wallet-collectible-url')?.addEventListener('click', () => {
-    const url = qubicConnect.getUserQubicWalletCollectibleUrl();
+    const url = qubicConnect.getUserQubicWalletCollectibleUrl(QUBIC_WALLET_URL);
     if (!url) {
       window.alert('url not found');
       return;
@@ -447,7 +448,7 @@ function main() {
   });
 
   document.getElementById('get-user-pass-url')?.addEventListener('click', () => {
-    const url = qubicConnect.getUserPassUrl();
+    const url = qubicConnect.getUserPassUrl(QUBIC_PASS_URL);
     if (!url) {
       window.alert('url not found');
       return;

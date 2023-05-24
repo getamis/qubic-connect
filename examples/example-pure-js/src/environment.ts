@@ -14,4 +14,5 @@ export const QUBIC_API_KEY = process.env.REACT_APP_QUBIC_API_KEY || '';
 export const QUBIC_API_SECRET = process.env.REACT_APP_QUBIC_API_SECRET || '';
 
 export const VERIFY_URL = process.env.REACT_APP_VERIFY_URL || '';
+export const QUBIC_PASS_URL = process.env.REACT_APP_QUBIC_PASS_URL || '';
 export const MOCK_BIND_SERVICE_API = process.env.REACT_APP_MOCK_BIND_SERVICE_API || '';
