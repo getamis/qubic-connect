@@ -119,7 +119,17 @@ qubicConnect.onBindTicketResult((bindTicketResult, error) => {
 qubicConnect.loginWithRedirect({
   walletType: 'qubic', // 'metamask' | 'qubic' | 'walletconnect'
   qubicSignInProvider: 'google', // 'facebook' | 'google' | 'apple'
-);
+});
+
+// walletType: metamask has special flow
+// if window.ethereum doesn't exist
+// it will open https://metamask.app.link/dapp/$url
+// in desktop, it will open metamask chrome extension page
+// in mobile, if installed it will called metamask dapp browse
+// in mobile, if not installed it will show google play or apple store page
+qubicConnect.loginWithRedirect({
+  walletType: 'metamask',
+});
 ```
 
 ### get current user
