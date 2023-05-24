@@ -409,6 +409,16 @@ export class QubicConnect {
     walletType: LoginRedirectWalletType;
     qubicSignInProvider?: QubicSignInProvider;
   }): void {
+    // if window.ethereum not detected
+    // on windows `https://metamask.app.link/dapp/${cleanedUrl}` will redirect to chrome extension page
+    //
+    // on mobile if metamask app installed, will open in metamask dapp browser
+    // if not installed will show app store or google play download page
+    if (options?.walletType === 'metamask' && !window.ethereum) {
+      const cleanedUrl = window.location.href.replace(/.*?:\/\//, '');
+      window.open(`https://metamask.app.link/dapp/${cleanedUrl}`);
+      return;
+    }
     const dataString = JSON.stringify({
       name: this.config.name,
       service: this.config.service,

@@ -351,17 +351,11 @@ function main() {
     qubicConnect.loginWithCredential(JSON.parse(credential));
   });
 
-  const metamaskElm = document.getElementById('redirect-login-metamask');
-
-  if (window.ethereum) {
-    metamaskElm?.addEventListener('click', () => {
-      qubicConnect.loginWithRedirect({
-        walletType: 'metamask',
-      });
+  document.getElementById('redirect-login-metamask')?.addEventListener('click', () => {
+    qubicConnect.loginWithRedirect({
+      walletType: 'metamask',
     });
-  } else {
-    metamaskElm?.remove();
-  }
+  });
 
   document.getElementById('redirect-login-walletconnect')?.addEventListener('click', () => {
     qubicConnect.loginWithRedirect({
