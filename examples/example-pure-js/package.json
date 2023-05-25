@@ -30,6 +30,11 @@
     "start:stag": "env-cmd -f ../.env.stag yarn start",
     "start:prod": "env-cmd -f ../.env.prod yarn start",
     "build": "react-app-rewired build",
+    "build:dev": "env-cmd -f ../.env.dev yarn build",
+    "build:stag": "env-cmd -f ../.env.stag yarn build",
+    "build:prod": "env-cmd -f ../.env.prod yarn build",
+    "deploy:stag": "build:stag && surge build https://qubic-connect-stag.surge.sh/",
+    "deploy:prod": "build:prod && surge build https://qubic-connect.surge.sh/",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },

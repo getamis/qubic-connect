@@ -19,6 +19,7 @@ import {
   QUBIC_WALLET_URL,
   MOCK_BIND_SERVICE_API,
   QUBIC_PASS_URL,
+  MOCK_LOGIN_SERVICE_API,
 } from './environment';
 import { GET_ASSET_DETAIL } from './gqlSchema/assets';
 import { AssetBuyOptionInput, CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
@@ -126,7 +127,7 @@ function main() {
     // login to client server
     // in the login process you should also called GQL credentialIssue, use prime to get credential
     // and response it with user data
-    const credentialIssueResponse = await fetch(`${MOCK_BIND_SERVICE_API}/credentialIssue`, {
+    const credentialIssueResponse = await fetch(`${MOCK_LOGIN_SERVICE_API}/credentialIssue`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
