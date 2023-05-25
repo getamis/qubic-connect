@@ -611,7 +611,7 @@ export class QubicConnect {
       provider: null,
       qubicUser,
     };
-
+    this.handleLogin(null, user);
     return user;
   }
 

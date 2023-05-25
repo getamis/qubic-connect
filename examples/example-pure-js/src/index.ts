@@ -19,6 +19,7 @@ import {
   QUBIC_WALLET_URL,
   MOCK_BIND_SERVICE_API,
   QUBIC_PASS_URL,
+  MOCK_LOGIN_SERVICE_API,
 } from './environment';
 import { GET_ASSET_DETAIL } from './gqlSchema/assets';
 import { AssetBuyOptionInput, CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
@@ -126,7 +127,7 @@ function main() {
     // login to client server
     // in the login process you should also called GQL credentialIssue, use prime to get credential
     // and response it with user data
-    const credentialIssueResponse = await fetch(`${MOCK_BIND_SERVICE_API}/credentialIssue`, {
+    const credentialIssueResponse = await fetch(`${MOCK_LOGIN_SERVICE_API}/credentialIssue`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -159,11 +160,7 @@ function main() {
         memberId,
       });
       if (!success) throw Error('success failed');
-
-      const member = await loginClientServer({ memberId });
-
-      const user = await qubicConnect.loginWithCredential(member.credential);
-      window.alert('user login in:' + JSON.stringify(user));
+      window.alert(`success bind, no you can login with memberId ${memberId}`);
     } catch (error) {
       if (error instanceof Error) {
         window.alert(error.message);
@@ -195,12 +192,6 @@ function main() {
       },
     });
     window.alert(JSON.stringify(ETHToTWDCurrencyData));
-  });
-
-  const bindPrimeDom = document.querySelector('#bind-prime');
-  bindPrimeDom?.addEventListener('click', async () => {
-    const response = await qubicConnect.bindWithRedirect();
-    window.alert(JSON.stringify(response));
   });
 
   async function buyAsset(locale?: PaymentLocale) {
@@ -344,12 +335,18 @@ function main() {
     qubicConnect.bindWithRedirect();
   });
 
-  document.getElementById('login-with-credential')?.addEventListener('click', () => {
-    const credential = prompt('credential in json format');
-    if (!credential) {
-      throw Error('null credential');
+  document.getElementById('bind-mock-login')?.addEventListener('click', async () => {
+    const memberId = window.prompt('what memberId you want to login');
+    try {
+      if (!memberId) throw Error('no memberId');
+      const member = await loginClientServer({ memberId });
+      const user = await qubicConnect.loginWithCredential(member.credential);
+      window.alert('user login in:' + JSON.stringify(user));
+    } catch (error) {
+      if (error instanceof Error) {
+        window.alert(error.message);
+      }
     }
-    qubicConnect.loginWithCredential(JSON.parse(credential));
   });
 
   document.getElementById('redirect-login-metamask')?.addEventListener('click', () => {
