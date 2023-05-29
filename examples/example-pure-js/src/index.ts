@@ -160,7 +160,7 @@ function main() {
         memberId,
       });
       if (!success) throw Error('success failed');
-      window.alert(`success bind, no you can login with memberId ${memberId}`);
+      window.alert(`success bind, now you can login with memberId ${memberId}`);
     } catch (error) {
       if (error instanceof Error) {
         window.alert(error.message);
