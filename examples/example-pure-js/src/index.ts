@@ -113,6 +113,9 @@ function main() {
       },
       body: `bindTicket=${input.bindTicket}&memberId=${input.memberId}`,
     });
+    if (!bindResponse.ok) {
+      throw Error(await bindResponse.text());
+    }
     const bindData = (await bindResponse.json()) as {
       success: boolean;
     };
@@ -134,6 +137,10 @@ function main() {
       },
       body: `memberId=${input.memberId}`,
     });
+    if (!credentialIssueResponse.ok) {
+      throw Error(await credentialIssueResponse.text());
+    }
+
     const credential = (await credentialIssueResponse.json()) as Credential;
     return {
       id: input.memberId,
@@ -160,7 +167,7 @@ function main() {
         memberId,
       });
       if (!success) throw Error('success failed');
-      window.alert(`success bind, no you can login with memberId ${memberId}`);
+      window.alert(`success bind, now you can login with memberId ${memberId}`);
     } catch (error) {
       if (error instanceof Error) {
         window.alert(error.message);
