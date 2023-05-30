@@ -26,6 +26,16 @@ const qubicConnect = QubicConnect.initialize({
 </script>
 ```
 
+## Examples
+
+[https://qubic-connect-example.netlify.app/](https://qubic-connect-example.netlify.app/)
+
+### Intranet examples
+
+[https://staging--qubic-connect-example.netlify.app/](https://staging--qubic-connect-example.netlify.app/)
+
+[https://develop--qubic-connect-example.netlify.app/](https://develop--qubic-connect-example.netlify.app/)
+
 ## Usage - User Auth
 
 ### Common types
@@ -153,6 +163,37 @@ async function bindWithRedirect(options?: {
   walletType: LoginRedirectWalletType;
   qubicSignInProvider?: QubicSignInProvider;
 }): Promise<void>;
+```
+
+![flow](images/third-party-bind.png)
+
+#### Mock Client Server
+
+[Server Example Code](https://github.com/aimichen/qubic-prime-bind-server)
+
+##### Prod
+
+https://primebindprod-oad7xixtwq-de.a.run.app
+https://credentialissueprod-oad7xixtwq-de.a.run.app
+
+#### Intranet
+
+##### Stag
+
+https://primebind-oad7xixtwq-de.a.run.app
+https://credentialissue-oad7xixtwq-as.a.run.app
+
+##### Dev
+
+Only works in internal server
+
+we don't have mock client server for dev environment, need to use docker to run locally
+
+```cli
+docker pull aimi/qubic-prime-bind-server:commit-63d0994
+docker run -it --rm -p8080:80 aimi/qubic-prime-bind-server:commit-63d0994 build/local_web_server
+cd examples/example-pure-js
+yarn start:dev
 ```
 
 #### Example
@@ -329,6 +370,10 @@ const response = await qubicConnect.giftRedeem(giftRedeemInput, { locale: 'zh' }
 window.location.href = response.giftRedeem.paymentUrl;
 ```
 
+### Error Code
+
+[Payment](packages/core/src/constants/errorCodes.ts)
+
 ## Other Service API
 
 ### Verify access token on the server side
@@ -348,21 +393,6 @@ _response example_
   "address": "0x6CE72a0Db7534C286fF7b1C6D83028389aa17e56",
   "expires_in": 3596
 }
-```
-
-## Error Code
-
-[Payment](packages/core/src/constants/errorCodes.ts)
-
-## Bind mock client server for dev environment
-
-we don't have mock client server for dev environment, need to use docker to run locally
-
-```cli
-docker pull aimi/qubic-prime-bind-server:commit-63d0994
-docker run -it --rm -p8080:80 aimi/qubic-prime-bind-server:commit-63d0994 build/local_web_server
-cd examples/example-pure-js
-yarn start:dev
 ```
 
 ## Related Repo
