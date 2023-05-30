@@ -675,6 +675,7 @@ export class QubicConnect {
     return null;
   }
 
+  // walletUrl is only for developing purpose, not sdk maintainer don't have to know
   public getUserQubicWalletCollectibleUrl(walletUrl = WALLET_URL): string | null {
     // if not a qubic user
     if (!this.user?.qubicUser) {
@@ -688,6 +689,7 @@ export class QubicConnect {
     });
   }
 
+  // passUrl is only for developing purpose, not sdk maintainer don't have to know
   public getUserPassUrl(passUrl = PASS_URL): string | null {
     // not logged in user should not return any url
     if (!this.user) return null;
