@@ -1,0 +1,23 @@
+name: Merge Develop into Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Merge develop into staging
+        run: git merge --no-ff origin/develop
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: staging

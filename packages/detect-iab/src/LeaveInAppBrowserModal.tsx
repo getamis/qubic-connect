@@ -138,6 +138,7 @@ const { classes } = jss
     currentUrlInput: {
       height: 40,
       flex: 1,
+      minWidth: 0,
       border: 'none',
       userSelect: 'all',
       borderRadius: 8,
@@ -158,10 +159,9 @@ const { classes } = jss
     },
     currentUrlBtnCopied: {
       color: '#5FC417',
-    }
+    },
   })
   .attach();
-
 
 export interface ShowBlockerOptions {
   redirectUrl?: string;
@@ -182,21 +182,13 @@ function getHintImage(platform: Platform, browser: InAppBrowser) {
   if (platform === 'ios') {
     switch (browser) {
       case 'facebook':
-        return (
-          <HorizontalMoreOptions className={classes.icon} />
-        );
+        return <HorizontalMoreOptions className={classes.icon} />;
       case 'instagram':
-        return (
-          <HorizontalMoreOptions className={classes.icon} />
-        );
+        return <HorizontalMoreOptions className={classes.icon} />;
       case 'line':
-        return (
-          <VerticalMoreOptions className={classes.icon} />
-        );
+        return <VerticalMoreOptions className={classes.icon} />;
       case 'messenger':
-        return (
-          <ExportMoreOptions className={classes.exportMoreIcon} />
-        );
+        return <ExportMoreOptions className={classes.exportMoreIcon} />;
       default:
     }
   }
@@ -204,28 +196,18 @@ function getHintImage(platform: Platform, browser: InAppBrowser) {
   if (platform === 'android') {
     switch (browser) {
       case 'facebook':
-        return (
-          <HorizontalMoreOptions className={classes.icon} />
-        );
+        return <HorizontalMoreOptions className={classes.icon} />;
       case 'instagram':
-        return (
-          <VerticalMoreOptions className={classes.icon} />
-        );
+        return <VerticalMoreOptions className={classes.icon} />;
       case 'line':
-        return (
-          <VerticalMoreOptions className={classes.icon} />
-        );
+        return <VerticalMoreOptions className={classes.icon} />;
       case 'messenger':
-        return (
-          <VerticalMoreOptions className={classes.icon} />
-        );
+        return <VerticalMoreOptions className={classes.icon} />;
       default:
     }
   }
 
-  return (
-    <HorizontalMoreOptions className={classes.icon} />
-  );
+  return <HorizontalMoreOptions className={classes.icon} />;
 }
 
 function getHintBrowserString(platform: Platform, browser: InAppBrowser) {
@@ -324,8 +306,7 @@ function isBlurSupported(): boolean {
   // https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter#Browser_compatibility
   return (
     typeof CSS !== 'undefined' &&
-    (CSS.supports('-webkit-backdrop-filter', 'blur(1px)') ||
-      CSS.supports('backdrop-filter', 'blur(1px)'))
+    (CSS.supports('-webkit-backdrop-filter', 'blur(1px)') || CSS.supports('backdrop-filter', 'blur(1px)'))
   );
 }
 
@@ -352,9 +333,9 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
   })();
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector('body');
     if (body) {
-      body.style.overflow = "hidden";
+      body.style.overflow = 'hidden';
     }
   }, []);
 
@@ -363,7 +344,7 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
       return {
         backdropFilter: 'saturate(180%) blur(10px)',
         WebKitBackdropFilter: 'saturate(180%) blur(10px)',
-      }
+      };
     }
 
     return {};
@@ -372,40 +353,42 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
 
-  const copyFn = useCallback((manual: boolean) => async () => {
-    const text = redirectUrl;
+  const copyFn = useCallback(
+    (manual: boolean) => async () => {
+      const text = redirectUrl;
 
-    if (typeof navigator !== undefined && typeof navigator.clipboard !== undefined) {
-      const resolve = () => { 
-        if (manual) {
-          setCopied(true);
+      if (typeof navigator !== undefined && typeof navigator.clipboard !== undefined) {
+        const resolve = () => {
+          if (manual) {
+            setCopied(true);
+          }
+        };
+        const reject = (err: any) => {
+          console.error(`透過 Clipboard 複製至剪貼簿失敗:${err.toString()}`);
+          setCopyFailed(true);
+        };
+
+        navigator.clipboard.writeText(text).then(resolve, reject);
+      } else if (document.queryCommandSupported && document.queryCommandSupported('copy')) {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.style.display = 'none';
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          if (manual) {
+            setCopied(true);
+          }
+        } catch (e) {
+          setCopyFailed(true);
         }
       }
-      const reject = (err: any) => { 
-        console.error('透過 Clipboard 複製至剪貼簿失敗:' + err.toString() ); 
-        setCopyFailed(true);
-      }
-
-      navigator.clipboard.writeText(text).then(resolve, reject)
-    }
-    else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
-      try {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.style.display = 'none';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        if (manual) {
-          setCopied(true);
-        }
-      } catch (e) {
-        setCopyFailed(true);
-      }
-    }
-  }, [redirectUrl]);
+    },
+    [redirectUrl],
+  );
 
   const displayMode = shouldAlwaysShowCopyUI || !arrowPosition ? DisplayMode.COPY : DisplayMode.HINT;
 
@@ -414,21 +397,17 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
       <div className={classes.backdrop} style={blurStyle}>
         <div className={classes.contentWrapper}>
           <img src={`data:image/png;base64, ${doubleBrowserIcons}`} alt="browser" style={{ width: 120, height: 120 }} />
-          <span className={classes.alertSentence1}>
-            {localeStrings.alertSentence1}
-          </span>
-          <span className={classes.alertSentence2}>
-            {localeStrings.alertSentence2}
-          </span>
+          <span className={classes.alertSentence1}>{localeStrings.alertSentence1}</span>
+          <span className={classes.alertSentence2}>{localeStrings.alertSentence2}</span>
           {displayMode === DisplayMode.COPY && (
             <div className={classes.currentUrlWrapper}>
-              <input
-                readOnly
-                value={redirectUrl}
-                className={classes.currentUrlInput}
-              />
+              <input readOnly value={redirectUrl} className={classes.currentUrlInput} />
               {!copyFailed && (
-                <button type="button" className={clsx([classes.currentUrlBtn, copied ? classes.currentUrlBtnCopied : undefined])} onClick={copyFn(true)}>
+                <button
+                  type="button"
+                  className={clsx([classes.currentUrlBtn, copied ? classes.currentUrlBtnCopied : undefined])}
+                  onClick={copyFn(true)}
+                >
                   {copied ? localeStrings.copied : localeStrings.copy}
                 </button>
               )}
