@@ -1,5 +1,13 @@
-import { PaymentLocale } from './../../../packages/core/src/types/Asset';
-import { QubicConnect, Currency, QubicConnectConfig, SdkFetchError } from '@qubic-connect/core';
+import {
+  QubicConnect,
+  Currency,
+  QubicConnectConfig,
+  SdkFetchError,
+  AssetBuyOptionInput,
+  CurrencyForAsset,
+  Credential,
+  PaymentLocale,
+} from '@qubic-connect/core';
 import QubicProvider from '@qubic-js/browser';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import { gql } from 'graphql-request';
@@ -22,8 +30,6 @@ import {
   MOCK_LOGIN_SERVICE_API,
 } from './environment';
 import { GET_ASSET_DETAIL } from './gqlSchema/assets';
-import { AssetBuyOptionInput, CurrencyForAsset } from '@qubic-connect/core/dist/types/Asset';
-import { Credential } from '@qubic-connect/core/dist/types/QubicConnect';
 
 const SDK_CONFIG: QubicConnectConfig = {
   name: 'Qubic Creator', // a display name for future usage
