@@ -3,6 +3,7 @@ import { createPortal } from 'preact/compat';
 import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
 import { showBlockerWhenIab, openExternalBrowserWhenLineIab } from '@qubic-connect/detect-iab';
+import InApp from '@qubic-js/detect-inapp';
 import { ResponsePassToConnect } from '@qubic-connect/redirect/src/utils';
 import qs from 'query-string';
 import {
@@ -48,6 +49,8 @@ const USER_STORAGE_KEY = '@qubic-connect/user';
 const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 1000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
 const AUTH_APP_URL = typeof window === 'undefined' ? '' : window.location.origin;
+
+const inapp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
 
 export class QubicConnect {
   private readonly config: InternalQubicConnectConfig;
@@ -106,6 +109,7 @@ export class QubicConnect {
       iabRedirectUrl = window.location.href,
       shouldAlwaysShowCopyUI = false,
       disableOpenExternalBrowserWhenLineIab = false,
+      enableAutoLoginInWalletIab = true,
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -126,6 +130,7 @@ export class QubicConnect {
       iabRedirectUrl,
       shouldAlwaysShowCopyUI,
       disableOpenExternalBrowserWhenLineIab,
+      enableAutoLoginInWalletIab,
     };
 
     QubicConnect.checkProviderOptions(config?.providerOptions);
@@ -156,7 +161,9 @@ export class QubicConnect {
       openExternalBrowserWhenLineIab();
     }
 
-    if (!disableIabWarning) {
+    const shouldAutoLogin = enableAutoLoginInWalletIab && window.ethereum && inapp.isInApp;
+
+    if (!disableIabWarning && !shouldAutoLogin) {
       showBlockerWhenIab({
         redirectUrl: iabRedirectUrl,
         shouldAlwaysShowCopyUI,
@@ -166,6 +173,10 @@ export class QubicConnect {
     this.handleRedirectResult();
     this.hydrateUser();
     this.onAuthStateChanged(QubicConnect.persistUser);
+
+    if (!this.user && shouldAutoLogin) {
+      this.loginWithWallet('metamask');
+    }
   }
 
   private static persistUser(user: WalletUser | null) {

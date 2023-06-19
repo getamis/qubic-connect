@@ -13,6 +13,7 @@ export interface QubicConnectConfig {
   shouldAlwaysShowCopyUI?: boolean;
   disableIabWarning?: boolean;
   disableOpenExternalBrowserWhenLineIab?: boolean;
+  enableAutoLoginInWalletIab?: boolean;
 
   // # fast login
   // authRedirectUrl where have different type of wallet
