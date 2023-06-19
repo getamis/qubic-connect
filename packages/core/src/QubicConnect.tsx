@@ -50,7 +50,9 @@ const RENEW_TOKEN_BEFORE_EXPIRED_MS = 30 * 60 * 1000;
 const CHECK_TOKEN_EXPIRED_INTERVAL_MS = 60 * 1000;
 const AUTH_APP_URL = typeof window === 'undefined' ? '' : window.location.origin;
 
-const inapp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
+const inapp = new InApp(
+  typeof navigator !== 'undefined' ? navigator.userAgent || navigator.vendor || (window as any).opera : '',
+);
 
 export class QubicConnect {
   private readonly config: InternalQubicConnectConfig;
