@@ -98,6 +98,7 @@ export class QubicConnect {
   public requestGraphql: SdkRequestGraphql;
   public marketRequestGraphql: SdkRequestGraphql;
 
+  private readonly shouldAutoLoginInWalletIab: true;
   constructor(config: QubicConnectConfig) {
     const {
       name,
@@ -163,9 +164,9 @@ export class QubicConnect {
       openExternalBrowserWhenLineIab();
     }
 
-    const shouldAutoLogin = enableAutoLoginInWalletIab && window.ethereum && inapp.isInApp;
+    this.shouldAutoLoginInWalletIab = enableAutoLoginInWalletIab && window.ethereum && inapp.isInApp;
 
-    if (!disableIabWarning && !shouldAutoLogin) {
+    if (!disableIabWarning && !this.shouldAutoLoginInWalletIab) {
       showBlockerWhenIab({
         redirectUrl: iabRedirectUrl,
         shouldAlwaysShowCopyUI,
@@ -176,7 +177,7 @@ export class QubicConnect {
     this.hydrateUser();
     this.onAuthStateChanged(QubicConnect.persistUser);
 
-    if (!this.user && shouldAutoLogin) {
+    if (!this.user && this.shouldAutoLoginInWalletIab) {
       this.loginWithWallet('metamask');
     }
   }
@@ -353,14 +354,17 @@ export class QubicConnect {
     method: Exclude<ExtendedExternalProviderMethod, 'redirect'>,
     qubicSignInProvider?: QubicSignInProvider,
   ): Promise<WalletUser> {
-    const option = this.config.providerOptions?.[method];
-    if (!option) {
-      throw Error(`providerOption.${method} not found`);
-    }
+    const optionProviderByMethod = this.config.providerOptions?.[method]?.provider;
 
-    const { provider: optionProvider } = option;
+    // if it is in wallet dapp browser
+    // it will try to use providerOption first if not it use window.ethereum
+    const optionProvider =
+      this.shouldAutoLoginInWalletIab && method === 'metamask'
+        ? optionProviderByMethod || window.ethereum
+        : optionProviderByMethod;
+
     if (!optionProvider) {
-      throw Error(`optionProvider not found`);
+      throw Error(`method ${method} optionProvider not found`);
     }
 
     if (optionProvider.isQubic && qubicSignInProvider) {
