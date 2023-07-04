@@ -707,7 +707,8 @@ export class QubicConnect {
   }
 
   // passUrl is only for developing purpose, not sdk maintainer don't have to know
-  public getUserPassUrl(passUrl = PASS_URL): string | null {
+  public getUserPassUrl(option?: { passUrl?: string; nextPath?: string }): string | null {
+    const { passUrl = PASS_URL, nextPath = '' } = option || {};
     // not logged in user should not return any url
     if (!this.user) return null;
     return qs.stringifyUrl({
@@ -716,6 +717,7 @@ export class QubicConnect {
         address: this.user.address,
         qubicSignInProvider: this.user.qubicUser?.provider,
         qubicSignInEmail: this.user.qubicUser?.email,
+        nextPath,
       },
     });
   }
