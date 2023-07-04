@@ -452,7 +452,10 @@ function main() {
   });
 
   document.getElementById('get-user-pass-url')?.addEventListener('click', () => {
-    const url = qubicConnect.getUserPassUrl(QUBIC_PASS_URL);
+    const url = qubicConnect.getUserPassUrl({
+      passUrl: QUBIC_PASS_URL,
+      nextPath: '/collectible/80001/0xe2CF55b027d49D14f663aa1B76177F271cF8C0C6/30',
+    });
     if (!url) {
       window.alert('url not found');
       return;

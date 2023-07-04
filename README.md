@@ -249,7 +249,10 @@ Will redirect to Qubic Pass url, and restrict it can be only sign in with the sa
 If not logged in, will return null.
 
 ```ts
-function getUserPassUrl(): string | null;
+function getUserPassUrl(options?: {
+  passUrl?: string; // default value: 'https://pass.qubic.app'
+  nextPath?: string; // default value '', ex: '/collectible/80001/0xe2CF55b027d49D14f663aa1B76177F271cF8C0C6/30'
+}): string | null;
 ```
 
 #### Example
