@@ -7,6 +7,20 @@
 ```ts
 import QubicConnect from '@qubic-connect/core';
 
+const wcProvider = (await EthereumProvider.init({
+  projectId: '<WALLET CONNECT PROJECT ID>',
+  showQrModal: true,
+  chains: [1],
+  methods: ['eth_sendTransaction', 'personal_sign'],
+  events: ['chainChanged', 'accountsChanged'],
+  metadata: {
+    name: 'My Dapp',
+    description: 'My Dapp description',
+    url: 'https://my-dapp.com',
+    icons: ['https://my-dapp.com/logo.png'],
+  },
+})) as any;
+
 const qubicConnect = new QubicConnect({
   name: 'Display Name',
   service: 'service-name',
@@ -20,9 +34,7 @@ const qubicConnect = new QubicConnect({
       provider: window.ethereum,
     },
     walletconnect: {
-      provider: new WalletConnectProvider({
-        infuraId: INFURA_ID,
-      }),
+      provider: wcProvider,
     },
     custom: {
       display: {

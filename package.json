@@ -25,7 +25,8 @@
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "lerna": "^5.1.8",
-    "nx": "^14.4.3"
+    "nx": "^14.4.3",
+    "tslib": "^2.6.0"
   },
   "scripts": {
     "deploy:payment:dev": "yarn workspace @qubic-connect/payment-form-web deploy:dev",
