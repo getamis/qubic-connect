@@ -9,10 +9,10 @@ import {
   PaymentLocale,
 } from '@qubic-connect/core';
 import QubicProvider from '@qubic-js/browser';
-import WalletConnectProvider from '@walletconnect/web3-provider';
 import { gql } from 'graphql-request';
 import querystring from 'query-string';
 import { v4 as uuidv4 } from 'uuid';
+import { EthereumProvider } from '@walletconnect/ethereum-provider';
 
 import './index.css';
 import {
@@ -23,7 +23,6 @@ import {
   MARKET_API_URL,
   AUTH_REDIRECT_URL,
   VERIFY_URL,
-  INFURA_ID,
   QUBIC_WALLET_URL,
   MOCK_BIND_SERVICE_API,
   QUBIC_PASS_URL,
@@ -31,36 +30,48 @@ import {
 } from './environment';
 import { GET_ASSET_DETAIL } from './gqlSchema/assets';
 
-const SDK_CONFIG: QubicConnectConfig = {
-  name: 'Qubic Creator', // a display name for future usage
-  key: API_KEY,
-  secret: API_SECRET,
-  service: API_SERVICE_NAME, //optional
-  apiUrl: API_URL, // optional
-  marketApiUrl: MARKET_API_URL,
-  authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
-  iabRedirectUrl: '', // optional
-  shouldAlwaysShowCopyUI: false, // optional
-  providerOptions: {
-    qubic: {
-      provider: new QubicProvider({
-        walletUrl: QUBIC_WALLET_URL,
-        enableIframe: true,
-        disableIabWarning: true,
-      }),
+async function main() {
+  const wcProvider = await EthereumProvider.init({
+    projectId: '0454e00195752e67920ca71728e21b30',
+    showQrModal: true,
+    chains: [1, 5, 137, 80001, 56, 97],
+    methods: ['eth_sendTransaction', 'personal_sign'],
+    events: ['chainChanged', 'accountsChanged'],
+    metadata: {
+      name: 'My Dapp',
+      description: 'My Dapp description',
+      url: 'https://my-dapp.com',
+      icons: ['https://my-dapp.com/logo.png'],
     },
-    metamask: {
-      provider: window.ethereum,
-    },
-    walletconnect: {
-      provider: new WalletConnectProvider({
-        infuraId: INFURA_ID,
-      }),
-    },
-  },
-};
+  });
 
-function main() {
+  const SDK_CONFIG: QubicConnectConfig = {
+    name: 'Qubic Creator', // a display name for future usage
+    key: API_KEY,
+    secret: API_SECRET,
+    service: API_SERVICE_NAME, //optional
+    apiUrl: API_URL, // optional
+    marketApiUrl: MARKET_API_URL,
+    authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
+    iabRedirectUrl: '', // optional
+    shouldAlwaysShowCopyUI: false, // optional
+    providerOptions: {
+      qubic: {
+        provider: new QubicProvider({
+          walletUrl: QUBIC_WALLET_URL,
+          enableIframe: true,
+          disableIabWarning: true,
+        }),
+      },
+      metamask: {
+        provider: window.ethereum,
+      },
+      walletconnect: {
+        provider: wcProvider as any,
+      },
+    },
+  };
+
   const qubicConnect = new QubicConnect(SDK_CONFIG);
 
   // only work after redirection from previous page
