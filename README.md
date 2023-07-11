@@ -167,6 +167,7 @@ async function bindWithRedirect(options?: {
 ```
 
 ![flow](images/third-party-bind.png)
+Generated from [third-party-bind.md](docs/third-party-bind.md)
 
 #### Mock Client Server
 
