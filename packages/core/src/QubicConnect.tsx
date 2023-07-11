@@ -178,7 +178,7 @@ export class QubicConnect {
     this.onAuthStateChanged(QubicConnect.persistUser);
 
     if (!this.user && this.shouldAutoLoginInWalletIab) {
-      this.loginWithWallet('metamask');
+      this.loginWithWallet(window.ethereum.isQubic ? 'qubic' : 'metamask');
     }
   }
 
@@ -359,7 +359,7 @@ export class QubicConnect {
     // if it is in wallet dapp browser
     // it will try to use providerOption first if not it use window.ethereum
     const optionProvider =
-      this.shouldAutoLoginInWalletIab && method === 'metamask'
+      this.shouldAutoLoginInWalletIab && (method === 'metamask' || method === 'qubic')
         ? optionProviderByMethod || window.ethereum
         : optionProviderByMethod;
 
