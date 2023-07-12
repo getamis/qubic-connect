@@ -706,6 +706,22 @@ export class QubicConnect {
     });
   }
 
+  // walletUrl is only for developing purpose, not sdk maintainer don't have to know
+  public getUserQubicWalletUrl(option?: { walletUrl?: string; nextPath?: string }): string | null {
+    const { walletUrl = WALLET_URL, nextPath = '' } = option || {};
+    // if not a qubic user
+    if (!this.user?.qubicUser && !this.user?.address) {
+      return null;
+    }
+    return qs.stringifyUrl({
+      url: `${walletUrl}/verify-user-address`,
+      query: {
+        nextPath,
+        userAddress: this.user.address,
+      },
+    });
+  }
+
   // passUrl is only for developing purpose, not sdk maintainer don't have to know
   public getUserPassUrl(option?: { passUrl?: string; nextPath?: string }): string | null {
     const { passUrl = PASS_URL, nextPath = '' } = option || {};

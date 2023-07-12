@@ -462,6 +462,18 @@ async function main() {
     window.open(url);
   });
 
+  document.getElementById('get-user-wallet-url')?.addEventListener('click', () => {
+    const url = qubicConnect.getUserQubicWalletUrl({
+      walletUrl: QUBIC_WALLET_URL,
+      nextPath: '/assets/detail/ETH',
+    });
+    if (!url) {
+      window.alert('url not found');
+      return;
+    }
+    window.open(url);
+  });
+
   document.getElementById('get-user-pass-url')?.addEventListener('click', () => {
     const url = qubicConnect.getUserPassUrl({
       passUrl: QUBIC_PASS_URL,
