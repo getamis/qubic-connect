@@ -49,8 +49,32 @@ export interface SdkRequestGraphql<TVariables = any, TResult = any> {
   (input: RequestGraphqlInput<TVariables>): Promise<TResult>;
 }
 
+function parseGraphqlErrors(errorResponse: string): Array<{
+  extensions: {
+    code: string;
+    subCode: number;
+  };
+  message: string;
+}> {
+  try {
+    return JSON.parse(errorResponse).errors;
+  } catch (error) {
+    return [];
+  }
+}
+
 export const createRequestGraphql =
-  ({ apiKey, apiSecret, apiUrl }: { apiKey: string; apiSecret: string; apiUrl: string }): SdkRequestGraphql =>
+  ({
+    apiKey,
+    apiSecret,
+    apiUrl,
+    onUnauthenticated,
+  }: {
+    apiKey: string;
+    apiSecret: string;
+    apiUrl: string;
+    onUnauthenticated: () => void;
+  }): SdkRequestGraphql =>
   ({ query, variables, path = '' }) => {
     // currently, we have 3 graphql endpoints:
     // origin api url has public and acc
@@ -80,10 +104,20 @@ export const createRequestGraphql =
       accessToken: getAccessToken(),
     });
 
-    return request({
-      url: endPoint,
-      document: query,
-      variables,
-      requestHeaders: headers,
+    return new Promise((resolve, reject) => {
+      return request({
+        url: endPoint,
+        document: query,
+        variables,
+        requestHeaders: headers,
+      })
+        .then(resolve)
+        .catch(error => {
+          const graphqlErrors = parseGraphqlErrors(error.response?.error);
+          if (graphqlErrors.some(eachGraphqlError => eachGraphqlError.extensions.code === 'UNAUTHENTICATED')) {
+            onUnauthenticated();
+          }
+          reject(error);
+        });
     });
   };
