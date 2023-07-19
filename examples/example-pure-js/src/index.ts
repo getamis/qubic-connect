@@ -453,20 +453,12 @@ async function main() {
     console.log({ currentUser: qubicConnect.getCurrentUser() });
   });
 
-  document.getElementById('get-user-wallet-collectible-url')?.addEventListener('click', () => {
-    const url = qubicConnect.getUserQubicWalletCollectibleUrl(QUBIC_WALLET_URL);
-    if (!url) {
-      window.alert('url not found');
-      return;
-    }
-    window.open(url);
-  });
-
   document.getElementById('get-user-wallet-url')?.addEventListener('click', () => {
     const url = qubicConnect.getUserQubicWalletUrl({
       walletUrl: QUBIC_WALLET_URL,
-      nextPath: '/assets/detail/ETH',
+      nextPath: '/assets/list',
     });
+
     if (!url) {
       window.alert('url not found');
       return;
@@ -475,9 +467,9 @@ async function main() {
   });
 
   document.getElementById('get-user-pass-url')?.addEventListener('click', () => {
-    const url = qubicConnect.getUserPassUrl({
+    const url = qubicConnect.getUserQubicPassUrl({
       passUrl: QUBIC_PASS_URL,
-      nextPath: '/collectible/80001/0xe2CF55b027d49D14f663aa1B76177F271cF8C0C6/30',
+      nextPath: '/collectibles',
     });
     if (!url) {
       window.alert('url not found');

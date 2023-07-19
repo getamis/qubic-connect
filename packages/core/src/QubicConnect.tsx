@@ -694,7 +694,12 @@ export class QubicConnect {
     return null;
   }
 
-  // walletUrl is only for developing purpose, not sdk maintainer don't have to know
+  /**
+   * Generate a url to Qubic wallet collectible list
+   * @deprecated please use getUserQubicWalletUrl
+   * @param {string} walletUrl is only for developing purpose, not sdk maintainer don't have to know
+   * @returns {string} url string
+   */
   public getUserQubicWalletCollectibleUrl(walletUrl = WALLET_URL): string | null {
     // if not a qubic user
     if (!this.user?.qubicUser) {
@@ -708,7 +713,13 @@ export class QubicConnect {
     });
   }
 
-  // walletUrl is only for developing purpose, not sdk maintainer don't have to know
+  /**
+   * Generate a url to Qubic Wallet specific path
+   * @param {Object} [option] -
+   * * option.walletUrl - optional: only for developing sdk purpose
+   * * option.nextPath - optional: target path ex: `/home`
+   * @returns {string} url string
+   */
   public getUserQubicWalletUrl(option?: { walletUrl?: string; nextPath?: string }): string | null {
     const { walletUrl = WALLET_URL, nextPath = '' } = option || {};
     // if not a qubic user
@@ -724,8 +735,14 @@ export class QubicConnect {
     });
   }
 
-  // passUrl is only for developing purpose, not sdk maintainer don't have to know
-  public getUserPassUrl(option?: { passUrl?: string; nextPath?: string }): string | null {
+  /**
+   * Generate a url to Qubic Pass specific path
+   * @param {Object} [option] -
+   * * option.passUrl - optional: only for developing sdk purpose
+   * * option.nextPath - optional: target path ex: `/home`
+   * @returns {string} url string
+   */
+  public getUserQubicPassUrl(option?: { passUrl?: string; nextPath?: string }): string | null {
     const { passUrl = PASS_URL, nextPath = '' } = option || {};
     // not logged in user should not return any url
     if (!this.user) return null;
@@ -738,5 +755,12 @@ export class QubicConnect {
         nextPath,
       },
     });
+  }
+
+  /**
+   * @deprecated use getUserQubicPassUrl
+   */
+  public getUserPassUrl(option?: { passUrl?: string; nextPath?: string }): string | null {
+    return this.getUserQubicPassUrl(option);
   }
 }
