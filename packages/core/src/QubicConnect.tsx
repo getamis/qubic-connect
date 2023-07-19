@@ -148,12 +148,14 @@ export class QubicConnect {
       apiKey,
       apiSecret,
       apiUrl,
+      onUnauthenticated: () => this.handleLogout(null),
     });
 
     this.marketRequestGraphql = createRequestGraphql({
       apiKey,
       apiSecret,
       apiUrl: marketApiUrl,
+      onUnauthenticated: () => this.handleLogout(null),
     });
 
     this.authRedirectUrl = authRedirectUrl;
