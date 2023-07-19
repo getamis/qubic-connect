@@ -1,0 +1,20 @@
+# Netlify will use env depends on branch
+# basically, we want to keep develop and staging have same code
+# but with different deployment setting
+#
+# Remember to delete pr branch after merging branch
+#
+
+name: 'auto-merge-develop-to-staging'
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  forward-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: NicholasBoll/action-forward-merge-pr@v1.0.0
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          branches: develop+staging
