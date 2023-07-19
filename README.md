@@ -233,13 +233,22 @@ const user = qubicConnect.getCurrentUser();
 Only Qubic Wallet user will get valid url string, otherwise it's null
 
 ```ts
-function getUserQubicWalletCollectibleUrl(): string | null;
+function getUserQubicWalletUrl(options?: {
+  walletUrl?: string; // default value: 'https://wallet.qubic.app'
+  nextPath?: string; // default value '', ex: '/assets/list'
+}): string | null;
 ```
 
 #### Example
 
 ```tsx
-const url = useMemo(() => qubicConnect.getUserQubicWalletCollectibleUrl(), []);
+const url = useMemo(
+  () =>
+    qubicConnect.getUserQubicWalletUrl({
+      nextPath: '/assets/list',
+    }),
+  [],
+);
 
 return <a href={url}>View Collectibles</a>;
 ```
@@ -250,16 +259,22 @@ Will redirect to Qubic Pass url, and restrict it can be only sign in with the sa
 If not logged in, will return null.
 
 ```ts
-function getUserPassUrl(options?: {
+function getUserQubicPassUrl(options?: {
   passUrl?: string; // default value: 'https://pass.qubic.app'
-  nextPath?: string; // default value '', ex: '/collectible/80001/0xe2CF55b027d49D14f663aa1B76177F271cF8C0C6/30'
+  nextPath?: string; // default value '', ex: '/home'
 }): string | null;
 ```
 
 #### Example
 
 ```tsx
-const url = useMemo(() => qubicConnect.getUserPassUrl(), []);
+const url = useMemo(
+  () =>
+    qubicConnect.getUserQubicPassUrl({
+      nextPath: '/home',
+    }),
+  [],
+);
 
 return <a href={url}>View Pass</a>;
 ```
