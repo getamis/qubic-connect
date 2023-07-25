@@ -247,6 +247,8 @@ async function main() {
         beGift = prompt('Is this a gift? input true / false', '') === 'true';
       }
 
+      const dryrun = window.confirm('Dry Run?');
+
       const assetBuyInput = {
         asset: {
           assetId,
@@ -261,6 +263,7 @@ async function main() {
           successRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
         },
         requestId: uuidv4(),
+        dryrun,
         option: {} as AssetBuyOptionInput,
       };
 

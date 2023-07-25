@@ -4,10 +4,18 @@ export enum BuyStatus {
   FAILED = 'FAILED',
 }
 
+enum CheckoutPayType {
+  TAPPAY_CREDIT_CARD = 'TAPPAY_CREDIT_CARD',
+  CRYPTO = 'CRYPTO',
+  NEWEBPAY_VIRTUAL_ACCOUNT = 'NEWEBPAY_VIRTUAL_ACCOUNT',
+  NO_PAY = 'NO_PAY',
+}
+
 export interface AssetBuyInfo {
   status: BuyStatus;
   orderId: string;
   paymentUrl: string;
+  payTypes: CheckoutPayType[];
 }
 
 export enum CurrencyForAsset {
@@ -39,6 +47,7 @@ export interface AssetBuyInput {
   requestId: string;
   asset: AssetSaleInput;
   payCallback: PayCallbackInput;
+  dryrun?: boolean;
   option?: AssetBuyOptionInput;
 }
 

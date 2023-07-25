@@ -310,6 +310,7 @@ interface AssetBuyInput {
   requestId: string;
   asset: AssetSaleInput;
   payCallback: PayCallbackInput;
+  dryrun?: boolean; // default false
   option?: AssetBuyOptionInput;
 }
 
@@ -340,10 +341,18 @@ interface BuyAssetResponse {
   assetBuy: AssetBuyInfo;
 }
 
+enum CheckoutPayType {
+  TAPPAY_CREDIT_CARD
+  CRYPTO
+  NEWEBPAY_VIRTUAL_ACCOUNT
+  NO_PAY
+}
+
 interface AssetBuyInfo {
   status: BuyStatus;
   orderId: string;
   paymentUrl: string;
+  payTypes: [CheckoutPayType!]!
 }
 ```
 

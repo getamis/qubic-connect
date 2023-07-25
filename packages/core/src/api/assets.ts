@@ -12,11 +12,15 @@ export const BUY_ASSET = gql`
     $asset: AssetSaleInput!
     $payCallback: PayCallbackInput!
     $option: AssetBuyOptionInput
+    $dryrun: Boolean!
   ) {
-    assetBuy(input: { requestId: $requestId, asset: $asset, payCallback: $payCallback, option: $option }) {
+    assetBuy(
+      input: { requestId: $requestId, asset: $asset, payCallback: $payCallback, option: $option, dryrun: $dryrun }
+    ) {
       status
       orderId
       paymentUrl
+      payTypes
     }
   }
 `;
@@ -43,6 +47,7 @@ export const GIFT_REDEEM = gql`
       status
       orderId
       paymentUrl
+      payTypes
     }
   }
 `;
