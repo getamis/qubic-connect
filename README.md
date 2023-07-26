@@ -318,7 +318,7 @@ interface AssetSaleInput {
   assetId: string;
   variantId: string;
   quantity: number;
-  price: number;
+  price: string;
   currency: CurrencyForAsset;
 }
 
