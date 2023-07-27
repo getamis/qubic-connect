@@ -1,6 +1,6 @@
 import jss from 'jss';
 import preset from 'jss-preset-default';
-import { useEffect, memo, useMemo, useCallback, useState } from 'preact/compat';
+import { useEffect, memo, useCallback, useState } from 'preact/compat';
 import clsx from 'clsx';
 import InApp, { InAppBrowser } from '@qubic-js/detect-inapp';
 
@@ -40,6 +40,7 @@ const { classes } = jss
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
+      backdropFilter: 'saturate(180%) blur(10px)',
     },
     contentWrapper: {
       padding: '0 24px',
@@ -301,15 +302,6 @@ function getArrowPosition(platform: Platform, browser: InAppBrowser) {
   return null;
 }
 
-function isBlurSupported(): boolean {
-  // https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports
-  // https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter#Browser_compatibility
-  return (
-    typeof CSS !== 'undefined' &&
-    (CSS.supports('-webkit-backdrop-filter', 'blur(1px)') || CSS.supports('backdrop-filter', 'blur(1px)'))
-  );
-}
-
 const LeaveInAppBrowserModal = memo<ModalProps>(props => {
   const { inApp, options } = props;
 
@@ -337,17 +329,6 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
     if (body) {
       body.style.overflow = 'hidden';
     }
-  }, []);
-
-  const blurStyle = useMemo(() => {
-    if (isBlurSupported()) {
-      return {
-        backdropFilter: 'saturate(180%) blur(10px)',
-        WebKitBackdropFilter: 'saturate(180%) blur(10px)',
-      };
-    }
-
-    return {};
   }, []);
 
   const [copied, setCopied] = useState(false);
@@ -394,7 +375,7 @@ const LeaveInAppBrowserModal = memo<ModalProps>(props => {
 
   return (
     <div id={LEAVE_IAB_MODAL_ID} className={classes.modal}>
-      <div className={classes.backdrop} style={blurStyle}>
+      <div className={classes.backdrop}>
         <div className={classes.contentWrapper}>
           <img src={`data:image/png;base64, ${doubleBrowserIcons}`} alt="browser" style={{ width: 120, height: 120 }} />
           <span className={classes.alertSentence1}>{localeStrings.alertSentence1}</span>
