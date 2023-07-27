@@ -47,7 +47,7 @@ export interface AssetBuyInput {
   requestId: string;
   asset: AssetSaleInput;
   payCallback: PayCallbackInput;
-  dryrun?: boolean;
+  dryrun: boolean;
   option?: AssetBuyOptionInput;
 }
 
