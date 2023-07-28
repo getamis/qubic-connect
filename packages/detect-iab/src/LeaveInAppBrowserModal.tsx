@@ -41,6 +41,7 @@ const { classes } = jss
       justifyContent: 'center',
       alignItems: 'center',
       backdropFilter: 'saturate(180%) blur(10px)',
+      WebkitBackdropFilter: 'saturate(180%) blur(10px)',
     },
     contentWrapper: {
       padding: '0 24px',
