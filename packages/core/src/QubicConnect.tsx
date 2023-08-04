@@ -385,13 +385,16 @@ export class QubicConnect {
         await optionProvider.enable();
       }
       const { accessToken, expiredAt, address } = await signMessageAndLogin(method, optionProvider);
+      const {
+        me: { qubicUser },
+      } = await getMe(this.marketRequestGraphql);
       const result: WalletUser = {
         method,
         accessToken,
         expiredAt,
         address,
         provider: optionProvider,
-        qubicUser: null,
+        qubicUser,
       };
 
       this.handleLogin(null, result);
