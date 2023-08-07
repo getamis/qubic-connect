@@ -11,11 +11,24 @@ enum CheckoutPayType {
   NO_PAY = 'NO_PAY',
 }
 
+enum UnavailablePayReason {
+  GAS_PRICE_SURGE = 'GAS_PRICE_SURGE',
+  PAYMENT_LIMIT_EXCEEDED = 'PAYMENT_LIMIT_EXCEEDED',
+  EXCHANGE_PRICE_FAILED = 'EXCHANGE_PRICE_FAILED',
+  PAYMENT_MAINTENANCE = 'PAYMENT_MAINTENANCE',
+}
+
+export interface UnavailablePay {
+  type: CheckoutPayType;
+  reason: UnavailablePayReason;
+}
+
 export interface AssetBuyInfo {
   status: BuyStatus;
   orderId: string;
   paymentUrl: string;
   payTypes: CheckoutPayType[];
+  unavailablePayTypes: UnavailablePay[];
 }
 
 export enum CurrencyForAsset {
@@ -25,8 +38,7 @@ export enum CurrencyForAsset {
 }
 
 export interface AssetSaleInput {
-  assetId: string;
-  variantId: string;
+  assetVariantId: string;
   quantity: number;
   price: string;
   currency: CurrencyForAsset;
@@ -47,7 +59,7 @@ export interface AssetBuyInput {
   requestId: string;
   asset: AssetSaleInput;
   payCallback: PayCallbackInput;
-  dryrun: boolean;
+  test?: boolean;
   option?: AssetBuyOptionInput;
 }
 

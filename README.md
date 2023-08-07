@@ -304,19 +304,18 @@ interface PayCallbackInput {
 async function buyAssetAndCreateCheckout(
   assetBuyInput: AssetBuyInput,
   options?: AssetBuyOptions,
-): Promise<BuyAssetResponse | null>;
+): Promise<AssetBuyResponse | null>;
 
 interface AssetBuyInput {
   requestId: string;
   asset: AssetSaleInput;
   payCallback: PayCallbackInput;
-  dryrun?: boolean; // default false
+  test?: boolean; // default false
   option?: AssetBuyOptionInput;
 }
 
 interface AssetSaleInput {
-  assetId: string;
-  variantId: string;
+  assetVariantId: string;
   quantity: number;
   price: string;
   currency: CurrencyForAsset;
@@ -337,7 +336,7 @@ interface AssetBuyOptions {
   locale?: PaymentLocale;
 }
 
-interface BuyAssetResponse {
+interface AssetBuyResponse {
   assetBuy: AssetBuyInfo;
 }
 
@@ -348,11 +347,24 @@ enum CheckoutPayType {
   NO_PAY
 }
 
+enum UnavailablePayReason {
+  GAS_PRICE_SURGE
+  PAYMENT_LIMIT_EXCEEDED
+  EXCHANGE_PRICE_FAILED
+  PAYMENT_MAINTENANCE
+}
+
+type UnavailablePay {
+  type: CheckoutPayType!
+  reason: UnavailablePayReason!
+}
+
 interface AssetBuyInfo {
   status: BuyStatus;
   orderId: string;
   paymentUrl: string;
   payTypes: [CheckoutPayType!]!
+  unavailablePayTypes: [UnavailablePay!]!
 }
 ```
 

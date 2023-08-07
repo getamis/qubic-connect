@@ -21,8 +21,8 @@ export const GET_ME = gql`
   }
 `;
 
-export async function getMe(sdkRequestGraphql: SdkRequestGraphql<void, MeResponse>): Promise<MeResponse> {
-  const meResponse = await sdkRequestGraphql({
+export async function getMe(sdkRequestGraphql: SdkRequestGraphql): Promise<MeResponse> {
+  const meResponse = await sdkRequestGraphql<MeResponse>({
     query: GET_ME,
   });
 

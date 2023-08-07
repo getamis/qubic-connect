@@ -3,7 +3,6 @@ import {
   Currency,
   QubicConnectConfig,
   SdkFetchError,
-  AssetBuyOptionInput,
   CurrencyForAsset,
   Credential,
   PaymentLocale,
@@ -27,8 +26,10 @@ import {
   MOCK_BIND_SERVICE_API,
   QUBIC_PASS_URL,
   MOCK_LOGIN_SERVICE_API,
+  QUBIC_PAYMENT_HOST,
 } from './environment';
-import { GET_ASSET_DETAIL } from './gqlSchema/assets';
+import { AssetDetail, GET_ASSET_DETAIL } from './gqlSchema/assets';
+import { AssetBuyInput } from '@qubic-connect/core';
 
 async function main() {
   const wcProvider = await EthereumProvider.init({
@@ -225,37 +226,38 @@ async function main() {
       throw new Error('no buyable asset');
     }
 
-    const assetDetail = await qubicConnect.requestGraphql({
-      path: '/services/graphql-acc',
+    let purchaseCode = prompt('Purchase code?');
+    const response = await qubicConnect.marketRequestGraphql<{ asset: AssetDetail }>({
       query: GET_ASSET_DETAIL,
       variables: {
         assetId,
-        disableSurge: false,
-        paymentMode: 'FIAT',
+        ...(purchaseCode && { purchaseCode }),
       },
     });
 
-    if (assetDetail) {
-      let purchaseCode = '';
+    if (response) {
       let beGift = false;
 
-      if (assetDetail.getAssetDetail.salePhases?.[0]?.mode === 'PURCHASE_CODE') {
-        purchaseCode = prompt('Please enter purchaseCode', '') || '';
-      }
-
-      if (assetDetail.getAssetDetail.giftable) {
+      if (response.asset.saleData.gift?.expiredDays) {
         beGift = prompt('Is this a gift? input true / false', '') === 'true';
       }
 
-      const dryrun = window.confirm('Dry Run?');
+      let assetVariantIndex = 0;
+      if (response.asset.saleData.variants.length > 1) {
+        assetVariantIndex = Number(
+          prompt(`Enter asset variant index [0~${response.asset.saleData.variants.length - 1}]`),
+        );
+      }
 
-      const assetBuyInput = {
+      const assetVariant = response.asset.saleData.variants[assetVariantIndex];
+      const test = window.prompt('Type `yes` to dry run test')?.toLocaleLowerCase() === 'yes';
+
+      const assetBuyInput: AssetBuyInput = {
         asset: {
-          assetId,
+          assetVariantId: assetVariant.id,
           currency: CurrencyForAsset.TWD,
-          price: assetDetail.getAssetDetail.batchAsset.price,
+          price: assetVariant.price,
           quantity: 1,
-          variantId: assetDetail.getAssetDetail.batchAssets[0].batchId,
         },
         payCallback: {
           failureRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
@@ -263,17 +265,12 @@ async function main() {
           successRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
         },
         requestId: uuidv4(),
-        dryrun,
-        option: {} as AssetBuyOptionInput,
+        test,
+        option: {
+          ...(purchaseCode && { purchaseCode }),
+          ...(beGift && { beGift: true }),
+        },
       };
-
-      if (purchaseCode) {
-        assetBuyInput.option.purchaseCode = purchaseCode;
-      }
-
-      if (beGift) {
-        assetBuyInput.option.beGift = true;
-      }
 
       const assetBuyResult = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput, { locale });
 
@@ -319,17 +316,16 @@ async function main() {
       checkoutInfo = response?.assetBuy;
     }
 
-    if (!checkoutInfo) return;
+    if (!checkoutInfo?.paymentUrl) return;
 
     try {
-      const assetDomain = prompt('Please enter domain', 'http://localhost:3000');
-
-      if (!assetDomain) {
-        return null;
+      // if you want to debug payment web in localhost
+      if (QUBIC_PAYMENT_HOST) {
+        const { pathname, search } = new URL(checkoutInfo.paymentUrl);
+        window.location.href = `${QUBIC_PAYMENT_HOST}${pathname}${search}`;
       }
 
-      const { pathname, search } = new URL(checkoutInfo.paymentUrl);
-      window.location.href = `${assetDomain}${pathname}${search}`;
+      window.location.href = checkoutInfo.paymentUrl;
     } catch (e) {
       console.error(e);
     }
