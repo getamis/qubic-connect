@@ -33,7 +33,7 @@ import { isWalletconnectProvider } from './utils/isWalletconnectProvider';
 import { getMe } from './api/me';
 import { createSignMessageAndLogin } from './utils/signMessageAndLogin';
 import { AssetBuyInput, AssetBuyOptions, GiftRedeemInput, GiftRedeemOptions } from './types/Asset';
-import { buyAsset, BuyAssetResponse, giftRedeem, GiftRedeemResponse } from './api/assets';
+import { buyAsset, AssetBuyResponse, giftRedeem, GiftRedeemResponse } from './api/assets';
 import { addLocaleToUrl } from './utils/addLocaleToUrl';
 import { clientTicketIssue } from './api/clientTicket';
 import { PASS_URL, WALLET_URL } from './constants/config';
@@ -641,7 +641,7 @@ export class QubicConnect {
   public async buyAssetAndCreateCheckout(
     assetBuyInput: AssetBuyInput,
     options?: AssetBuyOptions,
-  ): Promise<BuyAssetResponse | null> {
+  ): Promise<AssetBuyResponse | null> {
     try {
       const response = await buyAsset(this.marketRequestGraphql, assetBuyInput);
 

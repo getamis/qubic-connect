@@ -2,7 +2,7 @@ import { gql } from 'graphql-request';
 import { AssetBuyInfo, AssetBuyInput, GiftRedeemInfo, GiftRedeemInput } from '../types/Asset';
 import { SdkRequestGraphql } from '../utils/graphql';
 
-export interface BuyAssetResponse {
+export interface AssetBuyResponse {
   assetBuy: AssetBuyInfo;
 }
 
@@ -12,24 +12,26 @@ export const BUY_ASSET = gql`
     $asset: AssetSaleInput!
     $payCallback: PayCallbackInput!
     $option: AssetBuyOptionInput
-    $dryrun: Boolean!
+    $test: Boolean! = false
   ) {
-    assetBuy(
-      input: { requestId: $requestId, asset: $asset, payCallback: $payCallback, option: $option, dryrun: $dryrun }
-    ) {
+    assetBuy(input: { requestId: $requestId, asset: $asset, payCallback: $payCallback, option: $option, test: $test }) {
       status
       orderId
       paymentUrl
       payTypes
+      unavailablePayTypes {
+        type
+        reason
+      }
     }
   }
 `;
 
 export async function buyAsset(
-  sdkRequestGraphql: SdkRequestGraphql<AssetBuyInput, BuyAssetResponse>,
+  sdkRequestGraphql: SdkRequestGraphql,
   assetBuyInput: AssetBuyInput,
-): Promise<BuyAssetResponse> {
-  const response = await sdkRequestGraphql({
+): Promise<AssetBuyResponse> {
+  const response = await sdkRequestGraphql<AssetBuyResponse, AssetBuyInput>({
     query: BUY_ASSET,
     variables: assetBuyInput,
   });
@@ -53,7 +55,7 @@ export const GIFT_REDEEM = gql`
 `;
 
 export async function giftRedeem(
-  sdkRequestGraphql: SdkRequestGraphql<GiftRedeemInput, GiftRedeemResponse>,
+  sdkRequestGraphql: SdkRequestGraphql,
   giftRedeemInput: GiftRedeemInput,
 ): Promise<GiftRedeemResponse> {
   const response = await sdkRequestGraphql({

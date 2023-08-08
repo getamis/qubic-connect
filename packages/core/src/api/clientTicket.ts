@@ -17,10 +17,8 @@ export const CLIENT_TICKET_ISSUE = gql`
   }
 `;
 
-export async function clientTicketIssue(
-  sdkRequestGraphql: SdkRequestGraphql<void, ClientTicketIssueResponse>,
-): Promise<ClientTicketIssueResponse> {
-  const response = await sdkRequestGraphql({
+export async function clientTicketIssue(sdkRequestGraphql: SdkRequestGraphql): Promise<ClientTicketIssueResponse> {
+  const response = await sdkRequestGraphql<ClientTicketIssueResponse>({
     query: CLIENT_TICKET_ISSUE,
     path: '/services/graphql-public',
   });

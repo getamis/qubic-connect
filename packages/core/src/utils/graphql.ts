@@ -45,9 +45,9 @@ export interface RequestGraphqlInput<TVariables> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface SdkRequestGraphql<TVariables = any, TResult = any> {
-  (input: RequestGraphqlInput<TVariables>): Promise<TResult>;
-}
+export type SdkRequestGraphql = <TData = any, TVariables = any>(
+  input: RequestGraphqlInput<TVariables>,
+) => Promise<TData>;
 
 function parseGraphqlErrors(errorResponse: string): Array<{
   extensions: {
