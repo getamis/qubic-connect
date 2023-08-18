@@ -34,7 +34,8 @@
     "watch": "lerna run watch --scope={'@qubic-connect/redirect,@qubic-connect/detect-iab,@qubic-connect/core'}",
     "release": "npm run build && lerna publish --force-publish",
     "prepare": "husky install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint:tsc": "yarn workspace @qubic-connect/redirect tsc && yarn workspace @qubic-connect/detect-iab tsc && yarn workspace @qubic-connect/core tsc"
   },
   "repository": {
     "type": "git",

@@ -12,7 +12,7 @@ function extractOperationName(document: DocumentNode): string | undefined {
   ) as OperationDefinitionNode[];
 
   if (operationDefinitions.length === 1) {
-    operationName = operationDefinitions[0].name?.value;
+    operationName = operationDefinitions[0]?.name?.value;
   }
 
   return operationName;
