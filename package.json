@@ -32,7 +32,7 @@
     "deploy:payment:dev": "yarn workspace @qubic-connect/payment-form-web deploy:dev",
     "build": "lerna run build --scope={'@qubic-connect/redirect,@qubic-connect/detect-iab,@qubic-connect/core'}",
     "watch": "lerna run watch --scope={'@qubic-connect/redirect,@qubic-connect/detect-iab,@qubic-connect/core'}",
-    "release": "npm run build && lerna publish --force-publish",
+    "release": "npm run build && lerna publish --force-publish --exact",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint:tsc": "yarn workspace @qubic-connect/redirect tsc && yarn workspace @qubic-connect/detect-iab tsc && yarn workspace @qubic-connect/core tsc"
