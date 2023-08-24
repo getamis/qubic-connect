@@ -15,7 +15,7 @@ export const { classes } = jss
       alignItems: 'center',
       justifyContent: 'center',
       display: 'flex',
-      zIndex: 100,
+      zIndex: 2147483647, // max number make sure in the most front
       touchAction: 'none',
     },
     backdrop: {

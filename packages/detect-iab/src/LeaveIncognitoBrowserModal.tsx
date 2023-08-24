@@ -12,7 +12,7 @@ interface ModalProps {
   browserName: string;
 }
 
-const isiPhone = /iPhone|iPod/i.test(navigator.userAgent);
+const isiPhone = typeof window !== 'undefined' ? /iPhone|iPod/i.test(navigator.userAgent) : false;
 
 const LeaveIncognitoBrowserModal = memo<ModalProps>(props => {
   const { browserName } = props;
