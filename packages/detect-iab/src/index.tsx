@@ -6,9 +6,9 @@ import LeaveInAppBrowserModal, { ShowBlockerOptions } from './LeaveInAppBrowserM
 import LeaveIncognitoBrowserModal from './LeaveIncognitoBrowserModal';
 
 export async function showBlockerWhenIab(options?: ShowBlockerOptions): Promise<void> {
-  const incognitoResult = await detectIncognito();
+  const incognitoResult = typeof window !== 'undefined' ? await detectIncognito() : null;
 
-  if (incognitoResult.isPrivate && !document.getElementById(LEAVE_INCOGNITO_MODAL_ID)) {
+  if (incognitoResult && incognitoResult.isPrivate && !document.getElementById(LEAVE_INCOGNITO_MODAL_ID)) {
     const createdRootDiv = document.createElement('div');
     document.body.appendChild(createdRootDiv);
 
