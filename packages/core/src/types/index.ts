@@ -9,7 +9,7 @@ export type {
   OnLogin,
   OnLogout,
   Credential,
-} from './QubicConnect';
+} from './QubicConnectConfig';
 
 export { BuyStatus, CurrencyForAsset } from './Asset';
 

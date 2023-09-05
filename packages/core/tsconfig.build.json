@@ -2,9 +2,6 @@
   "extends": "../../tsconfig.build.json",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "outDir": "dist",
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
-    "types": ["preact"]
+    "outDir": "dist"
   }
 }

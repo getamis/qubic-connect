@@ -1,5 +1,3 @@
-import { ComponentChild, render, VNode } from 'preact';
-import { createPortal } from 'preact/compat';
 import { EventEmitter } from 'events';
 import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
 import { showBlockerWhenIab, openExternalBrowserWhenLineIab } from '@qubic-connect/detect-iab';
@@ -14,16 +12,13 @@ import {
   WalletUser,
   BindTicketResult,
   Credential,
-} from './types/QubicConnect';
-import LoginButton, { LoginButtonProps } from './components/LoginButton';
+} from './types/QubicConnectConfig';
 import {
   ExtendedExternalProvider,
   ExtendedExternalProviderMethod,
   ProviderOptions,
 } from './types/ExtendedExternalProvider';
 import { SdkFetchError } from './types';
-import LoginModal, { LoginModalProps } from './components/LoginModal/LoginModal';
-import App from './components/App';
 import { createRequestGraphql, SdkRequestGraphql } from './utils/graphql';
 import { API_URL, AUTH_REDIRECT_URL, MARKET_API_URL } from './constants/backend';
 import { createFetch, SdkFetch } from './utils/sdkFetch';
@@ -56,9 +51,6 @@ const inapp = new InApp(
 
 export class QubicConnect {
   private readonly config: InternalQubicConnectConfig;
-  private rootDiv: HTMLDivElement;
-  private children: Array<ComponentChild> = [];
-  private vNodeMap = new Map<HTMLElement, ComponentChild>();
   private authRedirectUrl: string;
   public provider: ExtendedExternalProvider | null = null;
   public address: string | null = null;
@@ -159,8 +151,6 @@ export class QubicConnect {
     });
 
     this.authRedirectUrl = authRedirectUrl;
-    this.rootDiv = document.createElement('div');
-    document.body.appendChild(this.rootDiv);
 
     if (!disableOpenExternalBrowserWhenLineIab) {
       openExternalBrowserWhenLineIab();
@@ -297,53 +287,6 @@ export class QubicConnect {
       qubicUser: this.user?.qubicUser || null,
     };
     this.handleLogin(null, user);
-  }
-
-  private forceUpdate(): void {
-    render(
-      <App
-        key="app"
-        sdkFetch={this.fetch}
-        sdkRequestGraphql={this.requestGraphql}
-        config={this.config}
-        onLogin={this.handleLogin}
-        onLogout={this.handleLogout}
-      >
-        {this.children}
-      </App>,
-      this.rootDiv,
-    );
-  }
-
-  private renderToChildren(node: VNode, element: HTMLElement) {
-    const existingVNode = this.vNodeMap.get(element);
-    if (existingVNode) {
-      this.children = this.children.map(child => {
-        if (child === existingVNode) {
-          const newVNode = createPortal(node, element);
-          this.vNodeMap.set(element, newVNode);
-          return newVNode;
-        }
-        return child;
-      });
-    } else {
-      const newVNode = createPortal(node, element);
-      this.vNodeMap.set(element, newVNode);
-      this.children = [...this.children, newVNode];
-    }
-    this.forceUpdate();
-  }
-
-  public createLoginButton(element: HTMLElement | null, props: LoginButtonProps): void {
-    if (!element) throw Error(`${element} not found`);
-
-    this.renderToChildren(<LoginButton {...props} />, element);
-  }
-
-  public createLoginModal(element: HTMLElement | null, props: LoginModalProps): void {
-    if (!element) throw Error(`${element} not found`);
-
-    this.renderToChildren(<LoginModal {...props} />, element);
   }
 
   private handleAccountsChanged(accounts: string[]) {
