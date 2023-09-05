@@ -74,6 +74,8 @@ export interface QubicUser {
 
 ### Initialize Qubic Connect
 
+In React, you should initialize it in global or context.
+
 ```ts
 import QubicConnect from '@qubic-connect/core';
 
@@ -329,7 +331,7 @@ enum CurrencyForAsset {
 
 interface AssetBuyOptionInput {
   beGift?: boolean;
-  purchaseCode?: string;
+  privateSaleCode?: string;
 }
 
 interface AssetBuyOptions {
@@ -340,31 +342,31 @@ interface AssetBuyResponse {
   assetBuy: AssetBuyInfo;
 }
 
-enum CheckoutPayType {
+enum CheckoutPaymentType {
   TAPPAY_CREDIT_CARD
   CRYPTO
   NEWEBPAY_VIRTUAL_ACCOUNT
   NO_PAY
 }
 
-enum UnavailablePayReason {
+enum UnavailablePaymentReason {
   GAS_PRICE_SURGE
   PAYMENT_LIMIT_EXCEEDED
   EXCHANGE_PRICE_FAILED
   PAYMENT_MAINTENANCE
 }
 
-type UnavailablePay {
-  type: CheckoutPayType!
-  reason: UnavailablePayReason!
+type UnavailablePayment {
+  type: CheckoutPaymentType!
+  reason: UnavailablePaymentReason!
 }
 
 interface AssetBuyInfo {
   status: BuyStatus;
   orderId: string;
   paymentUrl: string;
-  payTypes: [CheckoutPayType!]!
-  unavailablePayTypes: [UnavailablePay!]!
+  paymentTypes: [CheckoutPaymentType!]!
+  unavailablePayments: [UnavailablePayment!]!
 }
 ```
 
@@ -383,8 +385,8 @@ function giftRedeem(giftRedeemInput: GiftRedeemInput, options?: GiftRedeemOption
 
 interface GiftRedeemInput {
   requestId: string;
-  // valid giftTicket should be `^[A-HJ-NP-Z]{8}$`
-  giftTicket: string;
+  // valid giftCode should be `^[A-HJ-NP-Z]{8}$`
+  giftCode: string;
   payCallback: PayCallbackInput;
 }
 

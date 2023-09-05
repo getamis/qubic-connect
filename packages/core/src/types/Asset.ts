@@ -4,31 +4,31 @@ export enum BuyStatus {
   FAILED = 'FAILED',
 }
 
-enum CheckoutPayType {
+enum CheckoutPaymentType {
   TAPPAY_CREDIT_CARD = 'TAPPAY_CREDIT_CARD',
   CRYPTO = 'CRYPTO',
   NEWEBPAY_VIRTUAL_ACCOUNT = 'NEWEBPAY_VIRTUAL_ACCOUNT',
   NO_PAY = 'NO_PAY',
 }
 
-enum UnavailablePayReason {
+enum UnavailablePaymentReason {
   GAS_PRICE_SURGE = 'GAS_PRICE_SURGE',
   PAYMENT_LIMIT_EXCEEDED = 'PAYMENT_LIMIT_EXCEEDED',
   EXCHANGE_PRICE_FAILED = 'EXCHANGE_PRICE_FAILED',
   PAYMENT_MAINTENANCE = 'PAYMENT_MAINTENANCE',
 }
 
-export interface UnavailablePay {
-  type: CheckoutPayType;
-  reason: UnavailablePayReason;
+export interface UnavailablePayment {
+  type: CheckoutPaymentType;
+  reason: UnavailablePaymentReason;
 }
 
 export interface AssetBuyInfo {
   status: BuyStatus;
   orderId: string;
   paymentUrl: string;
-  payTypes: CheckoutPayType[];
-  unavailablePayTypes: UnavailablePay[];
+  paymentTypes: CheckoutPaymentType[];
+  unavailablePayments: UnavailablePayment[];
 }
 
 export enum CurrencyForAsset {
@@ -52,7 +52,7 @@ export interface PayCallbackInput {
 
 export interface AssetBuyOptionInput {
   beGift?: boolean;
-  purchaseCode?: string;
+  privateSaleCode?: string;
 }
 
 export interface AssetBuyInput {
@@ -71,8 +71,8 @@ export interface AssetBuyOptions {
 
 export interface GiftRedeemInput {
   requestId: string;
-  // valid giftTicket should be `^[A-HJ-NP-Z]{8}$`
-  giftTicket: string;
+  // valid giftCode should be `^[A-HJ-NP-Z]{8}$`
+  giftCode: string;
   payCallback: PayCallbackInput;
 }
 

@@ -1,7 +1,7 @@
 import { gql } from 'graphql-request';
 
 export const GET_ASSET_DETAIL = gql`
-  query getAsset($assetId: ID!, $purchaseCode: String) {
+  query getAsset($assetId: ID!, $privateSaleCode: String) {
     asset(assetId: $assetId) {
       id
       metadata {
@@ -17,7 +17,7 @@ export const GET_ASSET_DETAIL = gql`
         salePhases {
           mode
         }
-        variants(purchaseCode: $purchaseCode) {
+        variants(privateSaleCode: $privateSaleCode) {
           id
           available
           supply
