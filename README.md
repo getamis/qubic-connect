@@ -343,10 +343,11 @@ interface AssetBuyResponse {
 }
 
 enum CheckoutPaymentType {
-  TAPPAY_CREDIT_CARD
-  CRYPTO
-  NEWEBPAY_VIRTUAL_ACCOUNT
-  NO_PAY
+  UNSELECTED = 'UNSELECTED',
+  FREE = 'FREE',
+  CREDIT_CARD = 'CREDIT_CARD',
+  TRANSFER = 'TRANSFER',
+  CRYPTO = 'CRYPTO',
 }
 
 enum UnavailablePaymentReason {

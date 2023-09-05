@@ -5,10 +5,11 @@ export enum BuyStatus {
 }
 
 enum CheckoutPaymentType {
-  TAPPAY_CREDIT_CARD = 'TAPPAY_CREDIT_CARD',
+  UNSELECTED = 'UNSELECTED',
+  FREE = 'FREE',
+  CREDIT_CARD = 'CREDIT_CARD',
+  TRANSFER = 'TRANSFER',
   CRYPTO = 'CRYPTO',
-  NEWEBPAY_VIRTUAL_ACCOUNT = 'NEWEBPAY_VIRTUAL_ACCOUNT',
-  NO_PAY = 'NO_PAY',
 }
 
 enum UnavailablePaymentReason {
