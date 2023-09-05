@@ -17,8 +17,7 @@
     "clean": "rm -rf ./dist",
     "compile": "tsc -p tsconfig.build.json",
     "compile-umd": "rollup -c rollup.config.js",
-    "watch": "tsc -p tsconfig.build.json --watch",
-    "convert-svgs": "npx @svgr/cli --out-dir ./src/components/icons  ./src/assets/*.svg"
+    "watch": "tsc -p tsconfig.build.json --watch"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -31,7 +30,6 @@
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-replace": "^5.0.1",
     "@rollup/plugin-typescript": "^10.0.1",
-    "@svgr/cli": "^6.2.1",
     "@testing-library/jest-dom": "^5.16.4",
     "@types/crypto-js": "^4.1.1",
     "@types/uuid": "^8.3.4",
@@ -47,17 +45,12 @@
     "@qubic-connect/redirect": "^0.10.8",
     "@qubic-js/detect-inapp": "^1.4.1",
     "bignumber.js": "^9.0.2",
-    "clsx": "^1.1.1",
     "cross-fetch": "^3.1.5",
     "crypto-js": "^4.1.1",
     "graphql": "^16.5.0",
     "graphql-request": "^4.3.0",
-    "jss": "^10.9.0",
-    "jss-preset-default": "^10.9.0",
-    "preact": "^10.8.2",
     "query-string": "^7.1.1",
-    "uuid": "^8.3.2",
-    "web-vitals": "^2.1.4"
+    "uuid": "^8.3.2"
   },
   "publishConfig": {
     "access": "public"

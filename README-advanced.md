@@ -46,26 +46,3 @@ const qubicConnect = new QubicConnect({
   },
 });
 ```
-
-// 預設 style 顯示成 pop 中間
-
-```ts
-qubicConnect.createLoginModal(element: HTMLElement, {
-  methods?: Array<'metamask','walletconnect' | 'qubic'>,
-  onLogin: (
-    error: Error,
-    result: {
-      type: 'metamask' | 'walletconnect' | 'qubic',
-      address: string,
-      accessToken: string,
-      errorMessage: string,
-      provider: ExternalProvider
-    }
-  ) => void,
-  onLogout: () => void
-  titleText?: string, // default: 'Connect your wallet'
-  backdropStyle?: CSSStyle,
-  itemStyle?: CSSStyle, // each login button item
-})
-
-```

@@ -1,5 +1,5 @@
 import querystring from 'query-string';
-import { QubicConnectConfig } from './types/QubicConnect';
+import { QubicConnectConfig } from './types/QubicConnectConfig';
 import { QubicConnect } from './QubicConnect';
 
 export * from './types';

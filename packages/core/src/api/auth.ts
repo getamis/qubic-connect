@@ -1,7 +1,7 @@
 import querystring from 'query-string';
 import convertStringToHex from '../utils/convertStringToHex';
 import { SdkFetch } from '../utils/sdkFetch';
-import { Credential } from '../types/QubicConnect';
+import { Credential } from '../types/QubicConnectConfig';
 
 export interface LoginRequest {
   accountAddress: string;
