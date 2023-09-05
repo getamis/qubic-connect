@@ -18,8 +18,8 @@ export const BUY_ASSET = gql`
       status
       orderId
       paymentUrl
-      payTypes
-      unavailablePayTypes {
+      paymentTypes
+      unavailablePayments {
         type
         reason
       }
@@ -44,12 +44,12 @@ export interface GiftRedeemResponse {
 }
 
 export const GIFT_REDEEM = gql`
-  mutation GiftRedeem($requestId: String!, $giftTicket: String!, $payCallback: PayCallbackInput!) {
-    giftRedeem(input: { requestId: $requestId, giftTicket: $giftTicket, payCallback: $payCallback }) {
+  mutation GiftRedeem($requestId: String!, $giftCode: String!, $payCallback: PayCallbackInput!) {
+    giftRedeem(input: { requestId: $requestId, giftCode: $giftCode, payCallback: $payCallback }) {
       status
       orderId
       paymentUrl
-      payTypes
+      paymentTypes
     }
   }
 `;

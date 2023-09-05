@@ -226,12 +226,12 @@ async function main() {
       throw new Error('no buyable asset');
     }
 
-    let purchaseCode = prompt('Purchase code?');
+    let privateSaleCode = prompt('Private sale code?');
     const response = await qubicConnect.marketRequestGraphql<{ asset: AssetDetail }>({
       query: GET_ASSET_DETAIL,
       variables: {
         assetId,
-        ...(purchaseCode && { purchaseCode }),
+        ...(privateSaleCode && { privateSaleCode }),
       },
     });
 
@@ -267,7 +267,7 @@ async function main() {
         requestId: uuidv4(),
         test,
         option: {
-          ...(purchaseCode && { purchaseCode }),
+          ...(privateSaleCode && { privateSaleCode }),
           ...(beGift && { beGift: true }),
         },
       };
@@ -283,15 +283,15 @@ async function main() {
   }
 
   async function giftRedeem(locale?: PaymentLocale) {
-    let giftTicket = prompt('Please enter giftTicket', '') || '';
+    let giftCode = prompt('Please enter giftCode', '') || '';
 
-    if (!giftTicket) {
+    if (!giftCode) {
       throw new Error('no gift ticket');
     }
 
     const giftRedeemInput = {
       requestId: uuidv4(),
-      giftTicket,
+      giftCode,
       payCallback: {
         failureRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
         pendingRedirectUrl: 'https://creator-demo.dev.qubic.market/orders',
