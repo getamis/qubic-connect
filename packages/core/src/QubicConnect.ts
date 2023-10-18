@@ -676,6 +676,7 @@ export class QubicConnect {
       url: `${walletUrl}/verify-user-address`,
       query: {
         nextPath,
+        provider: this.user.qubicUser?.provider,
         userAddress: this.user.address,
       },
     });
