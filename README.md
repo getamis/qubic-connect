@@ -1,5 +1,10 @@
 # Qubic Connect SDK
 
+## Prerequisites
+
+Before getting started, you need to setup a project for allow domain, api key/secret you need and other stuff.
+https://admin.qubic.market/developer
+
 ## Installation
 
 ### Install from NPM
@@ -89,6 +94,11 @@ const qubicConnect = new QubicConnect({
 ### Direct sign in without wallet provider
 
 Login with redirect
+
+First of all, you need to add domain in https://admin.qubic.market/developer.
+This setting is not only for api CORS domains, but also allow list for redirect domains.
+
+For example, you can add `localhost:3000` for developing purpose.
 
 ```ts
 function loginWithRedirect(options?: {
