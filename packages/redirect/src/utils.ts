@@ -15,6 +15,7 @@ export interface RequestConnectToPassLogin {
   walletType?: LoginRedirectWalletType;
   qubicSignInProvider?: QubicSignInProvider;
   redirectUrl: string;
+  apiKey: string;
   dataString: string;
   action: 'login';
 }
@@ -23,6 +24,7 @@ export interface RequestConnectToPassBind {
   walletType?: LoginRedirectWalletType;
   qubicSignInProvider?: QubicSignInProvider;
   redirectUrl: string;
+  apiKey: string;
   dataString: string;
   clientTicket: string;
   action: 'bind';
@@ -77,6 +79,7 @@ export function createUrlRequestConnectToPass(url: string, options: RequestConne
           walletType: options.walletType,
           qubicSignInProvider: options?.qubicSignInProvider,
           redirectUrl: encodeURIComponent(options.redirectUrl),
+          apiKey: options.apiKey,
           dataString: encodeURIComponent(options.dataString),
           action: options.action,
         }
@@ -84,6 +87,7 @@ export function createUrlRequestConnectToPass(url: string, options: RequestConne
           walletType: options.walletType,
           qubicSignInProvider: options?.qubicSignInProvider,
           redirectUrl: encodeURIComponent(options.redirectUrl),
+          apiKey: options.apiKey,
           dataString: encodeURIComponent(options.dataString),
           clientTicket: options.clientTicket,
           action: 'bind',
@@ -164,6 +168,7 @@ export function getRequestConnectToPass(url: string): RequestConnectToPass | und
         walletType: query.walletType as LoginRedirectWalletType,
         qubicSignInProvider: query.qubicSignInProvider as QubicSignInProvider,
         redirectUrl: decodeURIComponent(query.redirectUrl),
+        apiKey: query.apiKey,
         dataString: decodeURIComponent(query.dataString),
         action: 'login',
       }
@@ -171,6 +176,7 @@ export function getRequestConnectToPass(url: string): RequestConnectToPass | und
         walletType: query.walletType as LoginRedirectWalletType,
         qubicSignInProvider: query.qubicSignInProvider as QubicSignInProvider,
         redirectUrl: decodeURIComponent(query.redirectUrl),
+        apiKey: query.apiKey,
         dataString: decodeURIComponent(query.dataString),
         clientTicket: query.clientTicket,
         action: 'bind',

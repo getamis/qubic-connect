@@ -398,6 +398,7 @@ export class QubicConnect {
       walletType: options?.walletType,
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,
+      apiKey: this.config.key,
       dataString,
       action: 'login',
     });
@@ -423,6 +424,7 @@ export class QubicConnect {
       walletType: options?.walletType,
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,
+      apiKey: this.config.key,
       dataString,
       clientTicket: response.clientTicketIssue.ticket,
       action: 'bind',
