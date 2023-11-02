@@ -541,7 +541,7 @@ export class QubicConnect {
           deferred.reject(error);
         });
       }
-      throw error;
+      console.error(error);
     }
   }
 
