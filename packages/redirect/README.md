@@ -17,7 +17,7 @@ entryspacing 1.0
 note over client, wallet: loginWithRedirect
 
 client->sdk:loginWithRedirect\n
-	sdk->auth:navigate to auth web\n{\n  action: 'login' \n  walletType\n  qubicSignInProvider\n  redirectUrl\n  dataString\n\n}
+	sdk->auth:navigate to auth web\n{\n  action: 'login' \n  walletType\n  qubicSignInProvider\n  redirectUrl\n  apiKey\n  dataString\n\n}
 
 	alt Qubic Wallet and has redirectUrl
 		auth->wallet:navigate to wallet\n{\n  ticketRedirectUrl,\n  provider: 'facebook' | 'google' | 'apple' | 'yahoo'\n}
@@ -43,7 +43,7 @@ note over client, adminApi: bindWithRedirect
 client->sdk:bindWithRedirect\n
 sdk->adminApi:clientTicketIssue\n
 sdk<-adminApi:response { ticket, expiredAt }
-	sdk->auth:navigate to auth web\n{\n  action: 'bind'\n  clientTicket\n  walletType\n  qubicSignInProvider\n  redirectUrl\n  dataString\n}\n\n
+	sdk->auth:navigate to auth web\n{\n  action: 'bind'\n  clientTicket\n  walletType\n  qubicSignInProvider\n  redirectUrl\n  apiKey\n  dataString\n}\n\n
 
 
 else action:bind

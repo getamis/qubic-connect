@@ -27,6 +27,7 @@ describe('utils', () => {
       walletType: 'qubic',
       qubicSignInProvider: 'google',
       redirectUrl: 'https://www.mydapp.com',
+      apiKey: 'apiKey123',
       dataString: JSON.stringify({ foo: 1, bar: 2 }),
     };
     const targetUrl = createUrlRequestConnectToPass('https://pass.qubic.app', RequestConnectToPass);
@@ -41,6 +42,7 @@ describe('utils', () => {
       walletType: 'qubic',
       qubicSignInProvider: 'google',
       redirectUrl: 'https://www.mydapp.com',
+      apiKey: 'apiKey123',
       dataString: JSON.stringify({ foo: 1, bar: 2 }),
       clientTicket: 'mockClientTicket',
       action: 'bind',
@@ -197,6 +199,7 @@ describe('real world', () => {
       walletType: 'qubic',
       qubicSignInProvider: 'google',
       redirectUrl: url,
+      apiKey: 'apiKey123',
       dataString: JSON.stringify({ foo: 1, bar: 2 }),
     });
 
@@ -277,6 +280,7 @@ describe('real world', () => {
       walletType: 'qubic',
       qubicSignInProvider: 'google',
       redirectUrl: url,
+      apiKey: 'apiKey123',
       dataString: JSON.stringify({ foo: 1, bar: 2 }),
     });
 
@@ -336,6 +340,7 @@ describe('real world', () => {
       walletType: 'qubic',
       qubicSignInProvider: 'google',
       redirectUrl: url,
+      apiKey: 'apiKey123',
       dataString: JSON.stringify({ foo: 1, bar: 2 }),
       clientTicket: 'mockClientTicket',
       action: 'bind',
