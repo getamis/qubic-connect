@@ -1,6 +1,6 @@
 {
   "name": "@qubic-connect/detect-iab",
-  "version": "0.11.1",
+  "version": "1.0.0",
   "description": "when detecting environment in iab, show blocking",
   "author": "Kevin.Wu <kevin.wu@maicoin.com>",
   "homepage": "https://github.com/getamis/qubic-creator-sdk/tree/main/packages/detect-iab#readme",
