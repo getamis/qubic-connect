@@ -91,7 +91,7 @@ export class QubicConnect {
   public requestGraphql: SdkRequestGraphql;
   public marketRequestGraphql: SdkRequestGraphql;
 
-  private readonly shouldAutoLoginInWalletIab: true;
+  private readonly shouldAutoLoginInWalletIab: boolean = true;
   constructor(config: QubicConnectConfig) {
     const {
       name,
@@ -105,8 +105,8 @@ export class QubicConnect {
       iabRedirectUrl = window.location.href,
       shouldAlwaysShowCopyUI = false,
       disableOpenExternalBrowserWhenLineIab = false,
-      enableAutoLoginInWalletIab = true,
       trackGaSettings = [],
+      autoLoginInWalletIabType = 'enable',
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -127,8 +127,8 @@ export class QubicConnect {
       iabRedirectUrl,
       shouldAlwaysShowCopyUI,
       disableOpenExternalBrowserWhenLineIab,
-      enableAutoLoginInWalletIab,
       trackGaSettings,
+      autoLoginInWalletIabType,
     };
 
     QubicConnect.checkProviderOptions(config?.providerOptions);
@@ -159,7 +159,13 @@ export class QubicConnect {
       openExternalBrowserWhenLineIab();
     }
 
-    this.shouldAutoLoginInWalletIab = enableAutoLoginInWalletIab && window.ethereum && inapp.isInApp;
+    this.shouldAutoLoginInWalletIab = (function detect(): boolean {
+      if (autoLoginInWalletIabType === 'disable') return false;
+      if (autoLoginInWalletIabType === 'qubic-only') {
+        return inapp.isInApp && !!window.ethereum?.isQubic;
+      }
+      return inapp.isInApp && !!window.ethereum;
+    })();
 
     if (!disableIabWarning && !this.shouldAutoLoginInWalletIab) {
       showBlockerWhenIab({
@@ -174,7 +180,7 @@ export class QubicConnect {
     initGaTrack(this.config.trackGaSettings);
 
     if (!this.user && this.shouldAutoLoginInWalletIab) {
-      this.loginWithWallet(window.ethereum.isQubic ? 'qubic' : 'metamask');
+      this.loginWithWallet(window.ethereum?.isQubic ? 'qubic' : 'metamask');
     }
   }
 

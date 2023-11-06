@@ -1,6 +1,8 @@
+import { ExtendedExternalProvider } from './ExtendedExternalProvider';
+
 declare global {
   interface Window {
-    ethereum: ExternalProvider;
+    ethereum?: ExtendedExternalProvider;
   }
 }
 
