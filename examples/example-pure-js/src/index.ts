@@ -45,6 +45,10 @@ async function main() {
       icons: ['https://my-dapp.com/logo.png'],
     },
   });
+  const searchParams = new URLSearchParams(window.location.search);
+
+  const autoLoginInWalletIabType = (searchParams.get('autoLoginInWalletIabType') ??
+    'qubic-only') as QubicConnectConfig['autoLoginInWalletIabType'];
 
   const SDK_CONFIG: QubicConnectConfig = {
     name: 'Qubic Creator', // a display name for future usage
@@ -56,7 +60,8 @@ async function main() {
     authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
     iabRedirectUrl: '', // optional
     shouldAlwaysShowCopyUI: false, // optional
-    trackGaSettings: ['G-W8EB8ZK5CV'],
+    trackGaSettings: ['G-W8EB8ZK5CV'], // optional
+    autoLoginInWalletIabType, // optional. options: enable, disable, qubic-only. default: enable
     providerOptions: {
       qubic: {
         provider: new QubicProvider({

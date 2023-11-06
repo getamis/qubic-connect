@@ -13,7 +13,7 @@ export interface QubicConnectConfig {
   shouldAlwaysShowCopyUI?: boolean;
   disableIabWarning?: boolean;
   disableOpenExternalBrowserWhenLineIab?: boolean;
-  enableAutoLoginInWalletIab?: boolean;
+  autoLoginInWalletIabType?: 'enable' | 'qubic-only' | 'disable';
 
   trackGaSettings?: Array<string>;
 
