@@ -162,9 +162,9 @@ export class QubicConnect {
     this.shouldAutoLoginInWalletIab = (function detect(): boolean {
       if (autoLoginInWalletIabType === 'disable') return false;
       if (autoLoginInWalletIabType === 'qubic-only') {
-        return inapp.isInApp && window.ethereum.isQubic;
+        return inapp.isInApp && !!window.ethereum?.isQubic;
       }
-      return inapp.isInApp && window.ethereum;
+      return inapp.isInApp && !!window.ethereum;
     })();
 
     if (!disableIabWarning && !this.shouldAutoLoginInWalletIab) {
@@ -180,7 +180,7 @@ export class QubicConnect {
     initGaTrack(this.config.trackGaSettings);
 
     if (!this.user && this.shouldAutoLoginInWalletIab) {
-      this.loginWithWallet(window.ethereum.isQubic ? 'qubic' : 'metamask');
+      this.loginWithWallet(window.ethereum?.isQubic ? 'qubic' : 'metamask');
     }
   }
 
