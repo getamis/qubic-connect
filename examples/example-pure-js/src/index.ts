@@ -56,6 +56,7 @@ async function main() {
     authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
     iabRedirectUrl: '', // optional
     shouldAlwaysShowCopyUI: false, // optional
+    trackGaSettings: ['G-W8EB8ZK5CV'],
     providerOptions: {
       qubic: {
         provider: new QubicProvider({

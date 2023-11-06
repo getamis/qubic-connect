@@ -15,7 +15,7 @@ export const GET_ASSET_DETAIL = gql`
           expiresDays
         }
         salePhases {
-          mode
+          saleMode
         }
         variants(privateSaleCode: $privateSaleCode) {
           id
@@ -53,7 +53,7 @@ export interface AssetDetail {
       expiredDays: string;
     } | null;
     salePhases: {
-      mode: string;
+      saleMode: string;
     };
     variants: Array<AssetVariant>;
   };

@@ -27,7 +27,6 @@ const qubicConnect = QubicConnect.initialize({
   name: 'Display Name', // will show up in display
   key: 'API_KEY',
   secret: 'API_SECRET',
-  enableAutoLoginInWalletIab: false // default true, it will auto login when url opened in Wallet dApp Browser which provides window.ethereum
 });
 </script>
 ```
@@ -88,6 +87,8 @@ const qubicConnect = new QubicConnect({
   name: 'Display Name', // will show up in display
   key: 'API_KEY',
   secret: 'API_SECRET',
+  enableAutoLoginInWalletIab: false // default true, it will auto login when url opened in Wallet dApp Browser which provides window.ethereum
+  trackGaSettings: [] // default: [], put measurement ids here to track addPaymentInfo event
 });
 ```
 
