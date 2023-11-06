@@ -32,6 +32,7 @@ import { buyAsset, AssetBuyResponse, giftRedeem, GiftRedeemResponse } from './ap
 import { addLocaleToUrl } from './utils/addLocaleToUrl';
 import { clientTicketIssue } from './api/clientTicket';
 import { PASS_URL, WALLET_URL } from './constants/config';
+import { addTrackSettingsToUrl, initGaTrack } from './utils/addTrackSettingsToUrl';
 
 const DEFAULT_SERVICE_NAME = 'qubic-creator';
 
@@ -105,6 +106,7 @@ export class QubicConnect {
       shouldAlwaysShowCopyUI = false,
       disableOpenExternalBrowserWhenLineIab = false,
       enableAutoLoginInWalletIab = true,
+      trackGaSettings = [],
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -126,6 +128,7 @@ export class QubicConnect {
       shouldAlwaysShowCopyUI,
       disableOpenExternalBrowserWhenLineIab,
       enableAutoLoginInWalletIab,
+      trackGaSettings,
     };
 
     QubicConnect.checkProviderOptions(config?.providerOptions);
@@ -168,6 +171,7 @@ export class QubicConnect {
     this.handleRedirectResult();
     this.hydrateUser();
     this.onAuthStateChanged(QubicConnect.persistUser);
+    initGaTrack(this.config.trackGaSettings);
 
     if (!this.user && this.shouldAutoLoginInWalletIab) {
       this.loginWithWallet(window.ethereum.isQubic ? 'qubic' : 'metamask');
@@ -595,6 +599,7 @@ export class QubicConnect {
       if (options?.locale) {
         paymentUrl = addLocaleToUrl(response.assetBuy.paymentUrl, options.locale);
       }
+      paymentUrl = addTrackSettingsToUrl(paymentUrl);
 
       return {
         ...response,
@@ -625,6 +630,7 @@ export class QubicConnect {
       if (options?.locale) {
         paymentUrl = addLocaleToUrl(response.giftRedeem.paymentUrl, options.locale);
       }
+      paymentUrl = addTrackSettingsToUrl(paymentUrl);
 
       return {
         ...response,

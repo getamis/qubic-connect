@@ -15,6 +15,8 @@ export interface QubicConnectConfig {
   disableOpenExternalBrowserWhenLineIab?: boolean;
   enableAutoLoginInWalletIab?: boolean;
 
+  trackGaSettings?: Array<string>;
+
   // # fast login
   // authRedirectUrl where have different type of wallet
   authRedirectUrl?: string;
