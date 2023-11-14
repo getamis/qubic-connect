@@ -1,4 +1,4 @@
-const { gtag } = window as any;
+const { gtag } = globalThis as any;
 
 function getClientId(tagId: string): Promise<string> {
   return new Promise(resolve => {
