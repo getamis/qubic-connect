@@ -602,10 +602,12 @@ export class QubicConnect {
 
       let { paymentUrl } = response.assetBuy;
 
-      if (options?.locale) {
-        paymentUrl = addLocaleToUrl(response.assetBuy.paymentUrl, options.locale);
+      if (paymentUrl) {
+        if (options?.locale) {
+          paymentUrl = addLocaleToUrl(response.assetBuy.paymentUrl, options.locale);
+        }
+        paymentUrl = addTrackSettingsToUrl(paymentUrl);
       }
-      paymentUrl = addTrackSettingsToUrl(paymentUrl);
 
       return {
         ...response,
@@ -633,10 +635,12 @@ export class QubicConnect {
 
       let { paymentUrl } = response.giftRedeem;
 
-      if (options?.locale) {
-        paymentUrl = addLocaleToUrl(response.giftRedeem.paymentUrl, options.locale);
+      if (paymentUrl) {
+        if (options?.locale) {
+          paymentUrl = addLocaleToUrl(response.giftRedeem.paymentUrl, options.locale);
+        }
+        paymentUrl = addTrackSettingsToUrl(paymentUrl);
       }
-      paymentUrl = addTrackSettingsToUrl(paymentUrl);
 
       return {
         ...response,
