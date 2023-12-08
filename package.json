@@ -8,7 +8,8 @@
     "examples/*"
   ],
   "dependencies": {
-    "husky": "^8.0.1"
+    "husky": "^8.0.1",
+    "patch-package": "^8.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.5",
@@ -35,7 +36,8 @@
     "release": "npm run build && lerna publish --force-publish",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:tsc": "yarn workspace @qubic-connect/redirect tsc && yarn workspace @qubic-connect/detect-iab tsc && yarn workspace @qubic-connect/core tsc"
+    "lint:tsc": "yarn workspace @qubic-connect/redirect tsc && yarn workspace @qubic-connect/detect-iab tsc && yarn workspace @qubic-connect/core tsc",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
