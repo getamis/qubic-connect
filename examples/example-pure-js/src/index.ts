@@ -58,6 +58,7 @@ async function main() {
     apiUrl: API_URL, // optional
     marketApiUrl: MARKET_API_URL,
     authRedirectUrl: AUTH_REDIRECT_URL, // optional, for debug
+    disableIabWarning: false, // optional
     iabRedirectUrl: '', // optional
     shouldAlwaysShowCopyUI: false, // optional
     trackGaSettings: ['G-W8EB8ZK5CV'], // optional

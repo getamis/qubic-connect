@@ -1,6 +1,6 @@
 const en = {
-  alertIabSentence1: 'You are using a third-party browser',
-  alertIabSentence2: 'To have a better experience, open the website in system browser.',
+  alertIabSentence1: 'You are using an in-app browser.',
+  alertIabSentence2: 'Some functions will be affected. To have a better experience, tap “⋯” and choose “open in system browser”.',
   alertIncognitoSentence1: 'You are now in private browsing mode',
   alertIncognitoSentence2: 'To have a better experience, open the website in normal browsing mode.',
   hintPart1: 'Tap "',
@@ -17,8 +17,8 @@ const en = {
 };
 
 const zhTW = {
-  alertIabSentence1: '您正在使用第三方瀏覽器',
-  alertIabSentence2: '為了享有更完整的服務，請以系統瀏覽器開啟網頁',
+  alertIabSentence1: '您正在使用其他應用程式的瀏覽器',
+  alertIabSentence2: '可能會影響部分功能，為了享有更完整的服務，請點擊「⋯」，並選擇「 以瀏覽器開啟」。',
   alertIncognitoSentence1: '您正在使用私密瀏覽模式',
   alertIncognitoSentence2: '為了享有更完整的服務，請在瀏覽器以一般模式開啟網頁',
   hintPart1: '點擊「',

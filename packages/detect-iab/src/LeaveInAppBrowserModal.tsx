@@ -4,7 +4,6 @@ import InApp, { InAppBrowser } from '@qubic-js/detect-inapp';
 
 import HorizontalMoreOptions from './icons/HorizontalMoreOptions';
 import VerticalMoreOptions from './icons/VerticalMoreOptions';
-import ExportMoreOptions from './icons/ExportMoreOptions';
 import { LEAVE_IAB_MODAL_ID } from './constant';
 import { getLocaleStrings } from './locale';
 import { classes } from './styles';
@@ -31,27 +30,15 @@ interface ModalProps {
 function getHintImage(platform: Platform, browser: InAppBrowser) {
   if (platform === 'ios') {
     switch (browser) {
-      case 'facebook':
-        return <HorizontalMoreOptions className={classes.icon} />;
       case 'instagram':
         return <HorizontalMoreOptions className={classes.icon} />;
-      case 'line':
-        return <VerticalMoreOptions className={classes.icon} />;
-      case 'messenger':
-        return <ExportMoreOptions className={classes.exportMoreIcon} />;
       default:
     }
   }
 
   if (platform === 'android') {
     switch (browser) {
-      case 'facebook':
-        return <HorizontalMoreOptions className={classes.icon} />;
       case 'instagram':
-        return <VerticalMoreOptions className={classes.icon} />;
-      case 'line':
-        return <VerticalMoreOptions className={classes.icon} />;
-      case 'messenger':
         return <VerticalMoreOptions className={classes.icon} />;
       default:
     }
@@ -63,27 +50,15 @@ function getHintImage(platform: Platform, browser: InAppBrowser) {
 function getHintBrowserString(platform: Platform, browser: InAppBrowser) {
   if (platform === 'ios') {
     switch (browser) {
-      case 'facebook':
-        return localeStrings.openInSystemBrowser; // open in system browser
       case 'instagram':
         return localeStrings.openInSystemBrowser; // open in system browser
-      case 'line':
-        return localeStrings.openInBrowser; // open in browser
-      case 'messenger':
-        return localeStrings.openInSafari; // open in safari
       default:
     }
   }
 
   if (platform === 'android') {
     switch (browser) {
-      case 'facebook':
-        return localeStrings.openInSystemBrowser; // open in system browser
       case 'instagram':
-        return localeStrings.openInChrome; // Open in Chrome
-      case 'line':
-        return localeStrings.openInDefaultBrowser; // open in your default browser
-      case 'messenger':
         return localeStrings.openInChrome; // Open in Chrome
       default:
     }
@@ -122,27 +97,15 @@ function getAndroidFacebookBrowser(userAgent: string): InAppBrowser {
 function getArrowPosition(platform: Platform, browser: InAppBrowser) {
   if (platform === 'ios') {
     switch (browser) {
-      case 'facebook':
-        return 'bottom';
       case 'instagram':
         return 'top';
-      case 'line':
-        return 'bottom';
-      case 'messenger':
-        return 'bottom';
       default:
     }
   }
 
   if (platform === 'android') {
     switch (browser) {
-      case 'facebook':
-        return 'top';
       case 'instagram':
-        return 'top';
-      case 'line':
-        return 'bottom';
-      case 'messenger':
         return 'top';
       default:
     }
