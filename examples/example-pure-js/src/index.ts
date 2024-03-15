@@ -35,7 +35,7 @@ async function main() {
   const wcProvider = await EthereumProvider.init({
     projectId: '0454e00195752e67920ca71728e21b30',
     showQrModal: true,
-    chains: [1, 5, 137, 80001, 56, 97],
+    chains: [1, 17000, 137, 80001, 56, 97],
     methods: ['eth_sendTransaction', 'personal_sign'],
     events: ['chainChanged', 'accountsChanged'],
     metadata: {
