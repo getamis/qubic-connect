@@ -75,9 +75,6 @@ export class QubicConnect {
         // user did not install metamask
         return;
       }
-      if (!providerOptions.metamask.provider.isMetaMask) {
-        throw Error('metamask only accept MetaMask provider');
-      }
     }
 
     if (providerOptions.walletconnect) {
@@ -194,11 +191,14 @@ export class QubicConnect {
         provider,
         ...restUser
       } = user;
+
+      // do not saved sensitive user data
+      restUser.qubicUser = null;
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(restUser));
     }
   }
 
-  private hydrateUser() {
+  private async hydrateUser() {
     const saved = localStorage.getItem(USER_STORAGE_KEY);
     if (!saved) return;
     try {
@@ -211,8 +211,14 @@ export class QubicConnect {
       if (QubicConnect.ifTokenExpired(user.expiredAt)) {
         this.handleLogout(null);
       } else {
+        // login again to get qubicUser data if exists
+        const {
+          me: { qubicUser },
+        } = await getMe(this.marketRequestGraphql);
+
         this.handleLogin(null, {
           ...user,
+          qubicUser,
           provider,
         });
       }
