@@ -75,9 +75,6 @@ export class QubicConnect {
         // user did not install metamask
         return;
       }
-      if (!providerOptions.metamask.provider.isMetaMask) {
-        throw Error('metamask only accept MetaMask provider');
-      }
     }
 
     if (providerOptions.walletconnect) {
