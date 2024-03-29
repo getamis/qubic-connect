@@ -1,20 +1,9 @@
 import InApp from '@qubic-js/detect-inapp';
 import { render } from 'preact';
-import { detectIncognito } from 'detectincognitojs';
-import { LEAVE_IAB_MODAL_ID, LEAVE_INCOGNITO_MODAL_ID } from './constant';
+import { LEAVE_IAB_MODAL_ID } from './constant';
 import LeaveInAppBrowserModal, { ShowBlockerOptions } from './LeaveInAppBrowserModal';
-import LeaveIncognitoBrowserModal from './LeaveIncognitoBrowserModal';
 
 export async function showBlockerWhenIab(options?: ShowBlockerOptions): Promise<void> {
-  const incognitoResult = typeof window !== 'undefined' ? await detectIncognito() : null;
-
-  if (incognitoResult && incognitoResult.isPrivate && !document.getElementById(LEAVE_INCOGNITO_MODAL_ID)) {
-    const createdRootDiv = document.createElement('div');
-    document.body.appendChild(createdRootDiv);
-
-    render(<LeaveIncognitoBrowserModal browserName={incognitoResult.browserName} />, createdRootDiv);
-    return;
-  }
   const inapp = new InApp(navigator.userAgent || navigator.vendor || (window as any).opera);
 
   if (inapp.isInApp && !document.getElementById(LEAVE_IAB_MODAL_ID)) {

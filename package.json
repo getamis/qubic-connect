@@ -8,7 +8,8 @@
     "examples/*"
   ],
   "dependencies": {
-    "husky": "^8.0.1"
+    "husky": "^8.0.1",
+    "patch-package": "^8.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.5",
@@ -21,7 +22,7 @@
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-preact": "^1.3.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "lerna": "^5.1.8",
@@ -29,13 +30,13 @@
     "tslib": "^2.6.0"
   },
   "scripts": {
-    "deploy:payment:dev": "yarn workspace @qubic-connect/payment-form-web deploy:dev",
     "build": "lerna run build --scope={'@qubic-connect/redirect,@qubic-connect/detect-iab,@qubic-connect/core'}",
     "watch": "lerna run watch --scope={'@qubic-connect/redirect,@qubic-connect/detect-iab,@qubic-connect/core'}",
     "release": "npm run build && lerna publish --force-publish",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:tsc": "yarn workspace @qubic-connect/redirect tsc && yarn workspace @qubic-connect/detect-iab tsc && yarn workspace @qubic-connect/core tsc"
+    "lint:tsc": "yarn workspace @qubic-connect/redirect tsc && yarn workspace @qubic-connect/detect-iab tsc && yarn workspace @qubic-connect/core tsc",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",

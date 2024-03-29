@@ -1,6 +1,6 @@
 {
   "name": "@qubic-connect/detect-iab",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "when detecting environment in iab, show blocking",
   "author": "Kevin.Wu <kevin.wu@maicoin.com>",
   "homepage": "https://github.com/getamis/qubic-creator-sdk/tree/main/packages/detect-iab#readme",
@@ -31,7 +31,6 @@
     "@ethersproject/providers": "^5.6.8",
     "@qubic-js/detect-inapp": "^1.4.1",
     "clsx": "^1.1.1",
-    "detectincognitojs": "^1.3.0",
     "jss": "^10.9.0",
     "jss-preset-default": "^10.9.0",
     "preact": "^10.8.2"
