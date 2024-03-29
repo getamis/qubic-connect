@@ -9,4 +9,5 @@ export enum QubicUserProvider {
 export interface QubicUser {
   provider: QubicUserProvider;
   email: string;
+  phone: string | null;
 }
