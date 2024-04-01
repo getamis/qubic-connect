@@ -89,6 +89,7 @@ export class QubicConnect {
   public marketRequestGraphql: SdkRequestGraphql;
 
   private readonly shouldAutoLoginInWalletIab: boolean = true;
+  private isUserReady = false;
   constructor(config: QubicConnectConfig) {
     const {
       name,
@@ -172,13 +173,18 @@ export class QubicConnect {
     }
 
     this.handleRedirectResult();
-    this.hydrateUser();
-    this.onAuthStateChanged(QubicConnect.persistUser);
     initGaTrack(this.config.trackGaSettings);
+    this.hydrateUser()
+      .then(() => {
+        this.onAuthStateChanged(QubicConnect.persistUser);
 
-    if (!this.user && this.shouldAutoLoginInWalletIab) {
-      this.loginWithWallet(window.ethereum?.isQubic ? 'qubic' : 'metamask');
-    }
+        if (!this.user && this.shouldAutoLoginInWalletIab) {
+          this.loginWithWallet(window.ethereum?.isQubic ? 'qubic' : 'metamask');
+        }
+      })
+      .finally(() => {
+        this.isUserReady = true;
+      });
   }
 
   private static persistUser(user: WalletUser | null) {
@@ -454,9 +460,8 @@ export class QubicConnect {
     // get result immediately when bind this event
     // if everything is ready
     if (
-      this.user ||
-      typeof this.cachedRedirectResult !== 'undefined' ||
-      typeof this.cachedRedirectError !== 'undefined'
+      this.isUserReady &&
+      (this.user || typeof this.cachedRedirectResult !== 'undefined' || typeof this.cachedRedirectError !== 'undefined')
     ) {
       callback(this.user, this.cachedRedirectError);
     }
