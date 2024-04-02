@@ -89,6 +89,7 @@ export class QubicConnect {
   public marketRequestGraphql: SdkRequestGraphql;
 
   private readonly shouldAutoLoginInWalletIab: boolean = true;
+  private isUserReady = false;
   constructor(config: QubicConnectConfig) {
     const {
       name,
@@ -172,13 +173,21 @@ export class QubicConnect {
     }
 
     this.handleRedirectResult();
-    this.hydrateUser();
-    this.onAuthStateChanged(QubicConnect.persistUser);
     initGaTrack(this.config.trackGaSettings);
+    // when state changed, persist user
+    this.onAuthStateChanged(QubicConnect.persistUser);
+    // hydrateUser will trigger handleLogin/handleLogout
+    this.hydrateUser().then(hasSavedUser => {
+      this.isUserReady = true;
+      // no stored user and no redirect result or error
+      if (!hasSavedUser && !this.hasRedirectResult) {
+        this.handleLogout(null);
+      }
 
-    if (!this.user && this.shouldAutoLoginInWalletIab) {
-      this.loginWithWallet(window.ethereum?.isQubic ? 'qubic' : 'metamask');
-    }
+      if (!this.user && this.shouldAutoLoginInWalletIab) {
+        this.loginWithWallet(window.ethereum?.isQubic ? 'qubic' : 'metamask');
+      }
+    });
   }
 
   private static persistUser(user: WalletUser | null) {
@@ -198,9 +207,9 @@ export class QubicConnect {
     }
   }
 
-  private async hydrateUser() {
+  private async hydrateUser(): Promise<boolean> {
     const saved = localStorage.getItem(USER_STORAGE_KEY);
-    if (!saved) return;
+    if (!saved) return false;
     try {
       const user = JSON.parse(saved) as WalletUser;
       setAccessToken(user.accessToken);
@@ -209,23 +218,25 @@ export class QubicConnect {
         provider.enable();
       }
       if (QubicConnect.ifTokenExpired(user.expiredAt)) {
-        this.handleLogout(null);
-      } else {
-        // login again to get qubicUser data if exists
-        const {
-          me: { qubicUser },
-        } = await getMe(this.marketRequestGraphql);
-
-        this.handleLogin(null, {
-          ...user,
-          qubicUser,
-          provider,
-        });
+        return false;
       }
+      // login again to get qubicUser data if exists
+      const {
+        me: { qubicUser },
+      } = await getMe(this.marketRequestGraphql);
+
+      this.handleLogin(null, {
+        ...user,
+        qubicUser,
+        provider,
+      });
+      return true;
     } catch (error) {
       // ignore error
-      console.warn('can not recover user from localStorage');
+      console.warn('hydrate user failed');
+      console.warn(error);
     }
+    return false;
   }
 
   private handleUserPurge() {
@@ -368,7 +379,9 @@ export class QubicConnect {
 
   public async logout(): Promise<void> {
     try {
-      await logout(this.fetch);
+      if (this.accessToken) {
+        await logout(this.fetch);
+      }
       this.handleLogout(null);
     } catch (error) {
       if (error instanceof Error) {
@@ -454,9 +467,8 @@ export class QubicConnect {
     // get result immediately when bind this event
     // if everything is ready
     if (
-      this.user ||
-      typeof this.cachedRedirectResult !== 'undefined' ||
-      typeof this.cachedRedirectError !== 'undefined'
+      this.isUserReady &&
+      (this.user || typeof this.cachedRedirectResult !== 'undefined' || typeof this.cachedRedirectError !== 'undefined')
     ) {
       callback(this.user, this.cachedRedirectError);
     }
@@ -497,6 +509,7 @@ export class QubicConnect {
     return parsedQuery;
   }
 
+  private hasRedirectResult = false;
   private async handleRedirectResult(): Promise<void> {
     try {
       const responsePassToConnect = QubicConnect.getRedirectResultFromUrlAndClearUrl();
@@ -507,6 +520,8 @@ export class QubicConnect {
         });
         return;
       }
+
+      this.hasRedirectResult = true;
 
       if (responsePassToConnect.action === 'bind') {
         // handle all bin error message here
