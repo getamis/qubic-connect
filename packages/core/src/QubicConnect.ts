@@ -177,21 +177,17 @@ export class QubicConnect {
     // when state changed, persist user
     this.onAuthStateChanged(QubicConnect.persistUser);
     // hydrateUser will trigger handleLogin/handleLogout
-    this.hydrateUser()
-      .then(hasSavedUser => {
-        this.isUserReady = true;
-        // no stored user and no redirect result or error
-        if (!hasSavedUser && !this.hasRedirectResult) {
-          this.handleLogout(null);
-        }
+    this.hydrateUser().then(hasSavedUser => {
+      this.isUserReady = true;
+      // no stored user and no redirect result or error
+      if (!hasSavedUser && !this.hasRedirectResult) {
+        this.handleLogout(null);
+      }
 
-        if (!this.user && this.shouldAutoLoginInWalletIab) {
-          this.loginWithWallet(window.ethereum?.isQubic ? 'qubic' : 'metamask');
-        }
-      })
-      .catch(() => {
-        this.isUserReady = true;
-      });
+      if (!this.user && this.shouldAutoLoginInWalletIab) {
+        this.loginWithWallet(window.ethereum?.isQubic ? 'qubic' : 'metamask');
+      }
+    });
   }
 
   private static persistUser(user: WalletUser | null) {
@@ -237,7 +233,8 @@ export class QubicConnect {
       return true;
     } catch (error) {
       // ignore error
-      console.warn('can not recover user from localStorage');
+      console.warn('hydrate user failed');
+      console.warn(error);
     }
     return false;
   }
