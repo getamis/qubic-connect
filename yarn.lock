@@ -3162,10 +3162,10 @@
     schema-utils "^3.0.0"
     source-map "^0.7.3"
 
-"@qubic-js/browser@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@qubic-js/browser/-/browser-1.11.0.tgz#eecb5a6d644f72deace53232931dae4ed9de7c41"
-  integrity sha512-kpvwfa2p8NdFvGc6cU7BYouw1w0ztX1OvRyfgPd74g4kCgjyhM6e4F/GhUGYkxrYsrLrsQku4grewEzqkbwsQQ==
+"@qubic-js/browser@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@qubic-js/browser/-/browser-1.12.0.tgz#9fd1b2678e501d8811eac8c404831a94887a8a89"
+  integrity sha512-+qX5blU34OfzjEq0h4JWByYjP6PHXMI4wCdrOl7Vz8pvYBkwV9haBxZ/R7GBEgjPQQ0QI12Pprzl+utBRilKgg==
   dependencies:
     "@emotion/css" "^11.1.3"
     "@qubic-connect/detect-iab" "^1.0.5"
@@ -3173,10 +3173,10 @@
     is-url "^1.2.4"
     json-rpc-engine "^6.1.0"
 
-"@qubic-js/core@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@qubic-js/core/-/core-1.11.0.tgz#49c2335d11c7043e68c4108e2e7ac5b46a7334b7"
-  integrity sha512-suEkVjXNVA//FB6ECyXDt7wXnMslTrAcAbKLdVLshvJTwcIiQQ3nynVBKfeinuFXzfoaLBYdF5VVEsWhqNkGAg==
+"@qubic-js/core@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@qubic-js/core/-/core-1.12.0.tgz#d51ecf3c5b717718096fc25817331008b70f08b1"
+  integrity sha512-e+E9dIErTDjq73H16v93W6EwaOkC7w+x9buz/xTmnJr0ly+PN9WGZSDcreYoRyzfkiU8bVDkYIns1qwZsuhQkg==
   dependencies:
     "@qubic-js/eth-json-rpc-infura" "^5.1.3"
     eth-rpc-errors "^4.0.2"
