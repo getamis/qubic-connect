@@ -63,18 +63,16 @@ function parseGraphqlErrors(errorResponse: string): Array<{
   }
 }
 
+type CreateRequestGraphqlProps = {
+  apiKey: string;
+  apiSecret: string;
+  apiUrl: string;
+  customHeaders?: Record<string, string>;
+  onUnauthenticated: () => void;
+};
+
 export const createRequestGraphql =
-  ({
-    apiKey,
-    apiSecret,
-    apiUrl,
-    onUnauthenticated,
-  }: {
-    apiKey: string;
-    apiSecret: string;
-    apiUrl: string;
-    onUnauthenticated: () => void;
-  }): SdkRequestGraphql =>
+  ({ apiKey, apiSecret, apiUrl, customHeaders, onUnauthenticated }: CreateRequestGraphqlProps): SdkRequestGraphql =>
   ({ query, variables, path = '' }) => {
     // currently, we have 3 graphql endpoints:
     // origin api url has public and acc
@@ -102,6 +100,7 @@ export const createRequestGraphql =
       apiSecret,
       body,
       accessToken: getAccessToken(),
+      customHeaders,
     });
 
     return new Promise((resolve, reject) => {

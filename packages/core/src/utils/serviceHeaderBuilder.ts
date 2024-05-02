@@ -8,6 +8,7 @@ type BuilderInput = {
   apiSecret: string;
   body?: BodyInit | null;
   accessToken?: string | null;
+  customHeaders?: Record<string, string>;
 };
 
 const serviceHeaderBuilder = ({
@@ -17,6 +18,7 @@ const serviceHeaderBuilder = ({
   apiKey,
   body = '',
   accessToken,
+  customHeaders = {},
 }: BuilderInput): HeadersInit => {
   if (!apiKey || !apiSecret) {
     return {};
@@ -38,6 +40,7 @@ const serviceHeaderBuilder = ({
       'Access-Control-Allow-Credentials': 'true',
       Authorization: `Bearer ${accessToken}`,
     }),
+    ...customHeaders,
   };
 };
 

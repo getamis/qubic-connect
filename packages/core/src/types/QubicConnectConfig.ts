@@ -20,6 +20,8 @@ export interface QubicConnectConfig {
   // # fast login
   // authRedirectUrl where have different type of wallet
   authRedirectUrl?: string;
+
+  customHeaders?: Record<string, string>;
 }
 
 export interface InternalQubicConnectConfig extends Omit<Required<QubicConnectConfig>, 'providerOptions'> {

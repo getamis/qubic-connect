@@ -32,8 +32,15 @@ export interface SdkFetch {
   (path: string, init: RequestInit): Promise<Response>;
 }
 
+type CreateFetchProps = {
+  apiKey: string;
+  apiSecret: string;
+  apiUrl: string;
+  customHeaders?: Record<string, string>;
+};
+
 export const createFetch =
-  ({ apiKey, apiSecret, apiUrl }: { apiKey: string; apiSecret: string; apiUrl: string }): SdkFetch =>
+  ({ apiKey, apiSecret, apiUrl, customHeaders }: CreateFetchProps): SdkFetch =>
   async (path, init) => {
     const serviceUri = `${apiUrl}/${path}`;
 
@@ -44,6 +51,7 @@ export const createFetch =
       apiKey,
       apiSecret,
       accessToken: getAccessToken(),
+      customHeaders,
     });
 
     const { headers: initHeaders, ...restInit } = init;
@@ -51,8 +59,8 @@ export const createFetch =
     const response = await crossFetch(serviceUri, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        ...serviceHeaders,
         ...initHeaders,
+        ...serviceHeaders,
       },
       credentials: 'include',
       ...restInit,
