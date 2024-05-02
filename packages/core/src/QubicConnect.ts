@@ -105,6 +105,7 @@ export class QubicConnect {
       disableOpenExternalBrowserWhenLineIab = false,
       trackGaSettings = [],
       autoLoginInWalletIabType = 'enable',
+      customHeaders = {},
     } = config;
     if (!apiKey) {
       throw Error('new QubicConnect should have key');
@@ -127,6 +128,7 @@ export class QubicConnect {
       disableOpenExternalBrowserWhenLineIab,
       trackGaSettings,
       autoLoginInWalletIabType,
+      customHeaders,
     };
 
     QubicConnect.checkProviderOptions(config?.providerOptions);
@@ -135,6 +137,7 @@ export class QubicConnect {
       apiKey,
       apiSecret,
       apiUrl,
+      customHeaders,
     });
 
     this.requestGraphql = createRequestGraphql({
@@ -148,6 +151,7 @@ export class QubicConnect {
       apiKey,
       apiSecret,
       apiUrl: marketApiUrl,
+      customHeaders,
       onUnauthenticated: () => this.handleLogout(null),
     });
 

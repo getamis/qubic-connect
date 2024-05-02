@@ -78,6 +78,9 @@ async function main() {
         provider: wcProvider as any,
       },
     },
+    customHeaders: {
+      'x-qubic-client-version': '0.0.0-alpha.0',
+    },
   };
 
   const qubicConnect = new QubicConnect(SDK_CONFIG);
