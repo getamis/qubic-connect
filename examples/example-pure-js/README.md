@@ -9,3 +9,5 @@ start:dev
 start:stag
 start:prod
 ```
+
+open url with localhost:3000

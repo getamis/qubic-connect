@@ -45,9 +45,9 @@ export interface RequestGraphqlInput<TVariables> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type SdkRequestGraphql = <TData = any, TVariables = any>(
+export type SdkRequestGraphql = <TData = any, TVariables extends object = any>(
   input: RequestGraphqlInput<TVariables>,
-) => Promise<TData>;
+) => PromiseLike<TData>;
 
 function parseGraphqlErrors(errorResponse: string): Array<{
   extensions: {
@@ -104,19 +104,26 @@ export const createRequestGraphql =
     });
 
     return new Promise((resolve, reject) => {
-      return request({
-        url: endPoint,
-        document: query,
-        variables,
-        requestHeaders: headers,
-      })
-        .then(resolve)
-        .catch(error => {
-          const graphqlErrors = parseGraphqlErrors(error.response?.error);
-          if (graphqlErrors.some(eachGraphqlError => eachGraphqlError.extensions.code === 'UNAUTHENTICATED')) {
-            onUnauthenticated();
-          }
-          reject(error);
-        });
+      return (
+        request({
+          url: endPoint,
+          document: query,
+          variables,
+          requestHeaders: headers,
+        })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .then(resolve as any)
+          .catch(error => {
+            const graphqlErrors = parseGraphqlErrors(error.response?.error);
+            if (
+              graphqlErrors &&
+              Array.isArray(graphqlErrors) &&
+              graphqlErrors.some(eachGraphqlError => eachGraphqlError.extensions.code === 'UNAUTHENTICATED')
+            ) {
+              onUnauthenticated();
+            }
+            reject(error);
+          })
+      );
     });
   };
