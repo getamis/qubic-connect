@@ -115,7 +115,11 @@ export const createRequestGraphql =
           .then(resolve as any)
           .catch(error => {
             const graphqlErrors = parseGraphqlErrors(error.response?.error);
-            if (graphqlErrors.some(eachGraphqlError => eachGraphqlError.extensions.code === 'UNAUTHENTICATED')) {
+            if (
+              graphqlErrors &&
+              Array.isArray(graphqlErrors) &&
+              graphqlErrors.some(eachGraphqlError => eachGraphqlError.extensions.code === 'UNAUTHENTICATED')
+            ) {
               onUnauthenticated();
             }
             reject(error);
