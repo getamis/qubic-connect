@@ -12,3 +12,5 @@ than
 cd examples/example-umd/
 yarn start
 ```
+
+open browser with localhost:3000 url
