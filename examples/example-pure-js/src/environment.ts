@@ -1,6 +1,5 @@
 export const DEBUG = process.env.REACT_APP_DEBUG === 'true';
 export const CHAIN_ID = Number(process.env.REACT_APP_CHAIN_ID) || 1;
-export const INFURA_ID = process.env.REACT_APP_INFURA_ID || '';
 
 export const API_SERVICE_NAME = process.env.REACT_APP_API_SERVICE_NAME || '';
 export const API_KEY = process.env.REACT_APP_API_KEY || '';
