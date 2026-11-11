@@ -3544,6 +3544,17 @@
     schema-utils "^3.0.0"
     source-map "^0.7.3"
 
+"@qubic-connect/detect-iab@1.2.4":
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/@qubic-connect/detect-iab/-/detect-iab-1.2.4.tgz#6cb4d6a13edd362355dc9758af7a76daf163b681"
+  integrity sha512-9TEDp0SyeIiORioUlEbqWhlYWQJwns1YFKAd+zjwIzVSNdgdfsTFGo6eGEwZ2zmajhyfh617VKOFctID02Lt7w==
+  dependencies:
+    "@qubic-js/detect-inapp" "^1.4.1"
+    clsx "^1.1.1"
+    jss "^10.9.0"
+    jss-preset-default "^10.9.0"
+    preact "^10.8.2"
+
 "@qubic-js/browser@2.0.5":
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@qubic-js/browser/-/browser-2.0.5.tgz#7ac35cdbbfd577246b5af29f2bcb0d1ac7d9c4c3"
@@ -12424,9 +12435,9 @@ node-fetch@^2.6.1, node-fetch@^2.6.12, node-fetch@^2.6.7:
     whatwg-url "^5.0.0"
 
 node-forge@^1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
-  integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.4.3.tgz#5dc578529ac8e162f58038c6673337cabfab3277"
+  integrity sha512-P6wzfh6t70avmV8FrVEAd/36sOPJQ+hkaJVX1Laap9J/77m7M0eyozDvc8SwnDf4P7MP94gwbAAo0rg3YVXT+g==
 
 node-gyp-build@^4.3.0:
   version "4.5.0"
