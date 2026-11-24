@@ -315,19 +315,41 @@ describe('real world', () => {
       address: 'mockAddress',
     });
 
-    // code connect sdk, dApp
-    const params3 = getResponsePassToConnect(url);
-    // console.log('--- Qubic Connect SDK ---');
-    // console.log(url);
-    // console.log(params3);
-
-    expect(params3).toEqual({
+    expect(new URL(url).origin).toBe('https://www.mydapp.com');
+    expect(getResponsePassToConnect(url)).toEqual({
       action: 'login',
       accountAddress: 'mockAddress',
       signature: 'mockTicket',
       dataString: '{"foo":1,"bar":2}',
       isQubicUser: true,
     });
+  });
+
+  test.each([
+    ['http://localhost:3000/return', true],
+    ['http://127.0.0.1:3000/return', true],
+    ['http://0.0.0.0:3000/return', true],
+    ['http://merchant.example.com/return', false],
+    ['ftp://merchant.example.com/return', false],
+  ])('validates the direct wallet callback %s', (redirectUrl, accepted) => {
+    const passUrl = createUrlRequestConnectToPass('https://pass.qubic.app', {
+      action: 'login',
+      apiKey: 'apiKey123',
+      dataString: '{}',
+      redirectUrl,
+    });
+    const buildResponse = () =>
+      createUrlResponseWalletToPassOrConnect(passUrl, {
+        ticket: 'mockTicket',
+        expiredAt: MOCK_EXPIRED_AT,
+        address: 'mockAddress',
+      });
+
+    if (accepted) {
+      expect(new URL(buildResponse()).origin).toBe(new URL(redirectUrl).origin);
+    } else {
+      expect(buildResponse).toThrow('Invalid redirect URI');
+    }
   });
 
   test('full flow - bind', () => {
