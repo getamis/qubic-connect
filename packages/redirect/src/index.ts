@@ -13,6 +13,7 @@ import {
 } from './utils';
 
 export type { LoginRedirectWalletType, QubicSignInProvider } from './types';
+export { parseRedirectUrl } from './parseRedirectUrl';
 
 export const RedirectAuthManager = {
   connect: {

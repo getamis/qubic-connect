@@ -385,10 +385,13 @@ interface AssetBuyInfo {
 
 #### Example
 
-```ts
-const response = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput, { locale: 'zh' });
+Validate the checkout URL before navigating. `parseRedirectUrl` accepts HTTPS and HTTP on `localhost`, `127.0.0.1`, or `0.0.0.0`, and throws for invalid destinations. It does not authorize the destination domain.
 
-window.location.href = response.assetBuy.paymentUrl;
+```ts
+import { parseRedirectUrl } from '@qubic-connect/core';
+
+const response = await qubicConnect.buyAssetAndCreateCheckout(assetBuyInput, { locale: 'zh' });
+window.location.href = parseRedirectUrl(response.assetBuy.paymentUrl).href;
 ```
 
 ### giftRedeem
@@ -421,9 +424,13 @@ interface GiftRedeemInfo {
 #### Example
 
 ```ts
+import { parseRedirectUrl } from '@qubic-connect/core';
+
 const response = await qubicConnect.giftRedeem(giftRedeemInput, { locale: 'zh' });
 
-window.location.href = response.giftRedeem.paymentUrl;
+if (response?.giftRedeem.paymentUrl) {
+  window.location.href = parseRedirectUrl(response.giftRedeem.paymentUrl).href;
+}
 ```
 
 ### Error Code

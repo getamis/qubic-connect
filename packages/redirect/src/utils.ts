@@ -1,4 +1,5 @@
 import qs from 'query-string';
+import { parseRedirectUrl } from './parseRedirectUrl';
 import { LoginRedirectWalletType, QubicSignInProvider } from './types';
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
@@ -227,10 +228,12 @@ export function cleanResponseWalletToPass(currentUrl: string): string {
 }
 
 export function createUrlResponsePassToConnect(url: string, options: ResponsePassToConnect): string {
-  return qs.stringifyUrl({
+  const destination = qs.stringifyUrl({
     url,
     query: options as any,
   });
+  parseRedirectUrl(destination);
+  return destination;
 }
 
 // wallet
@@ -246,54 +249,33 @@ export function getRequestPassToWallet(url: string): RequestPassToWallet | undef
 }
 
 export function createUrlResponseWalletToPass(url: string, options: ResponseWalletToPass): string {
-  if ('errorMessage' in options) {
-    return qs.stringifyUrl({
-      url,
-      query: { errorMessage: options.errorMessage },
-    });
-  }
-  const query: ResponseWalletToPassSuccess = {
-    ticket: options.ticket,
-    expiredAt: options.expiredAt,
-    address: options.address,
-  };
-  return qs.stringifyUrl({
-    url,
-    query: query as any,
-  });
+  const query =
+    'errorMessage' in options
+      ? { errorMessage: options.errorMessage }
+      : { ticket: options.ticket, expiredAt: options.expiredAt, address: options.address };
+  const destination = qs.stringifyUrl({ url, query });
+  parseRedirectUrl(destination);
+  return destination;
 }
 
 export function createUrlResponseWalletToPassOrConnect(url: string, options: ResponseWalletToPass): string {
   const nextUrl = createUrlResponseWalletToPass(url, options);
+  const request = getRequestConnectToPass(nextUrl);
+  if (!request?.redirectUrl || request.action === 'bind') return nextUrl;
+
   const params = getResponseWalletToPass(nextUrl);
-
-  const requestConnectToPassParams = getRequestConnectToPass(nextUrl);
-
-  if (
-    !requestConnectToPassParams ||
-    !requestConnectToPassParams.redirectUrl ||
-    requestConnectToPassParams.action === 'bind'
-  ) {
-    // not detecting url just go back to pass
-    return nextUrl;
-  }
-
-  // if we detect redirectUrl we skip pass web, go to connect sdk directly
   if ('errorMessage' in params) {
-    return createUrlResponsePassToConnect((params as any).redirectUrl, {
-      action: requestConnectToPassParams.action,
-      errorMessage: (params as ResponseFail).errorMessage,
+    return createUrlResponsePassToConnect(request.redirectUrl, {
+      action: request.action,
+      errorMessage: params.errorMessage,
     });
   }
 
-  if (!requestConnectToPassParams.dataString) {
-    throw Error('params data string Not found');
-  }
-
-  return createUrlResponsePassToConnect(requestConnectToPassParams.redirectUrl, {
+  if (!request.dataString) throw Error('params data string Not found');
+  return createUrlResponsePassToConnect(request.redirectUrl, {
     accountAddress: params.address,
     signature: params.ticket,
-    dataString: requestConnectToPassParams.dataString,
+    dataString: request.dataString,
     isQubicUser: true,
     action: 'login',
   });

@@ -18,7 +18,7 @@ export interface QubicConnectConfig {
   trackGaSettings?: Array<string>;
 
   // # fast login
-  // authRedirectUrl where have different type of wallet
+  // Trusted auth service URL: HTTPS or local HTTP. Never set this from request or query parameters.
   authRedirectUrl?: string;
 
   customHeaders?: Record<string, string>;

@@ -4,6 +4,7 @@ import { QubicConnect } from './QubicConnect';
 
 export * from './types';
 export * from './constants';
+export { parseRedirectUrl } from '@qubic-connect/redirect';
 
 let globalQubicConnect: QubicConnect | null = null;
 

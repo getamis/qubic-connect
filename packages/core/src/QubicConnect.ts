@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider } from '@qubic-connect/redirect';
+import { RedirectAuthManager, LoginRedirectWalletType, QubicSignInProvider, parseRedirectUrl } from '@qubic-connect/redirect';
 import { showBlockerWhenIab, openExternalBrowserWhenLineIab } from '@qubic-connect/detect-iab';
 import InApp from '@qubic-js/detect-inapp';
 import { ResponsePassToConnect } from '@qubic-connect/redirect/src/utils';
@@ -418,6 +418,7 @@ export class QubicConnect {
       window.open(`https://metamask.app.link/dapp/${cleanedUrl}`);
       return;
     }
+    const authRedirectUrl = parseRedirectUrl(this.authRedirectUrl).href;
     const dataString = JSON.stringify({
       name: this.config.name,
       service: this.config.service,
@@ -427,7 +428,7 @@ export class QubicConnect {
     });
     const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
     const redirectUrl = cleanResponsePassToConnect(window.location.href);
-    window.location.href = createUrlRequestConnectToPass(this.authRedirectUrl, {
+    window.location.href = createUrlRequestConnectToPass(authRedirectUrl, {
       walletType: options?.walletType,
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,
@@ -441,6 +442,7 @@ export class QubicConnect {
     walletType: LoginRedirectWalletType;
     qubicSignInProvider?: QubicSignInProvider;
   }): Promise<void> {
+    const authRedirectUrl = parseRedirectUrl(this.authRedirectUrl).href;
     const dataString = JSON.stringify({
       name: this.config.name,
       service: this.config.service,
@@ -453,7 +455,7 @@ export class QubicConnect {
 
     const { createUrlRequestConnectToPass, cleanResponsePassToConnect } = RedirectAuthManager.connect;
     const redirectUrl = cleanResponsePassToConnect(window.location.href);
-    window.location.href = createUrlRequestConnectToPass(this.authRedirectUrl, {
+    window.location.href = createUrlRequestConnectToPass(authRedirectUrl, {
       walletType: options?.walletType,
       qubicSignInProvider: options?.qubicSignInProvider,
       redirectUrl,

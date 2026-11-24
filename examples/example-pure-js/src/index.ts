@@ -28,6 +28,7 @@ import {
   MOCK_LOGIN_SERVICE_API,
   QUBIC_PAYMENT_HOST,
 } from './environment';
+import { resolvePaymentUrl } from './resolvePaymentUrl';
 import { AssetDetail, GET_ASSET_DETAIL } from './gqlSchema/assets';
 import { AssetBuyInput } from '@qubic-connect/core';
 
@@ -329,13 +330,7 @@ async function main() {
     if (!checkoutInfo?.paymentUrl) return;
 
     try {
-      // if you want to debug payment web in localhost
-      if (QUBIC_PAYMENT_HOST) {
-        const { pathname, search } = new URL(checkoutInfo.paymentUrl);
-        window.location.href = `${QUBIC_PAYMENT_HOST}${pathname}${search}`;
-      }
-
-      window.location.href = checkoutInfo.paymentUrl;
+      window.location.href = resolvePaymentUrl(checkoutInfo.paymentUrl, QUBIC_PAYMENT_HOST);
     } catch (e) {
       console.error(e);
     }
